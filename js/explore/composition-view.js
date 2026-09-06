@@ -4,10 +4,11 @@
 // Supports viewing for world, single country, or sum of selected countries
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
 import {
     COLORS,
+    labelInkOn,
     INDICATOR_LABELS,
     formatValue,
     formatMFA,
@@ -21,7 +22,7 @@ import {
     CROPS_COMPONENT_KEYS,
     CROPS_COMPONENT_LABELS,
     CROPS_COMPONENT_COLORS
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 let container = null;
 let resizeObserver = null;
@@ -92,7 +93,7 @@ function renderCountryValueComposition(base, year, width, height) {
 
     const total = children.reduce((s, d) => s + d.value, 0);
     const titleBar = document.createElement('div');
-    titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
+    titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
     const scope = selectedCountries.length > 0 ? children.length + ' selected countries' : 'All countries';
     titleBar.textContent = `${label} by country — ${scope} — ${year}`;
 
@@ -116,12 +117,18 @@ function renderCountryValueComposition(base, year, width, height) {
         const pct = total > 0 ? ((d.value / total) * 100).toFixed(1) : '0.0';
 
         const cell = document.createElement('div');
-        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:opacity .15s`;
-        cell.addEventListener('mouseenter', () => { cell.style.opacity = '0.85'; });
-        cell.addEventListener('mouseleave', () => { cell.style.opacity = '1'; });
+        // Ink chosen from the tile's own luminance; the tile colour itself is
+        // the data encoding and is left exactly as it is.
+        const ink = labelInkOn(d.color);
+        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:box-shadow .15s`;
+        // Hover used to dim the whole tile to .85, which dimmed its label with
+        // it and cost the text real contrast. A ring in the tile's own ink says
+        // the same thing and leaves the label alone.
+        cell.addEventListener('mouseenter', () => { cell.style.boxShadow = `inset 0 0 0 2px ${ink.ink}`; });
+        cell.addEventListener('mouseleave', () => { cell.style.boxShadow = 'none'; });
 
         const text = document.createElement('div');
-        text.style.cssText = 'padding:6px 8px;color:#fff;font-family:Inter,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,.45)';
+        text.style.cssText = `padding:6px 8px;color:${ink.ink};font-family:var(--ff);text-shadow:${ink.shadow}`;
         if (w > 52 && h > 22) {
             const nameEl = document.createElement('div');
             nameEl.style.cssText = `font-size:${w > 140 ? '12' : '10'}px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis`;
@@ -130,12 +137,12 @@ function renderCountryValueComposition(base, year, width, height) {
         }
         if (w > 88 && h > 52) {
             const valEl = document.createElement('div');
-            valEl.style.cssText = 'font-size:11px;opacity:.9;margin-top:2px';
+            valEl.style.cssText = 'font-size:11px;margin-top:2px';   // no dimming: size carries the hierarchy
             valEl.textContent = formatValue(d.value, field);
             text.appendChild(valEl);
 
             const pctEl = document.createElement('div');
-            pctEl.style.cssText = 'font-size:10px;opacity:.75;margin-top:1px';
+            pctEl.style.cssText = 'font-size:10px;margin-top:1px';
             pctEl.textContent = pct + '% of shown total';
             text.appendChild(pctEl);
         }
@@ -292,7 +299,7 @@ function render() {
             if (children.length === 0) {
                 panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:Inter,sans-serif">No data</div>';
                 const lbl = document.createElement('div');
-                lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
+                lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
                 lbl.textContent = comp.label + ' \u2014 ' + year;
                 panel.appendChild(lbl);
             } else {
@@ -379,13 +386,19 @@ function render() {
         const pct = ((d.value / total) * 100).toFixed(1);
 
         const cell = document.createElement('div');
-        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:opacity .15s`;
-        cell.addEventListener('mouseenter', () => { cell.style.opacity = '0.85'; });
-        cell.addEventListener('mouseleave', () => { cell.style.opacity = '1'; });
+        // Ink chosen from the tile's own luminance; the tile colour itself is
+        // the data encoding and is left exactly as it is.
+        const ink = labelInkOn(d.color);
+        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:box-shadow .15s`;
+        // Hover used to dim the whole tile to .85, which dimmed its label with
+        // it and cost the text real contrast. A ring in the tile's own ink says
+        // the same thing and leaves the label alone.
+        cell.addEventListener('mouseenter', () => { cell.style.boxShadow = `inset 0 0 0 2px ${ink.ink}`; });
+        cell.addEventListener('mouseleave', () => { cell.style.boxShadow = 'none'; });
 
         // Label
         const label = document.createElement('div');
-        label.style.cssText = 'padding:8px 10px;color:#fff;font-family:Inter,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,.4)';
+        label.style.cssText = `padding:8px 10px;color:${ink.ink};font-family:var(--ff);text-shadow:${ink.shadow}`;
 
         const showDetail = w > 80 && h > 50;
         const showName = w > 50 && h > 25;
@@ -399,12 +412,12 @@ function render() {
 
         if (showDetail) {
             const valEl = document.createElement('div');
-            valEl.style.cssText = 'font-size:12px;opacity:.85;margin-top:2px';
+            valEl.style.cssText = 'font-size:12px;margin-top:2px';
             valEl.textContent = formatFn(d.value);
             label.appendChild(valEl);
 
             const pctEl = document.createElement('div');
-            pctEl.style.cssText = 'font-size:11px;opacity:.7;margin-top:1px';
+            pctEl.style.cssText = 'font-size:11px;margin-top:1px';
             pctEl.textContent = pct + '% of total';
             label.appendChild(pctEl);
         }
@@ -419,7 +432,7 @@ function render() {
 
     // Title bar (normal flow, before the treemap)
     const titleBar = document.createElement('div');
-    titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
+    titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
     const scope = countries.length === 0 ? 'World'
         : countries.length === 1 ? (DataLoader.getMetadata(countries[0]) || {}).name || countries[0]
         : countries.length + ' countries';
@@ -449,7 +462,7 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
         panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:Inter,sans-serif">No data</div>';
         // Still add the country label
         const lbl = document.createElement('div');
-        lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
+        lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
         lbl.textContent = scopeLabel + ' \u2014 ' + year;
         panel.appendChild(lbl);
         return;
@@ -483,12 +496,18 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
         const pct = ((d.value / total) * 100).toFixed(1);
 
         const cell = document.createElement('div');
-        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:opacity .15s`;
-        cell.addEventListener('mouseenter', () => { cell.style.opacity = '0.85'; });
-        cell.addEventListener('mouseleave', () => { cell.style.opacity = '1'; });
+        // Ink chosen from the tile's own luminance; the tile colour itself is
+        // the data encoding and is left exactly as it is.
+        const ink = labelInkOn(d.color);
+        cell.style.cssText = `position:absolute;left:${leaf.x0}px;top:${leaf.y0}px;width:${w}px;height:${h}px;background:${d.color};overflow:hidden;cursor:pointer;transition:box-shadow .15s`;
+        // Hover used to dim the whole tile to .85, which dimmed its label with
+        // it and cost the text real contrast. A ring in the tile's own ink says
+        // the same thing and leaves the label alone.
+        cell.addEventListener('mouseenter', () => { cell.style.boxShadow = `inset 0 0 0 2px ${ink.ink}`; });
+        cell.addEventListener('mouseleave', () => { cell.style.boxShadow = 'none'; });
 
         const label = document.createElement('div');
-        label.style.cssText = 'padding:4px 6px;color:#fff;font-family:Inter,sans-serif;text-shadow:0 1px 3px rgba(0,0,0,.4)';
+        label.style.cssText = `padding:4px 6px;color:${ink.ink};font-family:var(--ff);text-shadow:${ink.shadow}`;
 
         const showDetail = w > 60 && h > 40;
         const showName = w > 40 && h > 20;
@@ -502,12 +521,12 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
 
         if (showDetail) {
             const valEl = document.createElement('div');
-            valEl.style.cssText = 'font-size:10px;opacity:.85;margin-top:1px';
+            valEl.style.cssText = 'font-size:10px;margin-top:1px';
             valEl.textContent = formatFn(d.value);
             label.appendChild(valEl);
 
             const pctEl = document.createElement('div');
-            pctEl.style.cssText = 'font-size:9px;opacity:.7;margin-top:1px';
+            pctEl.style.cssText = 'font-size:9px;margin-top:1px';
             pctEl.textContent = pct + '%';
             label.appendChild(pctEl);
         }
@@ -519,7 +538,7 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
 
     // Country/scope label
     const titleBar = document.createElement('div');
-    titleBar.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:Inter,sans-serif;text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
+    titleBar.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
     titleBar.textContent = scopeLabel + ' \u2014 ' + year;
 
     panel.appendChild(wrap);

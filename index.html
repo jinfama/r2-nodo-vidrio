@@ -1,27 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="robots" content="noindex,nofollow,noarchive">
 <meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Estelas — Growth's Wake</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
 <!-- d3 only used when the Huellas portada is active. -->
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
 :root{
-  --paper:#f3ede2;
-  --paper-2:#ebe2d2;
-  --ink:#1c1f24;
-  --ink-soft:#4a4e57;
-  --ink-mute:#8a8c8f;
-  --warm:#c93324;
-  --warm-soft:#d65f4f;
-  --rule:#d6cdbc;
+  /* Palette of the approved cover, 07_temp/portadas_visores_2026-09/
+     estelas/V5_wakes-in-the-sea.html — the same tokens the explorer runs
+     on, so the cover and the viewer under it are one surface. The cover
+     paints cream on a dark sea; here the ground is chart paper, so the
+     sea becomes the ink and the cream becomes the paper. Ratios measured
+     against --paper. Only the frame moves: the painting, the wake SVG and
+     the footprints keep their own colours. */
+  --paper:#f2ede0;       /* cover --cream lifted towards --foam            */
+  --paper-2:#e7dfcc;     /* one step back towards the cover --cream        */
+  --ink:#0e2c48;         /* cover --sea                          12.2:1    */
+  --ink-soft:#2a5474;    /* sea to line2                          6.9:1    */
+  --ink-mute:#456580;    /* cover --muted, walked down to AA      5.2:1    */
+  --warm:#c4502f;        /* cover --verm: rules, marks, big display type   */
+  --warm-ink:#9f4126;    /* verm for TEXT: 5.5:1 --paper, 4.9:1 --paper-2  */
+  --warm-soft:#d67a5c;
+  --warm-hero:#96381f;   /* --verm for the 100px hero word, which sits on the
+                            sea PHOTOGRAPH, not on paper: measured over those
+                            pixels, --warm gives 2.2:1 and --warm-ink 2.9:1,
+                            both under the 3:1 that large text needs. 3.3:1. */
+  --rule:#c6cfd6;        /* cover --cream2 as the hairline rule            */
   --ff-serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
-  --ff-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --ff-sans:'Geist','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  --ff-mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{background:var(--paper);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
@@ -35,13 +48,13 @@ body.mode-mar,
 body.mode-huellas{
   background-image:
     linear-gradient(180deg,
-      #f3ede2 0%,
-      #ede5d6 20%,
+      #f2ede0 0%,
+      #e7dfcc 20%,
       #d8d4cb 36%,
       #bfcad2 50%,
       #adbecc 68%,
       #93a7b6 100%);
-  min-height:100vh;
+  min-height:100vh;min-height:100dvh;
 }
 body.mode-mar::before,
 body.mode-huellas::before{
@@ -51,20 +64,20 @@ body.mode-huellas::before{
 }
 body.mode-estelas{
   background:
-    radial-gradient(1200px 600px at 75% 35%, rgba(58,87,122,0.04), transparent 60%),
-    radial-gradient(900px 500px at 15% 85%, rgba(168,57,46,0.03), transparent 60%),
-    linear-gradient(180deg, #f3ede2 0%, #ebe2d2 100%);
-  min-height:100vh;
+    radial-gradient(1200px 600px at 75% 35%, rgba(30,68,99,0.05), transparent 60%),
+    radial-gradient(900px 500px at 15% 85%, rgba(196,80,47,0.035), transparent 60%),
+    linear-gradient(180deg, #f2ede0 0%, #e7dfcc 100%);
+  min-height:100vh;min-height:100dvh;
 }
 
 a{color:var(--ink);text-decoration:none}
-a:hover{color:var(--warm)}
+a:hover{color:var(--warm-ink)}
 
 /* Custom cursor — a small warm-red ring with a centred dot. Always visible,
    reads over the painting and the cream paper alike. Falls back to crosshair
    if the browser can't render the SVG cursor. */
 body{
-  cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='8' fill='none' stroke='%23c93324' stroke-width='2'/><circle cx='14' cy='14' r='1.6' fill='%23c93324'/></svg>") 14 14, crosshair;
+  cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='8' fill='none' stroke='%23c4502f' stroke-width='2'/><circle cx='14' cy='14' r='1.6' fill='%23c4502f'/></svg>") 14 14, crosshair;
 }
 /* But standard pointer over buttons / links — UI affordance wins over aesthetics. */
 button,a,.cta{cursor:pointer}
@@ -77,26 +90,35 @@ button,a,.cta{cursor:pointer}
   pointer-events:none;
 }
 .topbar > *{pointer-events:auto}
-.topbar-actions{display:flex;align-items:center;gap:22px}
+.topbar-actions{
+  display:flex;align-items:center;gap:20px;
+  padding:7px 14px;
+  background:rgba(247,243,232,.90);
+  border:1px solid var(--rule);
+  backdrop-filter:blur(8px);
+  box-shadow:0 4px 14px rgba(14,44,72,.10);
+}
 
 /* Switcher chip-rows (style, language) share one register: a row of dot-separated
    buttons, with optional uppercase micro-label in front. Active item underlined
    in warm red. */
 .switcher{
   display:flex;align-items:center;gap:0;
-  font-family:var(--ff-sans);font-size:11px;font-weight:600;letter-spacing:.6px;
+  font-family:var(--ff-mono);font-size:10.5px;font-weight:600;letter-spacing:.07em;
 }
 .switcher .sw-label{
-  font-size:9px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;
+  font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
   color:var(--ink-mute);margin-right:8px;
 }
 .switcher button{
   background:transparent;border:none;padding:4px 8px;color:var(--ink-mute);
-  cursor:pointer;font:inherit;letter-spacing:inherit;
+  cursor:pointer;font:inherit;letter-spacing:inherit;white-space:nowrap;
   border-bottom:1px solid transparent;transition:color .2s,border-color .2s;
 }
 .switcher button:hover{color:var(--ink-soft)}
 .switcher button.active{color:var(--ink);border-bottom-color:var(--warm)}
+/* Decorative divider between switcher buttons: no information, marked
+   aria-hidden in the markup, so 1.4.3 does not apply and the faint tone stays. */
 .switcher .sep{color:var(--ink-mute);opacity:.5;font-weight:300;padding:0 2px}
 
 /* ---------- Audio mount — chip on top of a YouTube iframe ----------
@@ -110,9 +132,24 @@ button,a,.cta{cursor:pointer}
   isolation:isolate;
   transition:bottom .35s ease, right .35s ease;
 }
-/* When the viewer is open, clear the explorer's footer + timeline bar (~80 px
-   tall) so the chip doesn't sit on top of CSV/FULLSCREEN. */
-body.viewer-open .audio-mount{bottom:96px}
+/* When the viewer is open the chip used to float over the explorer's legends
+   and axes (bottom:96px, 240 px wide). Instead it collapses to a 44 px round
+   button parked in the bottom-right gutter that the explorer reserves for it
+   (body.embedded padding-right on .app-footer / .timeline-bar). It has to stay
+   *rendered* — YouTube refuses to keep audio alive in a display:none iframe —
+   so it is shrunk, not hidden. */
+body.viewer-open .audio-mount{
+  bottom:calc(6px + env(safe-area-inset-bottom));right:6px;
+  width:44px;height:44px;
+}
+body.viewer-open .audio-chip{
+  padding:0;justify-content:center;gap:0;
+  background:rgba(247,243,232,.95);
+}
+body.viewer-open .audio-chip .audio-chip-meta,
+body.viewer-open .audio-chip .audio-chip-hint{
+  display:none;
+}
 .audio-mount .yt-frame{
   position:absolute;inset:0;width:100%;height:100%;
   border:0;z-index:1;
@@ -124,15 +161,15 @@ body.viewer-open .audio-mount{bottom:96px}
   position:absolute;inset:0;z-index:2;
   display:flex;align-items:center;gap:10px;
   padding:8px 14px 8px 12px;
-  background:rgba(255,255,255,.92);
+  background:rgba(247,243,232,.93);
   border:1px solid var(--rule);
   backdrop-filter:blur(8px);
-  box-shadow:0 6px 22px rgba(28,31,36,.10);
+  box-shadow:0 6px 22px rgba(14,44,72,.12);
   font-family:var(--ff-sans);
   cursor:pointer;user-select:none;
   transition:background .2s, box-shadow .2s;
 }
-.audio-chip:hover{background:rgba(255,255,255,.98);box-shadow:0 8px 26px rgba(28,31,36,.14)}
+.audio-chip:hover{background:rgba(250,247,238,.98);box-shadow:0 8px 26px rgba(14,44,72,.16)}
 .audio-chip-eq{
   display:flex;align-items:flex-end;gap:2px;
   width:14px;height:14px;flex-shrink:0;
@@ -153,7 +190,7 @@ body.viewer-open .audio-mount{bottom:96px}
 .audio-chip-meta{font-size:11px;color:var(--ink-soft);white-space:nowrap;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
 .audio-chip-meta i{font-family:var(--ff-serif);font-style:italic;font-size:13px;color:var(--ink);margin-right:6px}
 .audio-chip-hint{
-  font-size:9px;letter-spacing:1.2px;text-transform:uppercase;
+  font-family:var(--ff-mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink-mute);font-weight:600;margin-left:auto;
   transition:opacity .35s ease;
 }
@@ -163,9 +200,10 @@ body.viewer-open .audio-mount{bottom:96px}
 /* ---------- Viewer iframe — single-document integration ----------
    The explorer lives in an iframe layered on top of the cover. The iframe is
    loaded lazily; clicking "Explore" reveals it and the music in the parent
-   keeps playing. A small "Estelas ↑" link returns to the cover. */
+   keeps playing. Going back is the explorer's own home button, which posts a
+   message up to this document — there is no second back-control on screen. */
 .viewer-frame{
-  position:fixed;inset:0;width:100vw;height:100vh;
+  position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;
   border:0;background:#fff;
   z-index:5;
   opacity:0;pointer-events:none;
@@ -173,28 +211,21 @@ body.viewer-open .audio-mount{bottom:96px}
 }
 body.viewer-open .viewer-frame{opacity:1;pointer-events:auto}
 /* When the viewer is open, hide the cover overlay underneath so its expensive
-   canvas/svg animations stop visibly competing. */
+   canvas/svg animations stop visibly competing.
+   IMPORTANT: opacity alone is not enough — the topbar sets pointer-events:auto
+   on its children, so the invisible language/mode buttons kept swallowing taps
+   over the explorer header. Fade out, then take the whole thing out of the hit
+   test with visibility:hidden (delayed so the fade is still seen). The `inert`
+   attribute is set from JS as a belt-and-braces measure for focus/AT. */
 body.viewer-open .hero,
-body.viewer-open .topbar{opacity:0;pointer-events:none;transition:opacity .35s ease}
-.viewer-back{
-  position:fixed;top:10px;left:18px;z-index:70;
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 12px;
-  background:rgba(255,255,255,.92);
-  border:1px solid var(--rule);
-  backdrop-filter:blur(8px);
-  box-shadow:0 4px 14px rgba(28,31,36,.10);
-  font-family:var(--ff-serif);font-style:italic;font-size:14px;color:var(--ink);
-  cursor:pointer;
-  opacity:0;pointer-events:none;transform:translateY(-6px);
-  transition:opacity .35s ease, transform .35s ease;
+body.viewer-open .topbar{
+  opacity:0;pointer-events:none;visibility:hidden;
+  transition:opacity .35s ease, visibility 0s linear .35s;
 }
-body.viewer-open .viewer-back{opacity:1;pointer-events:auto;transform:translateY(0)}
-.viewer-back:hover{color:var(--warm)}
-.viewer-back .arrow{font-family:var(--ff-sans);font-style:normal;font-weight:600;color:var(--warm);margin-right:2px}
-
+body.viewer-open .hero *,
+body.viewer-open .topbar *{pointer-events:none!important}
 .hero{
-  position:relative;min-height:100vh;
+  position:relative;min-height:100vh;min-height:100dvh;
   display:flex;flex-direction:column;
   overflow:hidden;
 }
@@ -213,7 +244,7 @@ body.mode-estelas .hero{
 /* Painting layer — only in mar / combinada. */
 .hero-bg{
   position:absolute;inset:0;
-  background-image:url('img/sea.png');
+  background-image:url('img/sea.webp?v=20260905a');
   background-size:cover;
   background-position:center 60%;
   background-repeat:no-repeat;
@@ -303,9 +334,9 @@ body.mode-huellas .hero-content{max-width:560px;text-align:left}
 body.mode-estelas .hero-content{max-width:780px;text-align:center}
 
 .kicker{
-  font-family:var(--ff-serif);font-style:italic;font-size:13px;font-weight:500;
-  letter-spacing:1.6px;text-transform:uppercase;color:var(--warm);
-  margin-bottom:22px;
+  font-family:var(--ff-mono);font-style:normal;font-size:10.5px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  margin-bottom:24px;
 }
 
 /* Main title — "Estelas" is always the warm-red highlight; the rest is ink. */
@@ -318,7 +349,10 @@ h1.title{
 }
 h1.title .wake{
   font-family:var(--ff-serif);font-style:italic;font-weight:500;
-  color:var(--warm);
+  /* Over the sea photograph --warm gives 2.2:1 and --warm-ink 2.9:1, both
+     under the 3:1 large text needs. --warm-hero is one step deeper in the same
+     hue. Rules and marks keep --warm; links and buttons keep --warm-ink. */
+  color:var(--warm-hero);
 }
 h1.title .tail{font-style:normal;color:var(--ink);font-size:.55em;font-weight:400;letter-spacing:0;margin-left:.20em}
 
@@ -344,14 +378,14 @@ body.mode-huellas .cta-row{justify-content:flex-start}
 body.mode-estelas .cta-row{justify-content:center}
 .cta{
   display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--ff-sans);font-size:13px;font-weight:600;letter-spacing:.8px;
+  font-family:var(--ff-mono);font-size:11.5px;font-weight:600;letter-spacing:.11em;
   text-transform:uppercase;
   padding:14px 26px;border:none;cursor:pointer;
   background:var(--ink);color:var(--paper);
   transition:all .25s ease;
   text-decoration:none;
 }
-.cta:hover{background:var(--warm);transform:translateY(-1px);color:var(--paper)}
+.cta:hover{background:var(--warm-ink);transform:translateY(-1px);color:var(--paper)}
 .cta .arrow{font-size:16px;line-height:1;transition:transform .25s}
 .cta:hover .arrow{transform:translateX(4px)}
 
@@ -364,16 +398,25 @@ body.mode-estelas .cta-row{justify-content:center}
   font-family:var(--ff-serif);font-size:clamp(20px,2vw,28px);
   line-height:1.3;font-weight:500;
   color:var(--ink);
-  text-shadow:0 0 18px rgba(243,237,226,0.55);
+  text-shadow:0 0 18px rgba(242,237,224,0.62);
 }
 .hero-quote em{font-style:italic;color:var(--ink)}
 .hero-quote .quote-src{
   display:block;margin-top:10px;
-  font-family:var(--ff-sans);font-size:11px;letter-spacing:1.8px;
-  text-transform:uppercase;color:var(--ink-soft);font-weight:600;
+  font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink);font-weight:600;
   text-shadow:none;
 }
 
+/* ============================================================
+   SQUARE CORNERS — the house rule on the cover
+   border-radius is 0 everywhere on this page. The collapsed audio
+   chip used to be a 44 px circle and is now a 44 px square: it is a
+   control, not a portrait and not a data point, so it was never an
+   exception. No other radius exists in this file, and no pill (999px)
+   ever did. The live exceptions all sit in explorer.html, declared
+   at the foot of its stylesheet.
+   ============================================================ */
 @media (max-width:760px){
   body.mode-mar .hero,
   body.mode-huellas .hero{padding:100px 24px 160px}
@@ -382,7 +425,11 @@ body.mode-estelas .cta-row{justify-content:center}
   .switcher .sw-label{display:none}
   .audio-mount{width:200px}
   .audio-chip-hint{display:none}
-  .topbar-actions{gap:14px}
+  /* the paper chip stays, but tucked in so the row never has to break a word */
+  .topbar{padding:12px 14px}
+  .topbar-actions{gap:10px;padding:6px 9px}
+  .switcher{font-size:10px;letter-spacing:.05em}
+  .switcher button{padding:4px 5px}
 }
 </style>
 </head>
@@ -394,16 +441,16 @@ body.mode-estelas .cta-row{justify-content:center}
     <nav class="switcher mode-switcher" aria-label="Visual mode">
       <span class="sw-label" data-i18n="modeLabel">Portada</span>
       <button data-mode="mar" class="active">Mar</button>
-      <span class="sep">·</span>
+      <span class="sep" aria-hidden="true">·</span>
       <button data-mode="estelas">Estelas</button>
-      <span class="sep">·</span>
+      <span class="sep" aria-hidden="true">·</span>
       <button data-mode="huellas">Huellas</button>
     </nav>
     <nav class="switcher lang-switcher" aria-label="Language">
       <button data-lang="en" class="active">EN</button>
-      <span class="sep">·</span>
+      <span class="sep" aria-hidden="true">·</span>
       <button data-lang="es">ES</button>
-      <span class="sep">·</span>
+      <span class="sep" aria-hidden="true">·</span>
       <button data-lang="zh">中文</button>
     </nav>
   </div>
@@ -468,7 +515,7 @@ body.mode-estelas .cta-row{justify-content:center}
      loading="lazy" defers the bundle until the user opens the viewer.
      Navigation back to the cover is done via the explorer's own "home" button
      (postMessage to parent), so there's no second back-control on screen. -->
-<iframe class="viewer-frame" id="viewer-frame" title="Estelas — explorer" loading="lazy"></iframe>
+<iframe class="viewer-frame" id="viewer-frame" title="Estelas — explorer" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
 
 <script>
 /* =========================================================
@@ -482,23 +529,61 @@ body.mode-estelas .cta-row{justify-content:center}
   const cta   = document.getElementById('cta-explore');
   if(!frame || !cta) return;
 
+  // Everything on the cover that can still be clicked once the explorer is on
+  // top. `inert` removes them from the hit test, the tab order and the a11y
+  // tree in one go; the CSS above (visibility:hidden) is the fallback for
+  // browsers without inert.
+  const coverLayers = [document.querySelector('.topbar'), document.querySelector('.hero')].filter(Boolean);
+  function setCoverInert(on){
+    coverLayers.forEach(el => { if(on) el.setAttribute('inert',''); else el.removeAttribute('inert'); });
+  }
+
+  // A shared link looks like index.html#explore?c=...&year=...&range=...&view=...
+  // The fragment addresses the VIEWER, but it is delivered to this document,
+  // and an iframe does not inherit its parent's fragment. So the section names
+  // the explorer can route to are listed here: a URL that starts with one of
+  // them opens the viewer on load and travels with it into the frame.
+  const VIEWER_HASH = /^#(globe|explore|analysis|about)(\?|$)/;
+
   function openViewer(){
-    if(!frame.src) frame.src = 'explorer.html';
+    if(!frame.src){
+      const carried = VIEWER_HASH.test(location.hash) ? location.hash : '';
+      frame.src = 'explorer.html?v=20260906m' + carried;
+    }
     document.body.classList.add('viewer-open');
+    setCoverInert(true);
     setTimeout(() => { try { frame.contentWindow && frame.contentWindow.focus(); } catch(_){} }, 60);
   }
   function closeViewer(){
     document.body.classList.remove('viewer-open');
+    setCoverInert(false);
+    // Leaving the viewer has to leave a cover URL behind, or a reload of what
+    // looks like the cover would jump straight back into the explorer.
+    if(location.hash){
+      try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   cta.addEventListener('click', (e) => { e.preventDefault(); openViewer(); });
+  // Deep link: land directly in the viewer, with the state the link carries.
+  if(VIEWER_HASH.test(location.hash)) openViewer();
+  // Escape on the cover document. Once the explorer has focus the key event
+  // never reaches us, so the explorer forwards it as a message (below).
   window.addEventListener('keydown', (e) => {
     if(e.key === 'Escape' && document.body.classList.contains('viewer-open')) closeViewer();
   });
-  // The explorer's home button posts back to us when it's embedded — see
-  // js/app.js's btn-home handler.
+  // The explorer's home button — and its Escape key — post back to us when it's
+  // embedded. See js/app.js (btn-home handler + the Escape forwarder).
   window.addEventListener('message', (e) => {
-    if(e.data && e.data.type === 'gw-back-to-cover') closeViewer();
+    if(!e.data || (frame.contentWindow && e.source !== frame.contentWindow)) return;
+    if(e.data.type === 'gw-back-to-cover') closeViewer();
+    // The explorer keeps its state in its own fragment. Mirror it here so the
+    // bar of the page the reader is actually looking at is the shareable link,
+    // and so a reload restores what is on screen.
+    if(e.data.type === 'gw-state-hash' && typeof e.data.hash === 'string'
+       && document.body.classList.contains('viewer-open')){
+      try { history.replaceState(null, '', e.data.hash); } catch(_){}
+    }
   });
 })();
 
@@ -547,7 +632,7 @@ const MODE_KEY = 'gw_mode';
       const m = v && v.match(/url\((['"]?)(.+?)\1\)/);
       if(m && m[2] && m[2] !== 'none') return m[2];
     } catch(_){}
-    return 'img/sea.png';
+    return 'img/sea.webp?v=20260905a';
   }
   const img = new Image();
   try { img.crossOrigin = 'anonymous'; } catch(_){}

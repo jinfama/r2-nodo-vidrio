@@ -3,10 +3,10 @@
 // Waterfall chart with optional faceting by country
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
-import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
+import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260906m';
 
 const MARGIN = { top: 24, right: 24, bottom: 64, left: 64 };
 const FACTOR_COLORS = {
@@ -223,7 +223,7 @@ function renderSingleWaterfall(dec, group) {
                 );
             }
         })
-        .on('mouseleave', () => Tooltip.hide());
+        .on('mouseleave', () => Tooltip.leave());
 
     // Connector lines
     for (let i = 0; i < barData.length - 1; i++) {
@@ -337,7 +337,7 @@ function renderMultiCountryChart(decompositions, group) {
                         event
                     );
                 })
-                .on('mouseleave', () => Tooltip.hide());
+                .on('mouseleave', () => Tooltip.leave());
         });
     });
 
@@ -496,7 +496,7 @@ function renderFacetedWaterfall(decompositions) {
                     );
                 }
             })
-            .on('mouseleave', () => Tooltip.hide());
+            .on('mouseleave', () => Tooltip.leave());
 
         // Connectors
         for (let i = 0; i < barData.length - 1; i++) {

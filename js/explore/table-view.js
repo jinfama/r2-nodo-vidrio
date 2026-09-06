@@ -2,9 +2,9 @@
 // TABLE VIEW - Sortable data table for selected countries/indicator/year
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import { exportCSV } from '../components/export.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import { exportCSV } from '../components/export.js?v=20260906m';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -16,7 +16,7 @@ import {
     formatRank,
     getColorForIndex,
     resolveIndicatorValue
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 let currentContainer = null;
 let sortColumn = 'rank';
@@ -129,7 +129,7 @@ function renderTable() {
     toolbar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid var(--cb);';
     toolbar.innerHTML = `
         <span style="font-size:12px;font-weight:600;color:var(--cd)">${INDICATOR_LABELS[indicator] || indicator} \u2014 ${year}</span>
-        <button id="explore-table-export" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--cb);border-radius:4px;background:var(--bgl);color:var(--cg)">Export CSV</button>
+        <button id="explore-table-export" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--cb);border-radius:0;background:var(--bgl);color:var(--cg)">Export CSV</button>
     `;
     wrapper.appendChild(toolbar);
 
@@ -175,7 +175,7 @@ function renderTable() {
     const tbody = document.createElement('tbody');
     rows.forEach((row, rowIdx) => {
         const tr = document.createElement('tr');
-        tr.style.cssText = `cursor:pointer;${row.isSelected ? 'background:rgba(30,96,145,0.06);' : ''}`;
+        tr.style.cssText = `cursor:pointer;${row.isSelected ? 'background:rgba(30,68,99,0.07);' : ''}`;
 
         tr.addEventListener('click', () => {
             State.toggleCountry(row.iso3);
@@ -195,7 +195,7 @@ function renderTable() {
             if (col.key === 'rank') {
                 td.textContent = row.rank < 999 ? row.rank : '\u2014';
                 td.style.fontWeight = '500';
-                td.style.color = COLORS.lightGray;
+                td.style.color = COLORS.uiText;   // a rank is a value, not a tint
             } else if (col.key === 'name') {
                 const colorIdx = selectedCountries.indexOf(row.iso3);
                 if (colorIdx >= 0) {

@@ -2,13 +2,14 @@
 // GLOBE RENDERER - Globe.gl wrapper for multi-indicator visualization
 // ============================================================================
 
-import DataLoader from '../data-loader.js';
-import State from '../state.js';
-import Tooltip from '../components/tooltip.js';
+import DataLoader from '../data-loader.js?v=20260906m';
+import State from '../state.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatRank, formatRatio,
-    getAbsoluteColorScale, resolveIndicatorValue, INDICATOR_LABELS, INDICATOR_UNITS
-} from '../utils.js';
+    getMapColor, MAP_NO_DATA, buildMapLegendHTML, resolveIndicatorValue,
+    INDICATOR_LABELS, INDICATOR_UNITS
+} from '../utils.js?v=20260906m';
 
 let globe = null;
 let currentColorFn = null;
@@ -40,17 +41,19 @@ export function initGlobe(containerId) {
 
         globe = Globe()(container)
             .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-water.png')
-            .backgroundColor('#ffffff')
+            // the same paper the explorer is printed on (--bg), so the globe
+            // is not a white hole in the middle of a cream page
+            .backgroundColor('#f2ede0')
             .showAtmosphere(true)
-            .atmosphereColor('#e0e8f0')
+            .atmosphereColor('#7fa6c2')
             .atmosphereAltitude(0.15)
             .width(container.clientWidth)
             .height(container.clientHeight)
             .polygonsData(features)
             .polygonGeoJsonGeometry(d => d.geometry)
             .polygonCapColor(d => getCountryColor(d.properties.iso3))
-            .polygonSideColor(() => 'rgba(30,96,145,0.06)')
-            .polygonStrokeColor(() => '#6c757d')
+            .polygonSideColor(() => 'rgba(14,44,72,0.10)')
+            .polygonStrokeColor(() => '#6f6a5f')
             .polygonAltitude(d => {
                 const iso3 = d.properties.iso3;
                 return State.get('selectedCountries').includes(iso3) ? 0.02 : 0.005;
@@ -91,7 +94,7 @@ export function initGlobe(containerId) {
 
         // Tooltip tracking
         container.addEventListener('mousemove', (e) => Tooltip.move(e));
-        container.addEventListener('mouseleave', () => Tooltip.hide());
+        container.addEventListener('mouseleave', () => Tooltip.leave());
 
         // Responsive resize
         const resizeObserver = new ResizeObserver(() => {
@@ -217,97 +220,21 @@ function resolveRankIndicator(indicator) {
 }
 
 function getCountryColor(iso3) {
-    if (!iso3) return '#b0b0b0';
+    if (!iso3) return MAP_NO_DATA;
     try {
-        const year = State.get('currentYear');
-        const indicator = State.get('indicator');
-        const val = DataLoader.getCountryValue(iso3, year);
-
-        const fieldValue = resolveIndicatorValue(val, indicator);
-        if (fieldValue == null || isNaN(fieldValue)) return '#b0b0b0'; // no data → medium gray
-        if (fieldValue === 0) return '#f5f0e8'; // zero → warm cream
-
-        return absoluteToColor(fieldValue, indicator);
+        const value = resolveIndicatorValue(
+            DataLoader.getCountryValue(iso3, State.get('currentYear')), State.get('indicator'));
+        return getMapColor(value, State.get('indicator'));
     } catch (e) {
-        return '#b0b0b0';
+        return MAP_NO_DATA;
     }
 }
 
-function absoluteToColor(value, indicator) {
-    const colorScale = getAbsoluteColorScale(indicator);
-
-    if (indicator === 'hdi' || indicator === 'hdi_ng') {
-        // Map HDI 0→1 to color scale 0.15→1.0 so low values still get visible color
-        const raw = Math.max(0, Math.min(1, value));
-        const t = 0.15 + raw * 0.85;
-        return colorScale(t);
-    }
-
-    // Indicators that can be negative (land use change) — use linear scale
-    if (indicator === 'co2luc' || indicator === 'co2luc_pc' || indicator === 'land' || indicator === 'land_pc') {
-        const rangeMin = indicator.endsWith('_pc') ? -10 : -100;
-        const rangeMax = indicator.endsWith('_pc') ? 20 : 500;
-        const t = Math.max(0, Math.min(1, (value - rangeMin) / (rangeMax - rangeMin)));
-        return colorScale(t);
-    }
-
-    let logMin, logMax;
-    if (indicator === 'ghg' || indicator === 'co2ff' || indicator === 'ff' || indicator === 'coal' || indicator === 'oil' || indicator === 'gas') {
-        logMin = Math.log(0.1);
-        logMax = Math.log(10000);
-    } else if (indicator === 'ch4') {
-        logMin = Math.log(0.1);
-        logMax = Math.log(500);
-    } else if (indicator === 'n2o') {
-        logMin = Math.log(0.01);
-        logMax = Math.log(100);
-    } else if (indicator === 'fgas') {
-        logMin = Math.log(0.001);
-        logMax = Math.log(50);
-    } else if (indicator === 'ghg_pc' || indicator === 'co2ff_pc' || indicator === 'ff_pc' || indicator === 'ch4_pc' || indicator === 'n2o_pc' || indicator === 'coal_pc' || indicator === 'oil_pc' || indicator === 'gas_pc') {
-        logMin = Math.log(0.1);
-        logMax = Math.log(40);
-    } else if (indicator === 'fgas_pc') {
-        logMin = Math.log(0.001);
-        logMax = Math.log(5);
-    } else if (indicator === 'pop') {
-        logMin = Math.log(0.05);
-        logMax = Math.log(1500);
-    } else if (indicator === 'pop_density') {
-        logMin = Math.log(1);
-        logMax = Math.log(5000);
-    } else if (indicator === 'gdp_total') {
-        logMin = Math.log(100);
-        logMax = Math.log(50000000);
-    } else if (indicator === 'gdp_pc') {
-        logMin = Math.log(400);
-        logMax = Math.log(80000);
-    } else if (indicator === 'rli') {
-        // RLI is 0-1 index, treat like HDI
-        const raw = Math.max(0, Math.min(1, value));
-        const t = 0.15 + raw * 0.85;
-        return colorScale(t);
-    } else if (indicator.startsWith('mfa_') && indicator.endsWith('_pc')) {
-        logMin = Math.log(0.5);
-        logMax = Math.log(100);
-    } else if (indicator.startsWith('mfa_')) {
-        logMin = Math.log(1);
-        logMax = Math.log(20000);
-    } else if (indicator === 'crop_total_pc') {
-        logMin = Math.log(0.01);
-        logMax = Math.log(5);
-    } else if (indicator.startsWith('crop_')) {
-        logMin = Math.log(0.01);
-        logMax = Math.log(500);
-    } else {
-        logMin = Math.log(0.1);
-        logMax = Math.log(10000);
-    }
-
-    const safeValue = Math.max(Math.exp(logMin), value);
-    const t = Math.max(0, Math.min(1, (Math.log(safeValue) - logMin) / (logMax - logMin)));
-    return colorScale(t);
-}
+// The globe used to carry its own copy of the choropleth's log bounds, and the
+// two copies had drifted: material flows ran 1-20000 here and 0.5-3000 on the
+// map, crops 0.01-5 here and 0.01-15 there, so the same country in the same
+// year came out a different colour depending on which view you opened. Both
+// now read MAP_DOMAINS from js/utils.js through getMapColor().
 
 // ---------------------------------------------------------------------------
 // Public helpers
@@ -325,70 +252,13 @@ export function updateGlobeColors() {
 export function updateGlobeLegend() {
     const container = document.getElementById('globe-legend');
     if (!container) return;
-
-    const indicator = State.get('indicator');
-    container.innerHTML = buildAbsoluteLegend(indicator);
+    container.innerHTML = buildMapLegendHTML(State.get('indicator'));
 }
 
-function buildAbsoluteLegend(indicator) {
-    const colorScale = getAbsoluteColorScale(indicator);
-    const isHdi = indicator === 'hdi' || indicator === 'hdi_ng';
-    const stops = 12;
-    const swatches = [];
-    for (let i = 0; i <= stops; i++) {
-        // For HDI, use compressed range 0.15→1.0 to match actual map colors
-        const t = isHdi ? 0.15 + (i / stops) * 0.85 : i / stops;
-        swatches.push(`<span class="legend-swatch" style="background:${colorScale(t)}"></span>`);
-    }
-
-    let lowLabel, midLabel, highLabel;
-    if (indicator === 'hdi' || indicator === 'hdi_ng') {
-        lowLabel = '0'; midLabel = '0.5'; highLabel = '1.0';
-    } else if (indicator === 'rli') {
-        lowLabel = '0'; midLabel = '0.5'; highLabel = '1.0';
-    } else if (indicator === 'ghg' || indicator === 'co2ff' || indicator === 'ff') {
-        lowLabel = '0.1 Mt'; midLabel = '100 Mt'; highLabel = '10 Gt';
-    } else if (indicator === 'ch4') {
-        lowLabel = '0.1 Mt'; midLabel = '10 Mt'; highLabel = '500 Mt';
-    } else if (indicator === 'n2o') {
-        lowLabel = '0.01 Mt'; midLabel = '1 Mt'; highLabel = '100 Mt';
-    } else if (indicator === 'fgas') {
-        lowLabel = '0.001 Mt'; midLabel = '0.1 Mt'; highLabel = '50 Mt';
-    } else if (indicator === 'ghg_pc' || indicator === 'co2ff_pc' || indicator === 'ff_pc') {
-        lowLabel = '0.1 t'; midLabel = '3 t'; highLabel = '40 t';
-    } else if (indicator === 'co2luc' || indicator === 'land') {
-        lowLabel = '-100 Mt'; midLabel = '0'; highLabel = '500 Mt';
-    } else if (indicator === 'pop') {
-        lowLabel = '~0'; midLabel = '50 M'; highLabel = '1.5 B';
-    } else if (indicator === 'pop_density') {
-        lowLabel = '1'; midLabel = '100'; highLabel = '5K/km\u00B2';
-    } else if (indicator === 'gdp_total') {
-        lowLabel = '$100M'; midLabel = '$500B'; highLabel = '$50T';
-    } else if (indicator.startsWith('mfa_') && indicator.endsWith('_pc')) {
-        lowLabel = '0.5 t'; midLabel = '10 t'; highLabel = '100 t';
-    } else if (indicator.startsWith('mfa_')) {
-        lowLabel = '1 Mt'; midLabel = '500 Mt'; highLabel = '20 Gt';
-    } else if (indicator === 'crop_total_pc') {
-        lowLabel = '0.01 ha'; midLabel = '0.5 ha'; highLabel = '5 ha';
-    } else if (indicator.startsWith('crop_')) {
-        lowLabel = '0.01 Mha'; midLabel = '10 Mha'; highLabel = '500 Mha';
-    } else if (indicator === 'gdp_pc') {
-        lowLabel = '$400'; midLabel = '$6K'; highLabel = '$80K';
-    } else {
-        lowLabel = 'Low'; midLabel = 'Mid'; highLabel = 'High';
-    }
-
-    return `
-        <div class="legend-title">${INDICATOR_LABELS[indicator] || indicator}</div>
-        <div class="legend-row">
-            <div class="legend-main">
-                <div class="legend-bar"><span class="legend-swatch" style="background:#ffffff;border:1px solid #ddd;box-sizing:border-box"></span>${swatches.join('')}</div>
-                <div class="legend-labels"><span>0</span><span>${midLabel}</span><span>${highLabel}</span></div>
-            </div>
-            <div class="legend-nodata"><div class="legend-nodata-swatch"></div><div class="legend-nodata-label">No data</div></div>
-        </div>
-    `;
-}
+// buildAbsoluteLegend() is gone with it: thirteen swatches under three labels
+// picked by a chain of if/else that no longer matched the scale it described
+// (it still announced 10 Gt for GHG when the map topped out at 5 Gt, and fell
+// back to "Low / Mid / High" for every indicator nobody had listed).
 
 export function flyToCountry(iso3) {
     if (!globe) {
@@ -406,4 +276,16 @@ export function flyToCountry(iso3) {
 export function resetGlobeView() {
     if (!globe) return;
     globe.pointOfView({ lat: 20, lng: 10, altitude: 2.8 }, 800);
+}
+
+// Exposed so the PNG export can force one frame before reading the WebGL
+// buffer -- globe.gl renders on demand and the buffer is otherwise blank.
+export function renderGlobeFrame() {
+    if (!globe) return null;
+    try {
+        globe.renderer().render(globe.scene(), globe.camera());
+        return globe.renderer().domElement;
+    } catch (e) {
+        return null;
+    }
 }

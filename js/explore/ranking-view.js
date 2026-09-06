@@ -3,17 +3,18 @@
 // Maddison-style with quartile zones, configurable indicator + scope
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS,
     INDICATOR_LABELS,
     getColorForIndex,
+    inkFor,
     formatValue,
     formatRank,
     resolveIndicatorValue
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 let currentContainer = null;
 
@@ -265,7 +266,7 @@ function renderBumpChart() {
                 `, event);
             })
             .on('mousemove', (event) => Tooltip.move(event))
-            .on('mouseleave', () => Tooltip.hide())
+            .on('mouseleave', () => Tooltip.leave())
             .on('click', () => State.toggleCountry(traj.iso3));
     });
 
@@ -283,14 +284,16 @@ function renderBumpChart() {
             .attr('y', lbl.y)
             .style('font-size', '10px')
             .style('font-weight', '700')
-            .style('fill', lbl.color)
+            .style('fill', inkFor(lbl.color))
             .text(lbl.name);
     });
 
-    // Footer
+    // Footer - interface text, so it takes the chrome ink. COLORS.lightGray
+    // stays above on the current-year rule and on the unselected trajectories,
+    // which are data.
     g.append('text')
         .attr('x', 0).attr('y', h + 30)
-        .style('font-size', '10px').style('fill', COLORS.lightGray)
+        .style('font-size', '10px').style('fill', COLORS.uiText)
         .text(`Showing ${trajectories.length} countries \u2014 Rank 1 = highest ${indLabel}`);
 }
 

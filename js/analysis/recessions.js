@@ -4,12 +4,12 @@
 // View 2: Decomposition — Kaya identity (Pop × Income × Intensity)
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS, getColorForIndex, formatEmissions, shortName
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 const GREEN_COLOR = '#2a9d8f';     // green growth (decoupling)
 const RECESS_COLOR = '#495057';    // recessive (dark gray)
@@ -339,7 +339,7 @@ function renderAnnualBars(g, points, w, h, isSingle, sharedYMax) {
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.lightGray)
+            .style('font-size', '10px').style('fill', COLORS.uiText)
             .text('Annual emission reduction (Mt CO\u2082e)');
         addHoverAnnual(g, points, xScale, yScale, w, h);
     }
@@ -410,7 +410,7 @@ function renderCumulativeArea(g, points, w, h, isSingle, sharedYMax) {
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.lightGray)
+            .style('font-size', '10px').style('fill', COLORS.uiText)
             .text('Cumulative emission reductions (Mt CO\u2082e)');
         addHoverCumulative(g, points, xScale, yScale, w, h);
     }
@@ -689,7 +689,7 @@ function renderKayaAnnual(g, data, w, h, isSingle, sharedMaxAbs) {
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.lightGray)
+            .style('font-size', '10px').style('fill', COLORS.uiText)
             .text('GHG change by Kaya factor (Mt CO\u2082e)');
 
         // Hover
@@ -771,7 +771,7 @@ function renderKayaCumulative(g, data, w, h, isSingle, sharedMaxAbs) {
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.lightGray)
+            .style('font-size', '10px').style('fill', COLORS.uiText)
             .text('Cumulative Kaya factor contribution (Mt CO\u2082e)');
     }
 
@@ -825,7 +825,10 @@ function addHoverAnnual(g, points, xScale, yScale, w, h) {
                 entry.ar6 != null ? `<div class="tooltip-row"><span class="tooltip-label">AR6</span><span class="tooltip-value">${entry.ar6}</span></div>` : ''
             ].join(''), event);
         })
-        .on('mouseleave', function () { hoverG.style('display', 'none'); Tooltip.hide(); });
+        .on('mouseleave', function () {
+            if (Tooltip.isPinned()) return;        // tap-anchored card keeps its crosshair
+            hoverG.style('display', 'none'); Tooltip.leave();
+        });
 }
 
 function addHoverCumulative(g, points, xScale, yScale, w, h) {
@@ -859,7 +862,10 @@ function addHoverCumulative(g, points, xScale, yScale, w, h) {
                 `<div class="tooltip-row"><span class="tooltip-label"><strong>Total</strong></span><span class="tooltip-value"><strong>${formatEmissions(totalCum)}</strong></span></div>`
             ].join(''), event);
         })
-        .on('mouseleave', function () { hoverG.style('display', 'none'); Tooltip.hide(); });
+        .on('mouseleave', function () {
+            if (Tooltip.isPinned()) return;        // tap-anchored card keeps its crosshair
+            hoverG.style('display', 'none'); Tooltip.leave();
+        });
 }
 
 function addHoverKaya(g, data, xScale, yScale, w, h) {
@@ -886,7 +892,10 @@ function addHoverKaya(g, data, xScale, yScale, w, h) {
                 `<div class="tooltip-row"><span class="tooltip-label"><strong>Total GHG</strong></span><span class="tooltip-value"><strong>${formatEmissions(entry.ghgChange)}</strong></span></div>`
             ].join(''), event);
         })
-        .on('mouseleave', function () { hoverG.style('display', 'none'); Tooltip.hide(); });
+        .on('mouseleave', function () {
+            if (Tooltip.isPinned()) return;        // tap-anchored card keeps its crosshair
+            hoverG.style('display', 'none'); Tooltip.leave();
+        });
 }
 
 function renderReductionsLegend(svg, margin, w) {

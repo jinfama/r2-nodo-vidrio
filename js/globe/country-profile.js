@@ -2,13 +2,13 @@
 // COUNTRY PROFILE - Side panel with multi-indicator mini charts + waterfall
 // ============================================================================
 
-import DataLoader from '../data-loader.js';
-import State from '../state.js';
+import DataLoader from '../data-loader.js?v=20260906m';
+import State from '../state.js?v=20260906m';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatMFA, formatCrops,
     formatRank, formatRatio,
     formatPercent, getAbsoluteColorScale, INDICATOR_LABELS
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 let currentIso3 = null;
 
@@ -773,7 +773,7 @@ function renderMiniCorrelation(containerId, iso3) {
         .attr('x', w - 4).attr('y', 24)
         .attr('text-anchor', 'end')
         .style('font-size', '8px')
-        .style('fill', COLORS.lightGray)
+        .style('fill', COLORS.uiText)      // 8px annotation: chrome, not data
         .text(year);
 
     // Axes

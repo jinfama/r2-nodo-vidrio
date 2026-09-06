@@ -2,13 +2,13 @@
 // CORRELATIONS - Gapminder-style bubble scatter plot
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS, COMPARISON_PALETTE, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, formatValue, resolveIndicatorValue
-} from '../utils.js';
+    getColorForIndex, inkFor, formatValue, resolveIndicatorValue
+} from '../utils.js?v=20260906m';
 
 const MARGIN = { top: 24, right: 118, bottom: 52, left: 72 };
 
@@ -310,8 +310,12 @@ function setupChart() {
         .attr('transform', 'rotate(-90)')
         .attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', COLORS.gray);
 
-    // Large year watermark in background
+    // Large year watermark in background. Decoration, not information: the
+    // analysis timeline bar under this chart prints the same year at 12.2:1
+    // (#analysis-timeline-year). Declared decorative so the faint tone can
+    // stay - darkening a 120px number to 3:1 would bury the bubbles.
     _yearLabel = svg.append('text').attr('class', 'year-watermark')
+        .attr('aria-hidden', 'true')
         .attr('x', chartW / 2).attr('y', chartH / 2)
         .attr('text-anchor', 'middle')
         .attr('dominant-baseline', 'central')
@@ -352,7 +356,7 @@ function renderBubbles(bubbles) {
             .attr('x', chartW / 2)
             .attr('y', chartH / 2)
             .attr('text-anchor', 'middle')
-            .attr('fill', COLORS.lightGray)
+            .attr('fill', COLORS.uiText)
             .attr('font-size', 13)
             .text(State.get('correlationScope') === 'selected'
                 ? 'Select countries to show selected-only correlations'
@@ -427,7 +431,7 @@ function renderBubbles(bubbles) {
                 event
             );
         })
-        .on('mouseleave', () => Tooltip.hide())
+        .on('mouseleave', () => Tooltip.leave())
         .on('click', (event, d) => State.toggleCountry(d.iso3));
 
     // Sort: dimmed bubbles first (background), then highlighted (foreground)
@@ -459,7 +463,7 @@ function renderBubbles(bubbles) {
 
     enterLabels.merge(labels)
         .text(d => d.name)
-        .attr('fill', d => d.color)
+        .attr('fill', d => inkFor(d.color))
         .transition().duration(dur)
         .attr('x', d => Math.max(30, Math.min(chartW - 30, xScale(d.x))))
         .attr('y', d => Math.max(14, yScale(d.y) - sizeScale(d.size) - 4))

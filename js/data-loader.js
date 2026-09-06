@@ -2,7 +2,7 @@
 // DATA LOADER - Loads cascorro JSON data files
 // ============================================================================
 
-import { NUMERIC_TO_ISO3, shortName } from './utils.js';
+import { NUMERIC_TO_ISO3, shortName } from './utils.js?v=20260906m';
 
 const DataLoader = (() => {
     let countryData = {};       // iso3 → array of yearly records

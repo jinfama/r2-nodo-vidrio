@@ -3,9 +3,9 @@
 // Supports absolute values, % of world total, and GHG stacked area decomposition
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -17,9 +17,10 @@ import {
     CROPS_COMPONENT_LABELS,
     CROPS_COMPONENT_COLORS,
     getColorForIndex,
+    inkFor,
     formatValue,
     resolveIndicatorValue
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 let currentContainer = null;
 let drawMode = 'line';       // 'line' | 'stacked'
@@ -470,7 +471,7 @@ function renderChart(vMode = 'abs') {
         .attr('x', -h / 2)
         .attr('text-anchor', 'middle')
         .style('font-size', '10px')
-        .style('fill', COLORS.lightGray)
+        .style('fill', COLORS.uiText)      // axis title: chrome, not data
         .text(yLabel);
 
     // Line generator
@@ -521,7 +522,8 @@ function renderChart(vMode = 'abs') {
             .attr('class', 'end-label')
             .attr('x', lbl.x)
             .attr('y', lbl.y)
-            .attr('fill', lbl.color)
+            // the name is text on paper: ink, not the line colour (utils.js)
+            .attr('fill', inkFor(lbl.color))
             .text(lbl.label);
     });
 
@@ -862,7 +864,7 @@ function renderStackedCountryArea(vMode = 'abs') {
     // Y label
     g.append('text').attr('transform', 'rotate(-90)')
         .attr('y', -margin.left + 14).attr('x', -h / 2).attr('text-anchor', 'middle')
-        .style('font-size', '10px').style('fill', COLORS.lightGray)
+        .style('font-size', '10px').style('fill', COLORS.uiText)
         .text(getYLabel(vMode, indicator, useLog));
 
     // Draw stacked areas
@@ -999,8 +1001,9 @@ function renderStackedCountryArea(vMode = 'abs') {
     });
 
     hoverRect.on('mouseleave', () => {
+        if (Tooltip.isPinned()) return;            // tap-anchored card keeps its crosshair
         hoverG.style('display', 'none');
-        Tooltip.hide();
+        Tooltip.leave();
     });
 }
 
@@ -1115,7 +1118,7 @@ function renderStackedArea(filterGases, vMode = 'abs', asLines = false, axisIndi
         components.forEach(gc => {
             const item = document.createElement('span');
             item.style.cssText = `display:flex;align-items:center;gap:3px`;
-            item.innerHTML = `<span style="width:10px;height:10px;border-radius:2px;background:${gc.color};opacity:.8;flex-shrink:0"></span>${gc.label}`;
+            item.innerHTML = `<span style="width:10px;height:10px;border-radius:0;background:${gc.color};opacity:.8;flex-shrink:0"></span>${gc.label}`;
             legendDiv.appendChild(item);
         });
         container.appendChild(legendDiv);
@@ -1260,7 +1263,7 @@ function renderStackedArea(filterGases, vMode = 'abs', asLines = false, axisIndi
                     : `${INDICATOR_LABELS[axisIndicator] || axisIndicator} (${INDICATOR_UNITS[axisIndicator] || ''})`;
                 g.append('text').attr('transform', 'rotate(-90)')
                     .attr('y', -margin.left + 14).attr('x', -h / 2).attr('text-anchor', 'middle')
-                    .style('font-size', '10px').style('fill', COLORS.lightGray).text(yLabel);
+                    .style('font-size', '10px').style('fill', COLORS.uiText).text(yLabel);
             }
 
             addStackedHover(g, svgEl, panel, components, xScale, yScale, w, h, vMode, axisIndicator);
@@ -1306,8 +1309,9 @@ function addStackedHover(g, svgEl, panel, components, xScale, yScale, w, h, vMod
     });
 
     hoverRect.on('mouseleave', () => {
+        if (Tooltip.isPinned()) return;            // tap-anchored card keeps its crosshair
         hoverG.style('display', 'none');
-        Tooltip.hide();
+        Tooltip.leave();
     });
 }
 
@@ -1412,7 +1416,7 @@ function renderMultiGasLines(selectedGases, vMode = 'abs', axisIndicator = 'ghg'
 
     g.append('text').attr('transform', 'rotate(-90)')
         .attr('y', -margin.left + 14).attr('x', -h / 2).attr('text-anchor', 'middle')
-        .style('font-size', '10px').style('fill', COLORS.lightGray)
+        .style('font-size', '10px').style('fill', COLORS.uiText)
         .text(getYLabel(vMode, axisIndicator, useLog));
 
     // Draw lines (clipped)
@@ -1439,7 +1443,7 @@ function renderMultiGasLines(selectedGases, vMode = 'abs', axisIndicator = 'ghg'
     }
     endLabels.forEach(lbl => {
         g.append('text').attr('class', 'end-label').attr('x', lbl.x).attr('y', lbl.y)
-            .attr('fill', lbl.color).text(lbl.label);
+            .attr('fill', inkFor(lbl.color)).text(lbl.label);
     });
 
     addHoverInteraction(g, svgEl, series, xScale, yScale, w, h, axisIndicator, vMode);
@@ -1729,7 +1733,10 @@ function renderFacetedByGas(selectedGases, isStacked = false, vMode = 'abs') {
                 }
                 Tooltip.show(lines.join(''), event);
             });
-            sHoverRect.on('mouseleave', () => { sHoverG.style('display', 'none'); Tooltip.hide(); });
+            sHoverRect.on('mouseleave', () => {
+                if (Tooltip.isPinned()) return;    // tap-anchored card keeps its crosshair
+                sHoverG.style('display', 'none'); Tooltip.leave();
+            });
 
         } else {
             // ---- Line mode: countries as separate series ----
@@ -1911,7 +1918,8 @@ function addHoverInteraction(g, svgEl, series, xScale, yScale, w, h, indicator, 
     });
 
     hoverRect.on('mouseleave', () => {
+        if (Tooltip.isPinned()) return;            // tap-anchored card keeps its crosshair
         hoverG.style('display', 'none');
-        Tooltip.hide();
+        Tooltip.leave();
     });
 }

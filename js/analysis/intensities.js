@@ -3,13 +3,13 @@
 // Progressive reveal: lines grow as timelapse advances
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
 import {
     COLORS, INDICATOR_LABELS, INDICATOR_UNITS,
     getColorForIndex, formatValue, shortName, resolveIndicatorValue
-} from '../utils.js';
+} from '../utils.js?v=20260906m';
 
 const MARGIN = { top: 24, right: 120, bottom: 44, left: 64 };
 let _unsubs = [];
@@ -370,5 +370,8 @@ function renderChart(container, seriesList, currentYear) {
                 Tooltip.show(`<strong>${ratioLabel} \u2014 ${year}</strong><table>${rows}</table>`, event);
             }
         })
-        .on('mouseleave', () => { hoverG.style('display', 'none'); Tooltip.hide(); });
+        .on('mouseleave', () => {
+            if (Tooltip.isPinned()) return;        // tap-anchored card keeps its crosshair
+            hoverG.style('display', 'none'); Tooltip.leave();
+        });
 }

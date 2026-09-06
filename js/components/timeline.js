@@ -3,7 +3,7 @@
 // Supports optional dual-handle mode for comparing two years
 // ============================================================================
 
-import State from '../state.js';
+import State from '../state.js?v=20260906m';
 
 const SPEEDS = [
     { label: '1x', ms: 300 },
@@ -26,6 +26,15 @@ export default class Timeline {
         this.bind();
         State.subscribe('currentYear', () => this.updatePosition());
         State.subscribe('yearRange', () => this.updatePosition());
+        // The left handle is state too. A restored permalink and Reset both
+        // write State.yearFrom; without this the handle stayed put while the
+        // charts had already moved to the new period. Dragging the handle sets
+        // _fromYear first and only then notifies, so this cannot loop.
+        State.subscribe('yearFrom', (v) => {
+            if (!this._dualMode || typeof v !== 'number' || v === this._fromYear) return;
+            this._fromYear = v;
+            this.updatePosition();
+        });
         State.subscribe('isPlaying', (val) => this.updatePlayBtn(val));
     }
 

@@ -2,13 +2,15 @@
 // APP.JS - Application entry point, routing, initialization
 // ============================================================================
 
-import State from './state.js';
-import DataLoader from './data-loader.js';
-import { initGlobeSection } from './globe/globe-section.js';
-import { initExploreSection } from './explore/explore-section.js';
-import { initAnalysisSection } from './analysis/analysis-section.js';
-import { toggleFullscreen, exportCSV } from './components/export.js';
-import CountryPicker from './components/country-picker.js';
+import State from './state.js?v=20260906m';
+import DataLoader from './data-loader.js?v=20260906m';
+import { initGlobeSection } from './globe/globe-section.js?v=20260906m';
+import { initExploreSection } from './explore/explore-section.js?v=20260906m';
+import { initAnalysisSection } from './analysis/analysis-section.js?v=20260906m';
+import { toggleFullscreen, exportCSV } from './components/export.js?v=20260906m';
+import CountryPicker from './components/country-picker.js?v=20260906m';
+import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260906m';
+import { INDICATOR_LABELS, INDICATOR_UNITS } from './utils.js?v=20260906m';
 
 // ---- TAB NAVIGATION ---- //
 const sections = {
@@ -46,17 +48,42 @@ function handleHash() {
     const section = parts[0];
     if (sections[section]) switchSection(section);
 
-    if (parts[1]) {
-        const params = new URLSearchParams(parts[1]);
-        if (params.has('c')) {
-            State.set('selectedCountries', params.get('c').split(',').filter(Boolean));
-        }
-        if (params.has('year')) State.set('currentYear', parseInt(params.get('year')));
-        if (params.has('range')) {
-            const [s, e] = params.get('range').split('-').map(Number);
-            if (s && e) State.set('yearRange', [s, e]);
-        }
-        if (params.has('ind')) State.set('indicator', params.get('ind'));
+    if (parts[1]) applyStateFromParams(new URLSearchParams(parts[1]));
+}
+
+// Restoring a shared link is an ORDERING problem, and getting the order wrong
+// is what made the permalink look broken: it restored the countries, the year
+// and the view, and then quietly threw away the period.
+//
+// explore-section.js recomputes the year range from the data extent of what is
+// on screen (adjustYearRangeForIndicator) every time the countries, the
+// indicator or the sub-view change. So anything that triggers that recompute
+// has to be applied FIRST, and the reader's own year and range LAST. The old
+// code did the opposite — it set the range inside handleHash() and then
+// clicked the sub-view 900 ms later from a timer, which put the range straight
+// back to the full extent of the data.
+function applyStateFromParams(params) {
+    if (params.has('c')) {
+        State.set('selectedCountries', params.get('c').split(',').filter(Boolean));
+    }
+    if (params.has('ind')) State.set('indicator', params.get('ind'));
+    // Sub-views own their own active class, so they are restored with a click.
+    const view = params.get('view');
+    if (view) document.querySelector(`.map-subtab[data-view="${view}"]`)?.click();
+    const an = params.get('an');
+    if (an) document.querySelector(`[data-analysis="${an}"]`)?.click();
+    // Last, after everything that could recompute them.
+    if (params.has('range')) {
+        const [s, e] = params.get('range').split('-').map(Number);
+        if (s && e) State.set('yearRange', [s, e]);
+    }
+    if (params.has('from')) {
+        const f = parseInt(params.get('from'), 10);
+        if (!isNaN(f)) State.set('yearFrom', f);
+    }
+    if (params.has('year')) {
+        const y = parseInt(params.get('year'), 10);
+        if (!isNaN(y)) State.set('currentYear', y);
     }
 }
 
@@ -392,7 +419,7 @@ function wireIntroEnter(overlayEl) {
         appEl.style.display = 'flex';
         // Retry globe init now that app is visible
         setTimeout(() => {
-            import('./globe/globe-renderer.js').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => overlayEl.remove(), 600);
     });
@@ -680,6 +707,69 @@ document.getElementById('footer-csv').addEventListener('click', () => {
     exportCSV(rows, `cascorro_data_${countries.join('_')}.csv`);
 });
 
+// ---- EMBEDDED MODE + MOBILE SHELL (sprint visores 2026-09) ---- //
+// When the explorer runs inside the cover's iframe we (a) tag the body so the
+// footer/timeline can reserve the bottom-right gutter used by the cover's
+// collapsed audio chip, and (b) forward Escape to the parent, because once the
+// iframe has focus the parent never sees the key.
+const IS_EMBEDDED = window !== window.parent;
+if (IS_EMBEDDED) document.body.classList.add('embedded');
+
+function isTypingTarget(el) {
+    if (!el) return false;
+    const tag = el.tagName;
+    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+}
+
+// Escape closes, in order of priority: an open overlay/sheet/dropdown (handled
+// by the components that own them), then the viewer itself.
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    if (isTypingTarget(document.activeElement)) return;
+    if (document.fullscreenElement) return;                       // let the browser exit fullscreen
+    if (document.getElementById('cpicker-overlay')?.classList.contains('open')) return;
+    if (document.getElementById('explore-right-panel')?.classList.contains('open')) return;
+    if (document.querySelector('.dropdown.visible, .search-results.visible')) return;
+    if (IS_EMBEDDED) {
+        try { window.parent.postMessage({ type: 'gw-back-to-cover' }, '*'); } catch (_) {}
+    }
+});
+
+// ---- EXPLORE SETTINGS BOTTOM SHEET (phones) ---- //
+(function wireExploreSheet() {
+    const panel    = document.getElementById('explore-right-panel');
+    const openBtn  = document.getElementById('explore-settings-btn');
+    const closeBtn = document.getElementById('explore-sheet-close');
+    const backdrop = document.getElementById('explore-sheet-backdrop');
+    if (!panel || !openBtn) return;
+
+    const isSheet = () => window.matchMedia('(max-width:900px)').matches;
+
+    function openSheet() {
+        panel.classList.add('open');
+        backdrop?.classList.add('open');
+        openBtn.setAttribute('aria-expanded', 'true');
+        panel.scrollTop = 0;
+    }
+    function closeSheet() {
+        panel.classList.remove('open');
+        backdrop?.classList.remove('open');
+        openBtn.setAttribute('aria-expanded', 'false');
+    }
+    openBtn.addEventListener('click', () => {
+        panel.classList.contains('open') ? closeSheet() : openSheet();
+    });
+    closeBtn?.addEventListener('click', closeSheet);
+    backdrop?.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && panel.classList.contains('open')) { e.preventDefault(); closeSheet(); }
+    });
+    // Leaving Explore, or growing past the breakpoint, must not leave a sheet
+    // stranded over the desktop layout.
+    State.subscribe('activeSection', (section) => { if (section !== 'explore') closeSheet(); });
+    window.addEventListener('resize', () => { if (!isSheet()) closeSheet(); });
+})();
+
 // ---- SECTION STATE CHANGE ---- //
 State.subscribe('activeSection', (section) => switchSection(section));
 
@@ -720,7 +810,7 @@ async function init() {
             if (introOverlay) introOverlay.classList.add('hidden');
             appEl.style.display = 'flex';
             setTimeout(() => {
-                import('./globe/globe-renderer.js').then(m => m.retryGlobe());
+                import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
             }, 100);
             setTimeout(() => introOverlay && introOverlay.remove(), 600);
         } else {
@@ -760,3 +850,268 @@ document.querySelectorAll('.method-indicator-btn').forEach(btn => {
         if (panel) { panel.classList.add('active'); panel.style.display = 'block'; }
     });
 });
+
+// ============================================================================
+// SHARE / EXPORT / RESET  (sprint visores 2026-09)
+// handleHash() above already *reads* a state URL; nothing ever wrote one, so
+// the viewer could not be linked to. These three functions close that: a URL
+// that carries the view, a PNG of the figure on screen with its own title,
+// year and source, and a way back to the initial state.
+// ============================================================================
+
+let _urlSyncTimer = null;
+
+function buildStateHash() {
+    const section = State.get('activeSection') || 'globe';
+    const p = new URLSearchParams();
+    const countries = State.get('selectedCountries') || [];
+    if (countries.length) p.set('c', countries.slice(0, 40).join(','));
+    const year = State.get('currentYear');
+    if (year) p.set('year', String(year));
+    const range = State.get('yearRange') || [];
+    if (range.length === 2) p.set('range', range[0] + '-' + range[1]);
+    // The left handle of the dual timeline. It clips every series in trend and
+    // composition, so a link without it comes back showing a different period.
+    const from = State.get('yearFrom');
+    if (from && range.length === 2 && from !== range[0]) p.set('from', String(from));
+    const ind = State.get('indicator');
+    if (ind) p.set('ind', ind);
+    if (section === 'explore') {
+        const view = State.get('exploreView');
+        if (view && view !== 'map') p.set('view', view);
+    }
+    if (section === 'analysis') {
+        const mode = State.get('analysisMode');
+        if (mode) p.set('an', mode);
+    }
+    const q = p.toString();
+    return '#' + section + (q ? '?' + q : '');
+}
+
+function permalinkURL() {
+    // Inside the cover's iframe the useful link is the cover, not the frame.
+    const base = (window !== window.parent)
+        ? location.origin + location.pathname.replace(/explorer\.html$/, 'index.html')
+        : location.origin + location.pathname;
+    return base + buildStateHash();
+}
+
+function writeURLNow() {
+    const h = buildStateHash();
+    try { history.replaceState(null, '', h); } catch (e) { /* link button still works */ }
+    // Embedded, the address bar the reader sees belongs to the cover, not to
+    // this frame. Send the state up so index.html can mirror it; otherwise the
+    // only shareable link is the one the "Link" button builds, and copying the
+    // bar gives a URL that restores nothing.
+    if (IS_EMBEDDED) {
+        try { window.parent.postMessage({ type: 'gw-state-hash', hash: h }, '*'); } catch (e) { /* ignore */ }
+    }
+}
+
+function scheduleURLSync() {
+    if (State.get('isPlaying')) return;   // the time-lapse would burn the replaceState budget
+    clearTimeout(_urlSyncTimer);
+    _urlSyncTimer = setTimeout(writeURLNow, 400);
+}
+
+function flashAction(btn, text) {
+    if (!btn) return;
+    const prev = btn.textContent;
+    btn.textContent = text;
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = prev; btn.disabled = false; }, 1400);
+}
+
+async function copyPermalink(btn) {
+    const url = permalinkURL();
+    try { history.replaceState(null, '', buildStateHash()); } catch (e) { /* ignore */ }
+    try {
+        await navigator.clipboard.writeText(url);
+        flashAction(btn, 'Copied');
+    } catch (e) {
+        window.prompt('Copy this link:', url);
+    }
+}
+
+// ---- PNG of what is on screen ---- //
+
+function exportSlug(text) {
+    return String(text || '')
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'growths-wake';
+}
+
+function pageStyleSheetText() {
+    let css = '';
+    for (const sheet of Array.from(document.styleSheets)) {
+        let rules;
+        try { rules = sheet.cssRules; } catch (e) { continue; }   // cross-origin (fonts)
+        if (!rules) continue;
+        for (const rule of Array.from(rules)) {
+            const t = rule.cssText || '';
+            if (t.startsWith('@import') || t.startsWith('@font-face')) continue;
+            css += t + '\n';
+        }
+    }
+    return css;
+}
+
+function visibleFigure() {
+    const section = document.querySelector('.section.active');
+    if (!section) return null;
+    const cands = Array.from(section.querySelectorAll('svg, canvas'))
+        .map(el => ({ el, r: el.getBoundingClientRect() }))
+        .filter(o => o.r.width > 140 && o.r.height > 100);
+    if (!cands.length) return null;
+    cands.sort((a, b) => (b.r.width * b.r.height) - (a.r.width * a.r.height));
+    return cands[0];
+}
+
+async function figureToImage(el, w, h) {
+    if (el.tagName.toLowerCase() === 'canvas') {
+        renderGlobeFrame();
+        const data = el.toDataURL('image/png');
+        if (!data || data.length < 2000) return null;
+        const img = new Image();
+        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = data; });
+        return img;
+    }
+    const clone = el.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', w);
+    clone.setAttribute('height', h);
+    if (!clone.getAttribute('viewBox')) clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    const st = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    st.textContent = pageStyleSheetText();
+    clone.insertBefore(st, clone.firstChild);
+    const txt = new XMLSerializer().serializeToString(clone);
+    const img = new Image();
+    try {
+        await new Promise((res, rej) => {
+            img.onload = res; img.onerror = rej;
+            img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(txt);
+        });
+    } catch (e) { return null; }
+    return img;
+}
+
+function figureTitle() {
+    const section = State.get('activeSection');
+    const ind = State.get('indicator');
+    const label = (typeof INDICATOR_LABELS !== 'undefined' && INDICATOR_LABELS[ind]) || ind || '';
+    const unit = (typeof INDICATOR_UNITS !== 'undefined' && INDICATOR_UNITS[ind]) || '';
+    if (section === 'globe') return { main: `Country profile — ${label}`, unit };
+    if (section === 'analysis') return { main: `Analysis — ${State.get('analysisMode')}`, unit };
+    if (section === 'about') return { main: 'About & sources', unit };
+    return { main: `${label}`, unit, view: State.get('exploreView') };
+}
+
+async function exportVisiblePNG(btn) {
+    const found = visibleFigure();
+    if (!found) { flashAction(btn, 'No figure'); return; }
+    const w = Math.max(620, Math.round(found.r.width));
+    const h = Math.max(380, Math.round(found.r.height));
+    const img = await figureToImage(found.el, w, h);
+    if (!img) { flashAction(btn, 'No figure'); return; }
+
+    const scale = 2, padTop = 76, padBottom = 52, padSide = 26;
+    const canvas = document.createElement('canvas');
+    canvas.width = (w + padSide * 2) * scale;
+    canvas.height = (h + padTop + padBottom) * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    const css = getComputedStyle(document.documentElement);
+    const paper = css.getPropertyValue('--bg').trim() || '#f2ede0';
+    const ink = css.getPropertyValue('--cd').trim() || '#0e2c48';
+    const mute = css.getPropertyValue('--cl').trim() || '#4a6d85';
+    const rule = css.getPropertyValue('--cb').trim() || '#c6cfd6';
+
+    ctx.fillStyle = paper;
+    ctx.fillRect(0, 0, w + padSide * 2, h + padTop + padBottom);
+    ctx.drawImage(img, padSide, padTop, w, h);
+
+    const t = figureTitle();
+    const year = State.get('currentYear');
+    const range = State.get('yearRange') || [];
+    const when = (State.get('activeSection') === 'explore' && State.get('exploreView') !== 'map' && range.length === 2)
+        ? `${range[0]}–${range[1]}` : String(year);
+
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = mute;
+    ctx.font = "600 9.5px 'Geist Mono', ui-monospace, Menlo, Consolas, monospace";
+    ctx.fillText("GROWTH'S WAKE · GLOBAL CHANGE & HUMAN DEVELOPMENT", padSide, 24);
+    ctx.fillStyle = ink;
+    ctx.font = "600 20px 'Bricolage Grotesque', Geist, system-ui, sans-serif";
+    ctx.fillText(`${t.main}${t.unit ? ` (${t.unit})` : ''} · ${when}`, padSide, 51);
+    const sel = State.get('selectedCountries') || [];
+    ctx.fillStyle = mute;
+    ctx.font = "400 10.5px Geist, system-ui, sans-serif";
+    if (sel.length) ctx.fillText(sel.join(', ').slice(0, 140), padSide, 66);
+
+    ctx.strokeStyle = rule;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padSide, h + padTop + 16);
+    ctx.lineTo(w + padSide, h + padTop + 16);
+    ctx.stroke();
+    ctx.fillStyle = mute;
+    ctx.font = "400 10px Geist, system-ui, sans-serif";
+    ctx.fillText("Source: Growth's Wake — Infante-Amate, Aguilera & Travieso. See About & sources for the full reference list.", padSide, h + padTop + 33);
+    ctx.fillText(permalinkURL().slice(0, 160), padSide, h + padTop + 47);
+
+    canvas.toBlob(blob => {
+        if (!blob) { flashAction(btn, 'Error'); return; }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `growths-wake_${exportSlug(t.main)}_${when.replace('–', '-')}.png`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        flashAction(btn, 'PNG ✓');
+    }, 'image/png');
+}
+
+// ---- Reset ---- //
+
+// The year and the range that state.js declares are placeholders: the loader
+// widens them to the real extent of the data. Reset has to return to what the
+// reader saw on first load, not to those placeholders.
+let INITIAL_VIEW = null;
+setTimeout(() => {
+    if (!INITIAL_VIEW) INITIAL_VIEW = {
+        year: State.get('currentYear'),
+        range: State.get('yearRange')
+    };
+}, 2200);
+
+function resetViewer() {
+    State.set('isPlaying', false);
+    State.clearCountries();
+    State.set('currentYear', INITIAL_VIEW ? INITIAL_VIEW.year : 2022);
+    State.set('yearRange', INITIAL_VIEW ? INITIAL_VIEW.range : [1850, 2022]);
+    State.set('baseIndicator', 'ghg');
+    State.set('perCapita', true);
+    State.set('indicator', 'co2ff_pc');
+    State.set('selectedGases', ['co2ff']);
+    document.querySelector('.map-subtab[data-view="map"]')?.click();
+    document.querySelector('.tab-btn[data-section="globe"]')?.click();
+    resetGlobeView();
+    writeURLNow();
+    setTimeout(writeURLNow, 500);   // after the sections re-render
+}
+
+// ---- Wiring ---- //
+
+document.getElementById('footer-link')?.addEventListener('click', e => copyPermalink(e.currentTarget));
+document.getElementById('footer-png')?.addEventListener('click', e => exportVisiblePNG(e.currentTarget));
+document.getElementById('footer-reset')?.addEventListener('click', e => {
+    resetViewer(); flashAction(e.currentTarget, 'Done');
+});
+
+['activeSection', 'selectedCountries', 'currentYear', 'yearRange', 'yearFrom', 'indicator',
+ 'exploreView', 'analysisMode', 'isPlaying'].forEach(key => State.subscribe(key, scheduleURLSync));
+
+// The link is applied once, by handleHash(), in an order that survives the
+// year-range recompute. It used to be re-applied here on a 900 ms timer, and
+// that second pass was exactly what reset the reader's period.
+setTimeout(scheduleURLSync, 1400);

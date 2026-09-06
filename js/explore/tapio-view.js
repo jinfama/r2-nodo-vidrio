@@ -4,10 +4,10 @@
 // Multi-country: renders one chart per country in a grid layout
 // ============================================================================
 
-import State from '../state.js';
-import DataLoader from '../data-loader.js';
-import Tooltip from '../components/tooltip.js';
-import { COLORS, getColorForIndex, shortName } from '../utils.js';
+import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260906m';
+import Tooltip from '../components/tooltip.js?v=20260906m';
+import { COLORS, getColorForIndex, shortName } from '../utils.js?v=20260906m';
 
 // Tapio pattern definitions (pre-computed in data as pat / pat_ff)
 const PATTERN_META = {
@@ -41,8 +41,21 @@ function classifyTapio(gdpGrowth, ghgGrowth) {
 
 let currentContainer = null;
 
+let _selectsWired = false;
+
 export function initTapioView() {
     currentContainer = document.getElementById('analysis-chart-wrapper');
+    // The two selects were read inside renderTapio() but nothing ever listened
+    // to them, so changing them did nothing until some other state moved.
+    // Wire them once (the nodes are static markup in explorer.html).
+    if (!_selectsWired) {
+        ['tapio-type-select', 'tapio-window-select'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', () => {
+                if (currentContainer) renderTapio();
+            });
+        });
+        _selectsWired = true;
+    }
 }
 
 export function updateTapioView() {
@@ -307,7 +320,7 @@ function renderSingleTapio(container, ds, windowSize, currentYear, emType) {
                 event
             );
         })
-        .on('mouseleave', () => Tooltip.hide());
+        .on('mouseleave', () => Tooltip.leave());
 
     // Label on current year point
     const curPt = points.find(d => d.year === currentYear);
