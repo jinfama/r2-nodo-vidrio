@@ -1,1252 +1,779 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Estelas — Growth's Wake</title>
+<meta name="color-scheme" content="dark">
+<title>Estelas · Global Change &amp; Human Development Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
-<!-- d3 only used when the Huellas portada is active. -->
-<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap">
 <style>
+/* Portada V6 (2026-09-08). Tokens de la portada aprobada V5 (wakes in the sea),
+   los mismos que el explorador re-asienta sobre papel: ver explorer.html :root. */
 :root{
-  /* Palette of the approved cover, 07_temp/portadas_visores_2026-09/
-     estelas/V5_wakes-in-the-sea.html — the same tokens the explorer runs
-     on, so the cover and the viewer under it are one surface. The cover
-     paints cream on a dark sea; here the ground is chart paper, so the
-     sea becomes the ink and the cream becomes the paper. Ratios measured
-     against --paper. Only the frame moves: the painting, the wake SVG and
-     the footprints keep their own colours. */
-  --paper:#f2ede0;       /* cover --cream lifted towards --foam            */
-  --paper-2:#e7dfcc;     /* one step back towards the cover --cream        */
-  --ink:#0e2c48;         /* cover --sea                          12.2:1    */
-  --ink-soft:#2a5474;    /* sea to line2                          6.9:1    */
-  --ink-mute:#456580;    /* cover --muted, walked down to AA      5.2:1    */
-  --warm:#c4502f;        /* cover --verm: rules, marks, big display type   */
-  --warm-ink:#9f4126;    /* verm for TEXT: 5.5:1 --paper, 4.9:1 --paper-2  */
-  --warm-soft:#d67a5c;
-  --warm-hero:#96381f;   /* --verm for the 100px hero word, which sits on the
-                            sea PHOTOGRAPH, not on paper: measured over those
-                            pixels, --warm gives 2.2:1 and --warm-ink 2.9:1,
-                            both under the 3:1 that large text needs. 3.3:1. */
-  --rule:#c6cfd6;        /* cover --cream2 as the hairline rule            */
-  --ff-serif:'Cormorant Garamond',Georgia,'Times New Roman',serif;
-  --ff-sans:'Geist','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-  --ff-mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --sea:#0E2C48; --sea2:#0A2136; --line:#1E4463; --line2:#2F5C7E;
+  --cream:#EFE4CC; --cream2:#C6CFD6; --muted:#8AA3B7; --foam:#EDF4F7; --verm:#C4502F; --ice:#7FA6C2;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:Geist,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
 }
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-html,body{background:var(--paper);color:var(--ink);font-family:var(--ff-sans);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+*{box-sizing:border-box;border-radius:0}
+html,body{height:100%}
+body{margin:0;background:var(--sea);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.45;
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+a{color:inherit}
+button{font:inherit;color:inherit}
 
-/* ---------- Backgrounds — switched by body.mode-* ----------
-   Three different portadas:
-     mode-mar       — painting + spotlight, no dashed lines.
-     mode-estelas   — cream paper + dashed wake-lines.
-     mode-huellas — painting + dashed wake-lines overlaid (hybrid). */
-body.mode-mar,
-body.mode-huellas{
-  background-image:
-    linear-gradient(180deg,
-      #f2ede0 0%,
-      #e7dfcc 20%,
-      #d8d4cb 36%,
-      #bfcad2 50%,
-      #adbecc 68%,
-      #93a7b6 100%);
-  min-height:100vh;min-height:100dvh;
-}
-body.mode-mar::before,
-body.mode-huellas::before{
-  content:'';position:fixed;left:0;right:0;top:42%;height:1px;
-  background:linear-gradient(90deg, transparent, rgba(95,112,128,0.22) 18%, rgba(95,112,128,0.22) 82%, transparent);
-  z-index:0;pointer-events:none;
-}
-body.mode-estelas{
-  background:
-    radial-gradient(1200px 600px at 75% 35%, rgba(30,68,99,0.05), transparent 60%),
-    radial-gradient(900px 500px at 15% 85%, rgba(196,80,47,0.035), transparent 60%),
-    linear-gradient(180deg, #f2ede0 0%, #e7dfcc 100%);
-  min-height:100vh;min-height:100dvh;
-}
+.page{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);height:100vh;height:100dvh;overflow:hidden}
 
-a{color:var(--ink);text-decoration:none}
-a:hover{color:var(--warm-ink)}
+/* ---------- text column ---------- */
+.col{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,18px);min-height:0;overflow:hidden;
+  padding:clamp(22px,3vh,34px) clamp(18px,2vw,30px) clamp(16px,2.2vh,24px) clamp(20px,2.6vw,40px);
+  background:linear-gradient(90deg,var(--sea2) 0%,rgba(10,33,54,.92) 100%);border-right:1px solid var(--line)}
+.eyebrow{margin:0;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.eyebrow .what{line-height:1.35}
+.lang{display:flex;flex:0 0 auto}
+.lang button{background:transparent;border:1px solid var(--line2);border-left-width:0;min-width:44px;min-height:44px;
+  padding:0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer}
+.lang button:first-child{border-left-width:1px}
+.lang button.on{background:var(--cream);color:var(--sea);border-color:var(--cream)}
+.lang button:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
+h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,"wdth" 88;
+  font-size:clamp(56px,5.6vw,96px);line-height:.86;letter-spacing:-.04em;margin:0;color:var(--cream)}
+.sub{margin:0;font-size:clamp(14px,1.05vw,17px);font-weight:500;letter-spacing:-.01em;color:var(--cream)}
+.lede{margin:0;color:var(--cream2);font-size:clamp(13px,.98vw,15px);max-width:44ch;text-wrap:pretty}
 
-/* Custom cursor — a small warm-red ring with a centred dot. Always visible,
-   reads over the painting and the cream paper alike. Falls back to crosshair
-   if the browser can't render the SVG cursor. */
-body{
-  cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='8' fill='none' stroke='%23c4502f' stroke-width='2'/><circle cx='14' cy='14' r='1.6' fill='%23c4502f'/></svg>") 14 14, crosshair;
-}
-/* But standard pointer over buttons / links — UI affordance wins over aesthetics. */
-button,a,.cta{cursor:pointer}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;text-decoration:none;
+  background:var(--cream);color:var(--sea);min-height:60px;padding:0 20px;
+  font-family:var(--display);font-weight:640;font-variation-settings:"opsz" 32,"wdth" 92;font-size:20px;letter-spacing:-.015em;
+  border:2px solid var(--cream);transition:background .15s,color .15s}
+.cta small{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-left:auto}
+.cta svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.cta:hover,.cta:focus-visible{background:var(--verm);border-color:var(--verm);color:var(--foam);outline:none}
 
-/* ---------- Top bar ---------- */
-.topbar{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  display:flex;align-items:center;justify-content:flex-end;
-  padding:18px 28px;
-  pointer-events:none;
-}
-.topbar > *{pointer-events:auto}
-.topbar-actions{
-  display:flex;align-items:center;gap:20px;
-  padding:7px 14px;
-  background:rgba(247,243,232,.90);
-  border:1px solid var(--rule);
-  backdrop-filter:blur(8px);
-  box-shadow:0 4px 14px rgba(14,44,72,.10);
-}
+.index{display:flex;flex-direction:column;border-top:1px solid var(--line2)}
+.index a{display:flex;align-items:center;gap:10px;min-height:44px;padding:2px 0;color:var(--cream2);text-decoration:none;
+  font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+.index a span.n{font-family:var(--mono);font-size:12px;color:var(--muted);width:24px;flex:0 0 auto}
+.index a span.h{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.index a:hover,.index a:focus-visible{color:var(--cream);outline:none}
+.index a:hover span.h,.index a:focus-visible span.h{color:var(--verm)}
 
-/* Switcher chip-rows (style, language) share one register: a row of dot-separated
-   buttons, with optional uppercase micro-label in front. Active item underlined
-   in warm red. */
-.switcher{
-  display:flex;align-items:center;gap:0;
-  font-family:var(--ff-mono);font-size:10.5px;font-weight:600;letter-spacing:.07em;
-}
-.switcher .sw-label{
-  font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
-  color:var(--ink-mute);margin-right:8px;
-}
-.switcher button{
-  background:transparent;border:none;padding:4px 8px;color:var(--ink-mute);
-  cursor:pointer;font:inherit;letter-spacing:inherit;white-space:nowrap;
-  border-bottom:1px solid transparent;transition:color .2s,border-color .2s;
-}
-.switcher button:hover{color:var(--ink-soft)}
-.switcher button.active{color:var(--ink);border-bottom-color:var(--warm)}
-/* Decorative divider between switcher buttons: no information, marked
-   aria-hidden in the markup, so 1.4.3 does not apply and the faint tone stays. */
-.switcher .sep{color:var(--ink-mute);opacity:.5;font-weight:300;padding:0 2px}
+.poem{margin:auto 0 0;padding:0 0 0 14px;border-left:2px solid var(--verm);max-width:40ch}
+.poem p{margin:0;font-family:var(--display);font-variation-settings:"opsz" 24,"wdth" 92;font-style:italic;
+  font-size:clamp(15px,1.25vw,19px);line-height:1.25;color:var(--cream);letter-spacing:-.01em}
+.poem .src{display:block;margin-top:.45em;font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.poem .gloss{display:block;margin-top:.25em;font-family:var(--sans);font-style:normal;font-size:12.5px;color:var(--muted)}
 
-/* ---------- Audio mount — chip on top of a YouTube iframe ----------
-   YouTube refuses to autoplay audio from display:none / invisible iframes,
-   so we render the iframe at its natural size and *cover it visually* with
-   the chip button. The browser still sees a "visible" iframe, but the user
-   only sees the elegant chip. */
-.audio-mount{
-  position:fixed;bottom:20px;right:24px;z-index:60;
-  width:240px;height:46px;
-  isolation:isolate;
-  transition:bottom .35s ease, right .35s ease;
-}
-/* When the viewer is open the chip used to float over the explorer's legends
-   and axes (bottom:96px, 240 px wide). Instead it collapses to a 44 px round
-   button parked in the bottom-right gutter that the explorer reserves for it
-   (body.embedded padding-right on .app-footer / .timeline-bar). It has to stay
-   *rendered* — YouTube refuses to keep audio alive in a display:none iframe —
-   so it is shrunk, not hidden. */
-body.viewer-open .audio-mount{
-  bottom:calc(6px + env(safe-area-inset-bottom));right:6px;
-  width:44px;height:44px;
-}
-body.viewer-open .audio-chip{
-  padding:0;justify-content:center;gap:0;
-  background:rgba(247,243,232,.95);
-}
-body.viewer-open .audio-chip .audio-chip-meta,
-body.viewer-open .audio-chip .audio-chip-hint{
-  display:none;
-}
-.audio-mount .yt-frame{
-  position:absolute;inset:0;width:100%;height:100%;
-  border:0;z-index:1;
-  /* Almost-invisible — but rendered, so YouTube allows audio playback. */
-  opacity:0.001;
-  pointer-events:none;
-}
-.audio-chip{
-  position:absolute;inset:0;z-index:2;
-  display:flex;align-items:center;gap:10px;
-  padding:8px 14px 8px 12px;
-  background:rgba(247,243,232,.93);
-  border:1px solid var(--rule);
-  backdrop-filter:blur(8px);
-  box-shadow:0 6px 22px rgba(14,44,72,.12);
-  font-family:var(--ff-sans);
-  cursor:pointer;user-select:none;
-  transition:background .2s, box-shadow .2s;
-}
-.audio-chip:hover{background:rgba(250,247,238,.98);box-shadow:0 8px 26px rgba(14,44,72,.16)}
-.audio-chip-eq{
-  display:flex;align-items:flex-end;gap:2px;
-  width:14px;height:14px;flex-shrink:0;
-}
-.audio-chip-eq span{
-  display:block;width:2px;background:var(--warm);
-  animation:eq-bar 0.9s ease-in-out infinite;
-}
-.audio-chip-eq span:nth-child(1){height:60%;animation-delay:-0.7s}
-.audio-chip-eq span:nth-child(2){height:90%;animation-delay:-0.3s}
-.audio-chip-eq span:nth-child(3){height:50%;animation-delay:-0.5s}
-.audio-chip-eq span:nth-child(4){height:80%;animation-delay:-0.1s}
-@keyframes eq-bar{
-  0%,100%{transform:scaleY(0.35)}
-  50%    {transform:scaleY(1.0)}
-}
-.audio-chip.paused .audio-chip-eq span{animation-play-state:paused;transform:scaleY(0.35)}
-.audio-chip-meta{font-size:11px;color:var(--ink-soft);white-space:nowrap;line-height:1.2;overflow:hidden;text-overflow:ellipsis}
-.audio-chip-meta i{font-family:var(--ff-serif);font-style:italic;font-size:13px;color:var(--ink);margin-right:6px}
-.audio-chip-hint{
-  font-family:var(--ff-mono);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--ink-mute);font-weight:600;margin-left:auto;
-  transition:opacity .35s ease;
-}
-.audio-chip.unmuted .audio-chip-hint{opacity:0;visibility:hidden;width:0;margin-left:0}
+/* ---------- stage ---------- */
+.stage{display:flex;flex-direction:column;min-width:0;min-height:0}
+.cap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px clamp(14px,1.6vw,24px) 8px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream)}
+.cap b{font-weight:600;color:var(--cream)}
+.cap .pin{color:var(--verm);font-weight:600}
+.cap .pin:empty{display:none}
+.cap .hint{margin-left:auto;color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px}
+#scene{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;touch-action:pan-y}
+#chart{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+#chart.grab{cursor:ew-resize}
 
-/* ---------- Hero — shared shell, three layouts via body.mode-* ---------- */
-/* ---------- Viewer iframe — single-document integration ----------
-   The explorer lives in an iframe layered on top of the cover. The iframe is
-   loaded lazily; clicking "Explore" reveals it and the music in the parent
-   keeps playing. Going back is the explorer's own home button, which posts a
-   message up to this document — there is no second back-control on screen. */
-.viewer-frame{
-  position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;
-  border:0;background:#fff;
-  z-index:5;
-  opacity:0;pointer-events:none;
-  transition:opacity .5s ease;
-}
-body.viewer-open .viewer-frame{opacity:1;pointer-events:auto}
-/* When the viewer is open, hide the cover overlay underneath so its expensive
-   canvas/svg animations stop visibly competing.
-   IMPORTANT: opacity alone is not enough — the topbar sets pointer-events:auto
-   on its children, so the invisible language/mode buttons kept swallowing taps
-   over the explorer header. Fade out, then take the whole thing out of the hit
-   test with visibility:hidden (delayed so the fade is still seen). The `inert`
-   attribute is set from JS as a belt-and-braces measure for focus/AT. */
-body.viewer-open .hero,
-body.viewer-open .topbar{
-  opacity:0;pointer-events:none;visibility:hidden;
-  transition:opacity .35s ease, visibility 0s linear .35s;
-}
-body.viewer-open .hero *,
-body.viewer-open .topbar *{pointer-events:none!important}
-.hero{
-  position:relative;min-height:100vh;min-height:100dvh;
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-/* Mar and combinada: bottom-left aligned hero content. */
-body.mode-mar .hero,
-body.mode-huellas .hero{
-  align-items:flex-start;justify-content:flex-start;
-  padding:100px 24px 80px 7vw;
-}
-/* Estelas: centred classic. */
-body.mode-estelas .hero{
-  align-items:center;justify-content:center;
-  padding:120px 24px 80px;
-}
+/* map inset: a cartouche in the open water of the early centuries */
+#mapbox{position:absolute;left:0;top:0;width:200px;display:flex;flex-direction:column;gap:6px;
+  background:rgba(10,33,54,.72);border:1px solid rgba(239,228,204,.28);padding:8px 8px 7px;pointer-events:auto}
+#mapcap{font-family:var(--mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream);line-height:1.3}
+#mapcap b{color:var(--foam)}
+#map{display:block;width:100%;height:auto}
+#map .c{stroke:rgba(10,33,54,.9);stroke-width:.45px;vector-effect:non-scaling-stroke}
+#map g.r{cursor:pointer}
+#map g.r.dim{opacity:.32}
+#map g.r.lit .c{stroke:var(--foam);stroke-width:1.1px}
+#map .none{fill:rgba(198,207,214,.10);stroke:rgba(198,207,214,.35);stroke-width:.4px;vector-effect:non-scaling-stroke;pointer-events:none}
+#map .frame{fill:none;stroke:rgba(239,228,204,.5);stroke-width:.8px;vector-effect:non-scaling-stroke}
+.legend{font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--cream2);display:flex;flex-direction:column;gap:5px}
+.legend .ramp{display:flex;align-items:center;gap:7px}
+.legend .bar{flex:1 1 auto;height:8px;background:linear-gradient(90deg,#EDF4F7 0%,#D8A98E 50%,#C4502F 100%);border:1px solid rgba(239,228,204,.3)}
+.legend .note{font-family:var(--sans);letter-spacing:0;color:var(--muted);font-size:12px;line-height:1.3}
+.legend .note-short{display:none}
 
-/* Painting layer — only in mar / combinada. */
-.hero-bg{
-  position:absolute;inset:0;
-  background-image:url('img/sea.webp?v=20260905a');
-  background-size:cover;
-  background-position:center 60%;
-  background-repeat:no-repeat;
-  z-index:0;
-  opacity:0;
-  filter:brightness(0.86) saturate(0.92) contrast(0.96);
-  animation:bg-drift 60s ease-in-out infinite alternate;
-  transition:opacity .45s ease;
-}
-@keyframes bg-drift{
-  0%   { background-position: 48% 58%; transform: scale(1.00); }
-  100% { background-position: 52% 62%; transform: scale(1.03); }
-}
-body.mode-mar .hero-bg,
-body.mode-huellas .hero-bg{opacity:0.94}
+/* tooltip (HTML, over the canvas) */
+.tip{position:fixed;z-index:5;pointer-events:none;background:rgba(8,22,37,.95);border:1px solid var(--cream);color:var(--cream);
+  padding:8px 11px;font-size:12.5px;line-height:1.45;max-width:260px;display:none}
+.tip.show{display:block}
+.tip b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.tip .yr{color:var(--muted);font-family:var(--mono);font-size:12px}
+.tip .v2{color:var(--verm)}
+.tip .pinned{display:block;margin-top:3px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
 
-/* FX canvas — Mar runs the spotlight, Combinada runs the painted-wake
-   droplets that follow the cursor. Hidden in Estelas. */
-.hero-spotlight{
-  position:absolute;inset:0;width:100%;height:100%;
-  z-index:1;pointer-events:none;
-  opacity:0;transition:opacity .45s ease;
-}
-body.mode-mar .hero-spotlight,
-body.mode-huellas .hero-spotlight{opacity:1}
+/* time bar */
+.timebar{display:flex;align-items:center;gap:14px;padding:10px clamp(14px,1.6vw,24px) 14px;border-top:1px solid var(--line)}
+#play{width:48px;height:48px;flex:0 0 auto;background:var(--cream);color:var(--sea);border:2px solid var(--cream);cursor:pointer;
+  display:flex;align-items:center;justify-content:center}
+#play svg{width:20px;height:20px;fill:currentColor}
+#play:hover,#play:focus-visible{background:var(--verm);border-color:var(--verm);color:var(--foam);outline:none}
+#play .ic-pause{display:none}
+#play.playing .ic-play{display:none}
+#play.playing .ic-pause{display:block}
+#slider{flex:1 1 auto;min-width:0;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
+#slider::-webkit-slider-runnable-track{height:3px;background:var(--line2)}
+#slider::-moz-range-track{height:3px;background:var(--line2)}
+#slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-9.5px;background:var(--cream);border:2px solid var(--sea)}
+#slider::-moz-range-thumb{width:22px;height:22px;background:var(--cream);border:2px solid var(--sea)}
+#slider:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
+.yr-wrap{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;min-width:5.2ch}
+#year{font-family:var(--mono);font-weight:600;font-size:clamp(34px,3vw,44px);line-height:1;letter-spacing:-.02em;color:var(--cream);font-variant-numeric:tabular-nums}
+.yr-wrap small{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.mob-only{display:none}
 
-/* Dashed wake SVG — only Estelas. */
-.wake-svg{
-  position:absolute;inset:0;width:100%;height:100%;
-  z-index:1;pointer-events:none;
-  opacity:0;transition:opacity .45s ease;
+/* ---------- portrait / phone ---------- */
+@media (max-width:899px){
+  body{overflow:auto}
+  .page{display:block;height:auto;overflow:visible}
+  .col{border-right:0;padding:16px 16px 6px;gap:8px;overflow:visible;background:none}
+  .col .cta,.col .index,.col .poem{display:none}
+  h1{font-size:clamp(52px,15vw,70px)}
+  .lede{font-size:13.5px;max-width:none}
+  .stage{display:block}
+  .cap{padding:8px 14px 6px;font-size:12px}
+  .cap .hint{display:none}
+  #scene{height:52vh;height:52dvh;min-height:380px}
+  .legend .note{display:none}
+  .legend .note-short{display:block}
+  #mapbox{padding:6px 7px 6px;gap:4px}
+  .timebar{padding:8px 14px 12px}
+  #year{font-size:36px}
+  .mob-only{display:flex}
+  .mob-cta{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 14px calc(8px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(14,44,72,0) 0%,rgba(14,44,72,.96) 30%)}
+  .mob-cta .cta{width:100%;min-height:56px;font-size:19px}
+  .mob-index{flex-direction:column;padding:8px 16px 110px;gap:14px}
+  .mob-index .index{width:100%}
+  .mob-index .poem{margin:6px 0 0}
 }
-body.mode-estelas .wake-svg{opacity:1}
-
-/* Huellas mode — walking wakes on a chart-grid background, footprint cursor.
-   Reuses codex's visual language so the user gets the exact intro they liked,
-   just integrated as a portada option instead of an intermediate page. */
-.huellas-stage{
-  position:absolute;inset:0;width:100%;height:100%;
-  z-index:1;opacity:0;pointer-events:none;
-  background:#adbecc;
-  overflow:hidden;
-  transition:opacity .45s ease;
-}
-.huellas-stage::before{
-  content:'';position:absolute;inset:0;
-  background-image:repeating-linear-gradient(0deg,rgba(31,52,62,.075) 0 1px,transparent 1px 124px),
-                   repeating-linear-gradient(90deg,rgba(31,52,62,.06) 0 1px,transparent 1px 124px);
-  opacity:.55;pointer-events:none;
-}
-.huellas-stage::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(245,239,222,.28),rgba(77,104,116,.10));
-  pointer-events:none;
-}
-.huellas-stage .huellas-svg{position:absolute;inset:0;width:100%;height:100%}
-body.mode-huellas .huellas-stage{opacity:1}
-/* The footprint cursor and trail are placed inside .huellas-stage; pointer
-   events are needed for the trail to register cursor moves. */
-body.mode-huellas .huellas-stage{pointer-events:auto}
-body.mode-huellas .huellas-stage.footprint-cursor,
-body.mode-huellas .huellas-stage.footprint-cursor button{cursor:none}
-@keyframes wakeFlow{from{stroke-dashoffset:0}to{stroke-dashoffset:-220}}
-.h-wake-line,.h-wake-halo{animation-name:wakeFlow;animation-timing-function:linear;animation-iteration-count:infinite}
-.h-wake-footprint{mix-blend-mode:multiply}
-.wake-cursor-footprint,.wake-cursor-trail{
-  position:absolute;width:34px;height:62px;
-  background-repeat:no-repeat;background-size:contain;background-position:center;
-  pointer-events:none;transform-origin:50% 50%;
-}
-.wake-cursor-footprint{z-index:5;opacity:.78;filter:drop-shadow(0 0 8px rgba(32,50,60,.10));mix-blend-mode:multiply}
-.wake-cursor-trail{z-index:1;opacity:.54;animation:cursorFootstepFade 4.6s ease-out forwards;mix-blend-mode:multiply}
-@keyframes cursorFootstepFade{0%{opacity:.58}18%{opacity:.66}100%{opacity:0}}
-@media(prefers-reduced-motion:reduce){.h-wake-line,.h-wake-halo{animation:none!important}}
-
-/* In Huellas mode, the cover background turns into the chart-grid blue
-   (covered by .huellas-stage anyway) so anything peeking through matches. */
-body.mode-huellas{background:#adbecc !important}
-body.mode-huellas::before{display:none}
-
-/* ---------- Hero content ---------- */
-.hero-content{
-  position:relative;z-index:2;width:100%;
-}
-body.mode-mar .hero-content,
-body.mode-huellas .hero-content{max-width:560px;text-align:left}
-body.mode-estelas .hero-content{max-width:780px;text-align:center}
-
-.kicker{
-  font-family:var(--ff-mono);font-style:normal;font-size:10.5px;font-weight:600;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
-  margin-bottom:24px;
-}
-
-/* Main title — "Estelas" is always the warm-red highlight; the rest is ink. */
-h1.title{
-  font-family:var(--ff-serif);
-  font-size:clamp(54px,7vw,104px);
-  font-weight:500;line-height:1.0;letter-spacing:-.5px;
-  color:var(--ink);
-  margin-bottom:14px;
-}
-h1.title .wake{
-  font-family:var(--ff-serif);font-style:italic;font-weight:500;
-  /* Over the sea photograph --warm gives 2.2:1 and --warm-ink 2.9:1, both
-     under the 3:1 large text needs. --warm-hero is one step deeper in the same
-     hue. Rules and marks keep --warm; links and buttons keep --warm-ink. */
-  color:var(--warm-hero);
-}
-h1.title .tail{font-style:normal;color:var(--ink);font-size:.55em;font-weight:400;letter-spacing:0;margin-left:.20em}
-
-.subtitle{
-  font-family:var(--ff-serif);font-weight:400;font-style:italic;
-  color:var(--ink);line-height:1.45;
-  margin:0 0 22px;
-}
-body.mode-mar .subtitle,
-body.mode-huellas .subtitle{font-size:clamp(16px,1.4vw,19px);max-width:520px}
-body.mode-estelas .subtitle{
-  font-size:clamp(18px,2.2vw,24px);max-width:620px;margin:0 auto 36px;
-  color:var(--ink-soft);line-height:1.35;
-}
-/* One subtitle visible per mode. Estelas reads minimalist; the other two read full. */
-body.mode-estelas .subtitle-full{display:none}
-body.mode-mar .subtitle-min,
-body.mode-huellas .subtitle-min{display:none}
-
-.cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
-body.mode-mar .cta-row,
-body.mode-huellas .cta-row{justify-content:flex-start}
-body.mode-estelas .cta-row{justify-content:center}
-.cta{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:var(--ff-mono);font-size:11.5px;font-weight:600;letter-spacing:.11em;
-  text-transform:uppercase;
-  padding:14px 26px;border:none;cursor:pointer;
-  background:var(--ink);color:var(--paper);
-  transition:all .25s ease;
-  text-decoration:none;
-}
-.cta:hover{background:var(--warm-ink);transform:translateY(-1px);color:var(--paper)}
-.cta .arrow{font-size:16px;line-height:1;transition:transform .25s}
-.cta:hover .arrow{transform:translateX(4px)}
-
-/* Machado quote — bottom-left, present in ALL three modes. Faint cream halo so
-   it reads over the painting, plain ink on cream paper. */
-.hero-quote{
-  position:absolute;z-index:2;
-  left:7vw;bottom:50px;
-  max-width:520px;
-  font-family:var(--ff-serif);font-size:clamp(20px,2vw,28px);
-  line-height:1.3;font-weight:500;
-  color:var(--ink);
-  text-shadow:0 0 18px rgba(242,237,224,0.62);
-}
-.hero-quote em{font-style:italic;color:var(--ink)}
-.hero-quote .quote-src{
-  display:block;margin-top:10px;
-  font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink);font-weight:600;
-  text-shadow:none;
-}
-
-/* ============================================================
-   SQUARE CORNERS — the house rule on the cover
-   border-radius is 0 everywhere on this page. The collapsed audio
-   chip used to be a 44 px circle and is now a 44 px square: it is a
-   control, not a portrait and not a data point, so it was never an
-   exception. No other radius exists in this file, and no pill (999px)
-   ever did. The live exceptions all sit in explorer.html, declared
-   at the foot of its stylesheet.
-   ============================================================ */
-@media (max-width:760px){
-  body.mode-mar .hero,
-  body.mode-huellas .hero{padding:100px 24px 160px}
-  body.mode-estelas .hero{padding:100px 24px 160px}
-  .hero-quote{left:24px;right:24px;bottom:90px;max-width:none}
-  .switcher .sw-label{display:none}
-  .audio-mount{width:200px}
-  .audio-chip-hint{display:none}
-  /* the paper chip stays, but tucked in so the row never has to break a word */
-  .topbar{padding:12px 14px}
-  .topbar-actions{gap:10px;padding:6px 9px}
-  .switcher{font-size:10px;letter-spacing:.05em}
-  .switcher button{padding:4px 5px}
-}
+@media (prefers-reduced-motion:reduce){ .cta,#play{transition:none} }
 </style>
 </head>
-<body class="mode-mar">
-
-<!-- ============ TOP BAR ============ -->
-<header class="topbar">
-  <div class="topbar-actions">
-    <nav class="switcher mode-switcher" aria-label="Visual mode">
-      <span class="sw-label" data-i18n="modeLabel">Portada</span>
-      <button data-mode="mar" class="active">Mar</button>
-      <span class="sep" aria-hidden="true">·</span>
-      <button data-mode="estelas">Estelas</button>
-      <span class="sep" aria-hidden="true">·</span>
-      <button data-mode="huellas">Huellas</button>
-    </nav>
-    <nav class="switcher lang-switcher" aria-label="Language">
-      <button data-lang="en" class="active">EN</button>
-      <span class="sep" aria-hidden="true">·</span>
-      <button data-lang="es">ES</button>
-      <span class="sep" aria-hidden="true">·</span>
-      <button data-lang="zh">中文</button>
-    </nav>
-  </div>
-</header>
-
-<!-- ============ AUDIO ============
-     Visible-but-covered YouTube iframe: the chip overlays the iframe at the
-     same screen rectangle, so the browser sees a rendered iframe (autoplay
-     allowed) and the user sees an elegant text chip. -->
-<div class="audio-mount" id="audio-mount">
-  <div id="yt-player" class="yt-frame"></div>
-  <button class="audio-chip muted" id="audio-chip" type="button" aria-label="Toggle music">
-    <span class="audio-chip-eq" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
-    <span class="audio-chip-meta">
-      <i>Footprints</i><span data-i18n="trackFootprints">Wayne Shorter · 1966</span>
-    </span>
-    <span class="audio-chip-hint" data-i18n="audioHint">Toca para escuchar</span>
-  </button>
-</div>
-
-<!-- ============ HERO ============ -->
-<section class="hero">
-  <div class="hero-bg" aria-hidden="true"></div>
-  <canvas class="hero-spotlight" id="spotlight-canvas" aria-hidden="true"></canvas>
-  <svg class="wake-svg" id="wake-svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <g id="wake-group"></g>
-  </svg>
-  <!-- Huellas portada: walking wake-lines on a chart-grid sea + footprint cursor. -->
-  <div class="huellas-stage" id="huellas-stage" aria-hidden="true">
-    <svg id="huellas-svg" class="huellas-svg" aria-hidden="true"></svg>
-  </div>
-
-  <div class="hero-content">
-    <div class="kicker" data-i18n="kicker">Historical trajectories — 1820 to today</div>
-    <h1 class="title">
-      <span class="wake">Estelas</span> <span class="tail">del crecimiento</span>
-    </h1>
-    <!-- Two subtitles: the long one for Mar/Combinada, the minimal one for Estelas. -->
-    <p class="subtitle subtitle-full" data-i18n-html="subtitle">
-      An interactive viewer of historical data on economic development, resource
-      use and environmental impacts since 1820.
+<body>
+<main class="page">
+  <header class="col">
+    <p class="eyebrow">
+      <span class="what" data-es="Cambio global y desarrollo humano · 1750–2024">Global change &amp; human development · 1750–2024</span>
+      <span class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="en" class="on" aria-label="English">EN</button>
+        <button type="button" data-lang="es" aria-label="Español">ES</button>
+      </span>
     </p>
-    <p class="subtitle subtitle-min" data-i18n-html="subtitleMin">
-      Historical series on development and the environment.
-    </p>
-    <div class="cta-row">
-      <a class="cta" id="cta-explore" href="#viewer">
-        <span data-i18n="ctaPrimary">Explore the trajectories</span>
-        <span class="arrow">→</span>
-      </a>
+    <h1>Estelas</h1>
+    <p class="sub" data-es="Explorador de cambio global y desarrollo humano">Global Change &amp; Human Development Explorer</p>
+    <p class="lede" data-es="Series históricas de 199 países y ocho regiones del mundo desde 1750: renta, población, desarrollo humano, emisiones de gases de efecto invernadero, tierra cultivada y uso de materiales. Las ocho regiones zarpan de la misma agua en 1750; durante siglo y medio sus estelas se trenzan en un solo rumbo y después se separan.">Historical series for 199 countries and eight world regions since 1750: income, population, human development, greenhouse gas emissions, cropland and material use. The eight regions leave the same water in 1750; for a century and a half their wakes braid into one course, and then they part.</p>
+
+    <a class="cta" id="cta" href="explorer.html#globe">
+      <span data-es="Entrar al visor">Enter the explorer</span>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+
+    <nav class="index" aria-label="Sections of the explorer">
+      <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span><span class="h">#globe</span></a>
+      <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar: mapas, rankings y series">Explore: maps, rankings and series</span><span class="h">#explore</span></a>
+      <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis: desacoplamiento y descomposición">Analysis: decoupling and decomposition</span><span class="h">#analysis</span></a>
+      <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span><span class="h">#about</span></a>
+    </nav>
+
+    <blockquote class="poem">
+      <p>Caminante, no hay camino,<br>sino estelas en la mar.
+        <span class="src">Antonio Machado · Proverbios y cantares XXIX · 1912</span>
+        <span class="gloss" data-es="Antonio Machado, Campos de Castilla.">Wanderer, there is no road — only wakes in the sea.</span>
+      </p>
+    </blockquote>
+  </header>
+
+  <section class="stage" aria-label="Scene">
+    <div class="cap" id="cap">
+      <span><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="$ internacionales de 2011 por persona">2011 international $ per person</span> · <span data-es="ocho regiones del mundo">eight world regions</span> · 1750–2024</span>
+      <span class="pin" id="pinlbl"></span>
+      <span class="hint" id="hint" data-es="Pasa el cursor por una estela o una región del mapa; clic para fijarla. Arrastra para recorrer los años.">Point at a wake or a region on the map; click to pin it. Drag sideways to move through the years.</span>
     </div>
-  </div>
+    <div id="scene">
+      <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024"></canvas>
+      <div id="mapbox">
+        <div id="mapcap"><b data-es="Gases de efecto invernadero por persona">Greenhouse gas per person</b> · t CO₂e · <span id="mapyear">1750</span></div>
+        <svg id="map" viewBox="0 0 200 100" aria-label="World map by region"></svg>
+        <div class="legend">
+          <div class="ramp"><span>1</span><span class="bar" aria-hidden="true"></span><span>≥ 20 t</span></div>
+          <div class="note" data-es="Altura de cada estela: PIB per cápita · Tinta y mapa: GEI por persona · Estimaciones anuales, sin interpolar.">Height of each wake: GDP per capita · Ink and map: greenhouse gas per person · Annual estimates, no interpolation.</div>
+          <div class="note note-short" data-es="Altura: PIB per cápita · Tinta y mapa: GEI por persona · Datos anuales.">Height: GDP per capita · Ink and map: GHG per person · Annual data.</div>
+        </div>
+      </div>
+      <div class="tip" id="tip" role="status" aria-live="polite"></div>
+    </div>
+    <div class="timebar">
+      <button id="play" type="button" class="playing" aria-label="Pause" data-es-label="Pausa" data-en-label="Pause" data-es-play="Reproducir" data-en-play="Play">
+        <svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l12 7-12 7z"/></svg>
+        <svg class="ic-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h4v14H4zM12 3h4v14h-4z"/></svg>
+      </button>
+      <input id="slider" type="range" min="1750" max="2024" step="1" value="1750" aria-label="Year">
+      <div class="yr-wrap"><output id="year" for="slider">1750</output><small data-es="año">year</small></div>
+    </div>
+    <div class="mob-only mob-cta">
+      <a class="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="mob-only mob-index">
+      <nav class="index" aria-label="Sections of the explorer">
+        <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span><span class="h">#globe</span></a>
+        <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar: mapas, rankings y series">Explore: maps, rankings and series</span><span class="h">#explore</span></a>
+        <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis: desacoplamiento y descomposición">Analysis: decoupling and decomposition</span><span class="h">#analysis</span></a>
+        <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span><span class="h">#about</span></a>
+      </nav>
+      <blockquote class="poem">
+        <p>Caminante, no hay camino,<br>sino estelas en la mar.
+          <span class="src">Antonio Machado · Proverbios y cantares XXIX · 1912</span>
+          <span class="gloss" data-es="Antonio Machado, Campos de Castilla.">Wanderer, there is no road — only wakes in the sea.</span>
+        </p>
+      </blockquote>
+    </div>
+  </section>
+</main>
 
-  <aside class="hero-quote" data-i18n-html="quote">
-    <em>… sino estelas en la mar.</em>
-    <span class="quote-src">Antonio Machado</span>
-  </aside>
-</section>
-
-<!-- ============ EMBEDDED VIEWER ============
-     The explorer lives inside this iframe — same document, same audio context.
-     loading="lazy" defers the bundle until the user opens the viewer.
-     Navigation back to the cover is done via the explorer's own "home" button
-     (postMessage to parent), so there's no second back-control on screen. -->
-<iframe class="viewer-frame" id="viewer-frame" title="Estelas — explorer" loading="lazy" allow="fullscreen" allowfullscreen></iframe>
-
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<script src="portada/cascorro.js"></script>
+<script src="portada/world-110m.js"></script>
+<script src="portada/regions-map.js"></script>
 <script>
-/* =========================================================
-   0. Viewer integration — one URL, one experience.
-   Click "Explore" → load explorer.html into the iframe and reveal it; the
-   music chip in the parent page keeps playing without interruption. The
-   "Estelas ↑" link in the corner returns to the cover.
-   --------------------------------------------------------- */
 (function(){
-  const frame = document.getElementById('viewer-frame');
-  const cta   = document.getElementById('cta-explore');
-  if(!frame || !cta) return;
+'use strict';
+/* ------------------------------------------------------------------
+   Estelas · portada V6. Eight world regions leave the same shore in
+   1750. The height of each wake is that region's GDP per capita; the
+   colour of its ink is the greenhouse gas its people release, and the
+   world map in the open water of the early centuries shows that same
+   ink, region by region, for the year on the clock.
+   ------------------------------------------------------------------ */
+var D=window.CASCORRO, TOPO=window.WORLD110, RG=window.CASCORRO_REGIONS;
+var canvas=document.getElementById('chart'), scene=document.getElementById('scene');
+var mapbox=document.getElementById('mapbox'), mapSvg=document.getElementById('map');
+var tip=document.getElementById('tip'), playBtn=document.getElementById('play'), slider=document.getElementById('slider');
+var yearOut=document.getElementById('year'), mapYear=document.getElementById('mapyear'), pinLbl=document.getElementById('pinlbl');
+var RM=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var COARSE=!!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
+window.__fps=0;window.__state=null;
+if(!D||!D.regions||!canvas.getContext||typeof d3==='undefined'||typeof topojson==='undefined')return;
+var ctx=canvas.getContext('2d');
 
-  // Everything on the cover that can still be clicked once the explorer is on
-  // top. `inert` removes them from the hit test, the tab order and the a11y
-  // tree in one go; the CSS above (visibility:hidden) is the fallback for
-  // browsers without inert.
-  const coverLayers = [document.querySelector('.topbar'), document.querySelector('.hero')].filter(Boolean);
-  function setCoverInert(on){
-    coverLayers.forEach(el => { if(on) el.setAttribute('inert',''); else el.removeAttribute('inert'); });
+/* ---------- language ---------- */
+var LANG_KEY='growthWake.language';           /* the explorer's own key (js/app.js) */
+var LANG='en';
+try{if(localStorage.getItem(LANG_KEY)==='es')LANG='es';}catch(e){}
+var T={
+  en:{perPerson:'per person',gdp:'GDP per capita',ghg:'t CO₂e per person',pinned:'pinned · click again to release',pinnedTap:'pinned · tap again to release',
+      part:'the wakes part',partShort:'they part',partSub:function(g,g0){return 'richest region earns '+g+'× the poorest ('+g0+'× in 1750)';},
+      onePath:'one path',open1:'open water:',open2:'nothing charted',play:'Play',pause:'Pause'},
+  es:{perPerson:'por persona',gdp:'PIB per cápita',ghg:'t CO₂e por persona',pinned:'fijada · clic de nuevo para soltar',pinnedTap:'fijada · toca de nuevo para soltar',
+      part:'las estelas se separan',partShort:'se separan',partSub:function(g,g0){return 'la región más rica gana '+g+'× la más pobre ('+g0+'× en 1750)';},
+      onePath:'un solo rumbo',open1:'mar abierta:',open2:'nada trazado',play:'Reproducir',pause:'Pausa'}
+};
+var NAMES={
+  en:{'East Asia & Pacific':'East Asia & Pacific','Europe & Central Asia':'Europe & Central Asia','Latin America & Caribbean':'Latin America & Caribbean',
+      'Middle East & North Africa':'Middle East & North Africa','North America':'North America','South Asia':'South Asia',
+      'Sub-Saharan Africa':'Sub-Saharan Africa','Western Europe':'Western Europe'},
+  es:{'East Asia & Pacific':'Asia Oriental y Pacífico','Europe & Central Asia':'Europa y Asia Central','Latin America & Caribbean':'América Latina y Caribe',
+      'Middle East & North Africa':'Oriente Medio y Norte de África','North America':'América del Norte','South Asia':'Asia Meridional',
+      'Sub-Saharan Africa':'África Subsahariana','Western Europe':'Europa Occidental'}
+};
+var SHORT={
+  en:{'East Asia & Pacific':'E. ASIA & PACIFIC','North America':'N. AMERICA','Europe & Central Asia':'EUROPE & C. ASIA','Western Europe':'W. EUROPE',
+      'Latin America & Caribbean':'LATIN AMERICA','Middle East & North Africa':'MID. EAST & N. AFR.','Sub-Saharan Africa':'SUB-SAHARAN AFR.','South Asia':'SOUTH ASIA'},
+  es:{'East Asia & Pacific':'ASIA OR. Y PACÍFICO','North America':'AMÉRICA DEL NORTE','Europe & Central Asia':'EUROPA Y ASIA C.','Western Europe':'EUROPA OCC.',
+      'Latin America & Caribbean':'AMÉRICA LATINA','Middle East & North Africa':'OR. MEDIO Y N. ÁFRICA','Sub-Saharan Africa':'ÁFRICA SUBSAH.','South Asia':'ASIA MERIDIONAL'}
+};
+/* on a phone the open water past the last reading is narrow: shorter plates */
+var TINY={
+  en:{'East Asia & Pacific':'E. ASIA & PAC.','North America':'N. AMERICA','Europe & Central Asia':'EUR. & C. ASIA','Western Europe':'W. EUROPE',
+      'Latin America & Caribbean':'LATIN AMERICA','Middle East & North Africa':'MENA','Sub-Saharan Africa':'AFRICA (SSA)','South Asia':'SOUTH ASIA'},
+  es:{'East Asia & Pacific':'ASIA OR. Y PAC.','North America':'AMÉRICA N.','Europe & Central Asia':'EUR. Y ASIA C.','Western Europe':'EUROPA OCC.',
+      'Latin America & Caribbean':'AMÉRICA LAT.','Middle East & North Africa':'OR. MEDIO','Sub-Saharan Africa':'ÁFRICA SUBS.','South Asia':'ASIA MERID.'}
+};
+function tr(k){return T[LANG][k];}
+function setLang(l,save){
+  LANG=(l==='es')?'es':'en';
+  document.documentElement.lang=LANG;
+  var els=document.querySelectorAll('[data-es]');
+  for(var i=0;i<els.length;i++){var el=els[i];
+    if(el.dataset.en==null)el.dataset.en=el.innerHTML;
+    el.innerHTML=LANG==='es'?el.dataset.es:el.dataset.en;}
+  var bs=document.querySelectorAll('.lang button');
+  for(i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].dataset.lang===LANG);
+  document.title=LANG==='es'?'Estelas · Explorador de cambio global y desarrollo humano':'Estelas · Global Change & Human Development Explorer';
+  if(save){try{localStorage.setItem(LANG_KEY,LANG);}catch(e){}}
+  syncPlayLabel();updatePinLabel();
+  if(chartLayer)buildChart();futDone=false;needDraw=true;
+}
+document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.lang,true);});});
+
+/* ---------- colour helpers ---------- */
+var SEA='#0E2C48',SEA2='#0A2136',LINE2='#2F5C7E',CREAM='#EFE4CC',MUTED='#8AA3B7',FOAM='#EDF4F7',VERM='#C4502F';
+var RGB={FOAM:[237,244,247],VERM:[196,80,47],ICE:[127,166,194],CREAM:[239,228,204]};
+function lerp3(a,b,t){t=t<0?0:t>1?1:t;return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
+function rgbaArr(c,al){return 'rgba('+Math.round(c[0])+','+Math.round(c[1])+','+Math.round(c[2])+','+al+')';}
+function rgba(c,a){var p=parseInt(c.slice(1),16);return 'rgba('+((p>>16)&255)+','+((p>>8)&255)+','+(p&255)+','+a+')';}
+function hash(n){var s=Math.sin(n*12.9898+78.233)*43758.5453;return s-Math.floor(s);}
+function smooth(t){return t*t*(3-2*t);}
+function noise(x,sd){var i0=Math.floor(x),f=x-i0,a=hash(i0+sd*131.7),b=hash(i0+1+sd*131.7);return (a+(b-a)*smooth(f))*2-1;}
+function fbm(x,sd){return noise(x,sd)*0.62+noise(x*2.31,sd+7)*0.26+noise(x*4.7,sd+19)*0.12;}
+function clamp(x){return x<0?0:x>1?1:x;}
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+function fmtMoney(v){return '$'+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,LANG==='es'?'.':',');}
+
+/* ---------- the eight courses ---------- */
+var YRS=D.world.years,N=YRS.length,Y0=YRS[0],Y1=YRS[N-1];
+function fill(arr){var v=new Array(N),last=arr[0]||0;for(var a=0;a<N;a++){var x=arr[a];if(x==null)x=last;else last=x;v[a]=x;}return v;}
+var ships=[],i,j;
+Object.keys(D.regions).forEach(function(k){
+  var r=D.regions[k];if(!r||!r.gdp_pc||r.gdp_pc.length!==N)return;
+  var v=fill(r.gdp_pc),e=null;
+  if(r.ghg&&r.pop&&r.ghg.length===N&&r.pop.length===N){
+    var gg=fill(r.ghg),pp=fill(r.pop);e=new Array(N);
+    for(var a2=0;a2<N;a2++)e[a2]=pp[a2]>0?gg[a2]*1e6/pp[a2]:0;   /* Mt CO2e / persons -> t per person */
   }
+  ships.push({name:k,v:v,e:e,ri:RG?RG.regions.indexOf(k):-1});
+});
+ships.sort(function(a,b){return b.v[N-1]-a.v[N-1];});
+var NS=ships.length;if(!NS)return;
+var shipOfRegion={};for(j=0;j<NS;j++)shipOfRegion[ships[j].ri]=j;
+/* ink: how far along cream -> vermilion a rate of t CO2e per person sits (1 -> 20 t, capped) */
+function heat(t){if(t==null)return 0;var u=(t-1)/19;return u<0?0:(u>1?1:Math.pow(u,0.82));}
+function inkAt(jj,idx){var s=ships[jj];return s.e?heat(s.e[idx]):0;}
+function inkCol(jj,idx,al){return rgbaArr(lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,idx)),al);}
+var vMax=0;for(j=0;j<NS;j++)for(i=0;i<N;i++)if(ships[j].v[i]>vMax)vMax=ships[j].v[i];vMax*=1.06;
+/* the year the wakes part: first year the richest region earns ten times the poorest */
+var GAP=10,ratio=new Array(N);
+for(i=0;i<N;i++){var lo=Infinity,hi=-Infinity;for(j=0;j<NS;j++){var w=ships[j].v[i];if(w<lo)lo=w;if(w>hi)hi=w;}ratio[i]=lo>0?hi/lo:1;}
+var partIdx=N-1;for(i=0;i<N;i++){if(ratio[i]>=GAP){partIdx=i;break;}}
+var partYear=YRS[partIdx],gap0=Math.round(ratio[0]*10)/10;
 
-  // A shared link looks like index.html#explore?c=...&year=...&range=...&view=...
-  // The fragment addresses the VIEWER, but it is delivered to this document,
-  // and an iframe does not inherit its parent's fragment. So the section names
-  // the explorer can route to are listed here: a URL that starts with one of
-  // them opens the viewer on load and travels with it into the frame.
-  const VIEWER_HASH = /^#(globe|explore|analysis|about)(\?|$)/;
+/* ---------- state ---------- */
+var idx=0,playing=false,pinned=-1,hover=-1,hoverIdx=N-1,hoverSrc='',needDraw=true;
+var RATE=(N-1)/5800;                       /* years per ms: the whole run in 5.8 s */
+var endedAt=null;                          /* when the clock last reached 2024, for the open-water fade */
 
-  function openViewer(){
-    if(!frame.src){
-      const carried = VIEWER_HASH.test(location.hash) ? location.hash : '';
-      frame.src = 'explorer.html?v=20260906m' + carried;
-    }
-    document.body.classList.add('viewer-open');
-    setCoverInert(true);
-    setTimeout(() => { try { frame.contentWindow && frame.contentWindow.focus(); } catch(_){} }, 60);
+/* ---------- layout ---------- */
+var W,H,dpr,mobile,xL,xData,xFut,yB,yT,chartLayer=null,tinyFont,smallFont,roseX,roseY,roseR,MB;
+function xs(y){return xL+(y-Y0)/(Y1-Y0)*(xData-xL);}
+function ys(v){return yB-(v/vMax)*(yB-yT);}
+function pt(jj,k){return [xs(YRS[k]),ys(ships[jj].v[k])+fbm(k*0.07+jj*9,jj)*(mobile?0.9:1.4)];}
+function xToIdx(x){var k=Math.round((x-xL)/(xData-xL)*(N-1));return k<0?0:k>N-1?N-1:k;}
+var TICKS_WIDE=[1750,1800,1850,1900,1950,2000,2024],TICKS_TIGHT=[1750,1850,1950,2024],TICKS=TICKS_WIDE;
+
+function layout(){
+  W=Math.max(280,scene.clientWidth);H=Math.max(300,scene.clientHeight);
+  dpr=Math.min(2,window.devicePixelRatio||1);
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+  mobile=window.innerWidth<900;
+  tinyFont='500 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';
+  smallFont='500 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';
+  xL=mobile?18:26;xFut=W-(mobile?10:22);
+  xData=Math.round(xL+(xFut-xL)*(mobile?0.70:0.86));
+  yT=mobile?22:30;yB=H-(mobile?30:34);
+  /* the map cartouche sits in the open water of the early centuries, where no wake ever climbs */
+  var mw=Math.round((xData-xL)*(mobile?0.58:0.42));mw=Math.max(150,Math.min(mw,mobile?210:400));
+  MB={x:xL+10,y:yT+6,w:mw};
+  mapbox.style.left=MB.x+'px';mapbox.style.top=MB.y+'px';mapbox.style.width=MB.w+'px';
+  roseX=Math.round(xL+(xData-xL)*0.66);roseY=Math.round(yT+(yB-yT)*0.34);roseR=Math.min(mobile?34:64,(yB-yT)*0.14);
+  TICKS=(xData-xL)<520?TICKS_TIGHT:TICKS_WIDE;
+  buildChart();buildFuture();futDone=false;gradCache={};needDraw=true;
+}
+
+function buildChart(){
+  chartLayer=document.createElement('canvas');chartLayer.width=canvas.width;chartLayer.height=canvas.height;
+  var g=chartLayer.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  g.fillStyle=SEA;g.fillRect(0,0,W,H);
+  var rg=g.createRadialGradient(W*0.30,H*0.25,10,W*0.55,H*0.6,Math.max(W,H)*0.95);
+  rg.addColorStop(0,'rgba(31,76,113,0.55)');rg.addColorStop(1,'rgba(6,20,34,0.78)');
+  g.fillStyle=rg;g.fillRect(0,0,W,H);
+  var k;
+  for(k=0;k<(mobile?260:700);k++){g.globalAlpha=0.03+0.07*hash(k*1.3);g.fillStyle=hash(k*2.1)>0.5?'#BFD6E6':'#04101C';g.fillRect(hash(k*3.7)*W,hash(k*8.1)*H,1,1);}
+  g.globalAlpha=1;
+  /* rhumb web of a portolan */
+  g.strokeStyle=rgba(LINE2,0.40);g.lineWidth=0.7;
+  for(k=0;k<32;k++){var a=k*Math.PI/16;g.beginPath();g.moveTo(roseX,roseY);g.lineTo(roseX+Math.cos(a)*Math.max(W,H)*1.6,roseY+Math.sin(a)*Math.max(W,H)*1.6);g.stroke();}
+  /* wave hatching */
+  g.strokeStyle=rgba('#8FB6CF',0.14);g.lineWidth=0.75;
+  for(k=0;k<(mobile?30:80);k++){var hx=hash(k*5.1)*(W-70)+20,hy=hash(k*9.3)*(H-60)+20,hw=9+hash(k*2.7)*16;
+    g.beginPath();for(var hq=0;hq<=6;hq++)g.lineTo(hx+hw*hq/6,hy+Math.sin(hq*1.05)*1.6);g.stroke();}
+  /* compass rose, faint */
+  rose(g,roseX,roseY,roseR,0.34);
+  /* the shore of 1750 */
+  g.strokeStyle=rgba(CREAM,0.5);g.lineWidth=1.2;g.lineJoin='round';
+  var sxs=[];for(k=0;k<=44;k++)sxs.push([xL-9+fbm(k*0.45,21)*4.5,yT-10+(yB+16-(yT-10))*k/44]);
+  g.beginPath();g.moveTo(sxs[0][0],sxs[0][1]);for(k=1;k<sxs.length;k++)g.lineTo(sxs[k][0],sxs[k][1]);g.stroke();
+  /* meridians + year scale, stopping at the last reading */
+  g.font=tinyFont;g.textAlign='center';g.textBaseline='top';
+  for(k=0;k<TICKS.length;k++){var tx=xs(TICKS[k]);
+    g.strokeStyle=rgba(LINE2,k===0?0:0.4);g.lineWidth=0.7;g.beginPath();g.moveTo(tx,yT-10);g.lineTo(tx,yB+6);g.stroke();
+    g.fillStyle=rgba(CREAM,0.8);g.fillText(TICKS[k],Math.min(xData-8,Math.max(xL+14,tx)),yB+11);}
+  /* value scale, in thousands of $, tucked just inside the last reading so the
+     name plates past the heads never sit on it */
+  g.textAlign='right';g.textBaseline='bottom';g.fillStyle=rgba(CREAM,0.55);
+  var step=vMax>40000?20000:10000;
+  for(var v=step;v<vMax;v+=step){var yy=ys(v);
+    g.strokeStyle=rgba(LINE2,0.35);g.beginPath();g.moveTo(xL,yy);g.lineTo(xData,yy);g.stroke();
+    g.fillText('$'+(v/1000)+'k',xData-12,yy-2);}
+  /* open water beyond the last reading */
+  var span=xFut-xData;
+  if(span>24){var gd=g.createLinearGradient(xData-span*0.2,0,xFut,0);
+    gd.addColorStop(0,'rgba(8,24,40,0)');gd.addColorStop(1,'rgba(6,20,34,0.42)');
+    g.fillStyle=gd;g.fillRect(xData-span*0.2,yT-14,span*1.2,yB-yT+26);
+    g.strokeStyle=rgba(CREAM,0.34);g.lineWidth=1;g.beginPath();g.moveTo(xData,yB+2);g.lineTo(xData,yB+9);g.stroke();}
+  /* neatline */
+  g.strokeStyle=rgba(CREAM,0.22);g.lineWidth=1;var m=mobile?4:8;g.strokeRect(m+0.5,m+0.5,W-2*m-1,H-2*m-1);
+}
+function rose(g,cx,cy,R,alpha){
+  if(R<16)return;g.save();g.globalAlpha=alpha;g.lineJoin='miter';
+  g.strokeStyle=rgba(CREAM,0.45);g.lineWidth=1;
+  [1,0.78,0.30].forEach(function(f){g.beginPath();g.arc(cx,cy,R*f,0,6.2832);g.stroke();});
+  var k,a;
+  for(k=0;k<16;k++){a=k*Math.PI/8-Math.PI/2;g.fillStyle=k%2?rgba(CREAM,0.26):rgba(CREAM,0.5);g.beginPath();
+    g.moveTo(cx+Math.cos(a)*R*(k%2?0.62:0.86),cy+Math.sin(a)*R*(k%2?0.62:0.86));
+    g.lineTo(cx+Math.cos(a+0.055)*R*0.18,cy+Math.sin(a+0.055)*R*0.18);g.lineTo(cx+Math.cos(a-0.055)*R*0.18,cy+Math.sin(a-0.055)*R*0.18);g.closePath();g.fill();}
+  g.fillStyle=VERM;g.beginPath();g.arc(cx,cy,R*0.055,0,6.2832);g.fill();g.restore();
+}
+
+/* ---------- one wake, up to the clock ---------- */
+var gradCache={};
+function inkGradient(jj,al){
+  var ck=jj+'|'+al;if(gradCache[ck])return gradCache[ck];
+  var g=ctx.createLinearGradient(xL,0,xData,0),q,ii;
+  for(q=0;q<=14;q++){ii=Math.round(q/14*(N-1));g.addColorStop(q/14,inkCol(jj,ii,al));}
+  gradCache[ck]=g;return g;
+}
+function wake(jj,upto,alpha,boost){
+  var steps=Math.max(4,Math.min(mobile?80:200,upto)),pts=[],k;
+  for(k=0;k<=steps;k++)pts.push(pt(jj,Math.round(upto*k/steps)));
+  if(pts.length<2)return null;
+  var head=pts[pts.length-1],prev=pts[pts.length-2],ang=Math.atan2(head[1]-prev[1],head[0]-prev[0]);
+  var W1=boost?2.1:1,A1=boost?1:0.8;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  ctx.globalAlpha=alpha*A1;ctx.strokeStyle=inkGradient(jj,A1);ctx.lineWidth=(mobile?1.3:1.6)*W1;
+  ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(k=1;k<pts.length;k++)ctx.lineTo(pts[k][0],pts[k][1]);ctx.stroke();
+  var sprd=mobile?3.2:4.6;
+  for(var sgn=-1;sgn<=1;sgn+=2){
+    ctx.globalAlpha=alpha*0.42;ctx.strokeStyle=inkGradient(jj,0.46);ctx.lineWidth=(mobile?0.65:0.85)*W1;ctx.beginPath();
+    for(k=0;k<pts.length;k++){var t=k/(pts.length-1),p=pts[k],pn=pts[Math.min(pts.length-1,k+1)];
+      var dx=pn[0]-p[0],dy=pn[1]-p[1],l=Math.sqrt(dx*dx+dy*dy)||1;
+      var off=sgn*sprd*Math.pow(1-t,0.55)*(0.5+0.9*t)+sgn*fbm(k*0.35+jj*5,jj+2)*1.2;
+      var x=p[0]-dy/l*off,y=p[1]+dx/l*off;if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+    ctx.stroke();}
+  ctx.globalAlpha=1;
+  return {head:head,ang:ang};
+}
+function shipGlyph(x,y,ang,sc,alpha,col){
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.max(-0.9,Math.min(0.9,ang)));ctx.globalAlpha=alpha;
+  ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(-sc*1.5,0);ctx.quadraticCurveTo(-sc*0.2,sc*0.62,sc*1.5,0);ctx.closePath();ctx.fill();
+  for(var m=-1;m<=1;m++){ctx.beginPath();ctx.moveTo(m*sc*0.75,0);ctx.lineTo(m*sc*0.75-sc*0.18,-sc*1.5);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(m*sc*0.75-sc*0.12,-sc*0.4);ctx.lineTo(m*sc*0.75-sc*0.16,-sc*1.25);ctx.lineTo(m*sc*0.75+sc*0.42,-sc*0.9);ctx.closePath();ctx.fill();}
+  ctx.restore();ctx.globalAlpha=1;
+}
+function band(upto,alpha){
+  if(alpha<=0||upto<2)return;
+  var step=Math.max(1,Math.round(upto/(mobile?70:130))),k;
+  ctx.globalAlpha=alpha;ctx.fillStyle=rgba(FOAM,0.10);ctx.beginPath();
+  for(k=0;k<=upto;k+=step){var lo=Infinity;for(j=0;j<NS;j++){var v=ships[j].v[k];if(v<lo)lo=v;}var x=xs(YRS[k]),y=ys(lo);if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
+  for(k=Math.floor(upto/step)*step;k>=0;k-=step){var hi=-Infinity;for(j=0;j<NS;j++){var v2=ships[j].v[k];if(v2>hi)hi=v2;}ctx.lineTo(xs(YRS[k]),ys(hi));}
+  ctx.closePath();ctx.fill();ctx.globalAlpha=1;
+}
+function partRule(alpha){
+  if(alpha<=0)return;ctx.globalAlpha=alpha;var x=xs(partYear);
+  ctx.setLineDash([3,4]);ctx.strokeStyle=rgba(CREAM,0.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,yT-6);ctx.lineTo(x,yB+4);ctx.stroke();ctx.setLineDash([]);
+  ctx.font='600 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.textAlign='left';ctx.textBaseline='top';ctx.lineJoin='round';
+  var l1='◆ '+partYear+' · '+tr('part'),l2=tr('partSub')(GAP,gap0),ly=yT+6,tx=x+6;
+  if(mobile){
+    /* on a phone the map cartouche owns the top-left and the plates the right,
+       so the label runs up the rule itself, clear of the wakes of 1885 */
+    ctx.save();ctx.translate(x-4,yB-42);ctx.rotate(-Math.PI/2);ctx.textAlign='left';ctx.textBaseline='bottom';
+    l1=partYear+' · '+tr('partShort');
+    ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,0,0);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,0,0);
+    ctx.restore();ctx.globalAlpha=1;return;}
+  ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,tx,ly);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,tx,ly);
+  if(!mobile){ctx.font='400 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.strokeText(l2,tx,ly+16);ctx.fillStyle=rgba(CREAM,0.7);ctx.fillText(l2,tx,ly+16);}
+  ctx.textAlign='left';ctx.globalAlpha=1;
+}
+function onePath(upto,alpha){
+  if(alpha<=0)return;var iA=0,iB=Math.min(upto,partIdx);if(iB<=iA+6)return;
+  var off=mobile?9:12,k,env=[];
+  for(k=iA;k<=iB;k+=Math.max(1,Math.round((iB-iA)/60))){var hi=-Infinity;for(j=0;j<NS;j++)if(ships[j].v[k]>hi)hi=ships[j].v[k];env.push([xs(YRS[k]),ys(hi)-off]);}
+  if(env.length<2)return;
+  ctx.globalAlpha=alpha;ctx.strokeStyle=rgba(CREAM,0.45);ctx.lineWidth=0.9;ctx.lineJoin='round';
+  ctx.beginPath();ctx.moveTo(env[0][0],env[0][1]+5);ctx.lineTo(env[0][0],env[0][1]);for(k=1;k<env.length;k++)ctx.lineTo(env[k][0],env[k][1]);
+  ctx.lineTo(env[env.length-1][0],env[env.length-1][1]+5);ctx.stroke();
+  var mi=(env.length*(mobile?0.3:0.6))|0,mx=env[mi][0],my=env[mi][1];
+  ctx.font=smallFont;ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.strokeStyle=rgba(SEA2,0.9);ctx.lineWidth=3;ctx.strokeText(tr('onePath'),mx,my-6);ctx.fillStyle=rgba(CREAM,0.85);ctx.fillText(tr('onePath'),mx,my-6);
+  ctx.globalAlpha=1;
+}
+/* name plates just past each head */
+function headLabels(heads,alpha,lit){
+  if(alpha<=0)return;
+  var gap=mobile?17:20,ord=heads.map(function(h,k){return {k:k,y:h[1],x:h[0]};}).sort(function(a,b){return a.y-b.y;});
+  var top=yT+2,bot=yB-2,k,prev=-1e9;
+  for(k=0;k<ord.length;k++){ord[k].ly=Math.max(ord[k].y,prev+gap,top);prev=ord[k].ly;}
+  prev=1e9;for(k=ord.length-1;k>=0;k--){ord[k].ly=Math.min(ord[k].ly,prev-gap,bot);prev=ord[k].ly;}
+  ctx.textBaseline='middle';ctx.textAlign='left';var fs=12;
+  ctx.font='600 '+fs+'px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.lineJoin='round';
+  for(k=0;k<ord.length;k++){var o=ord[k],lx=o.x+(mobile?9:12),nm=(mobile?TINY:SHORT)[LANG][ships[o.k].name]||ships[o.k].name;
+    var a=alpha*(lit<0||lit===o.k?1:0.42);ctx.globalAlpha=a;
+    var tw=ctx.measureText(nm).width;
+    if(lx+tw+4>W-4){lx=o.x-tw-(mobile?9:12);ctx.textAlign='left';}
+    if(Math.abs(o.ly-o.y)>2.5){ctx.strokeStyle=rgba(CREAM,0.32);ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(o.x+3,o.y);ctx.lineTo(lx-2,o.ly);ctx.stroke();}
+    ctx.fillStyle=rgba(SEA2,0.72);ctx.fillRect(lx-3,o.ly-fs*0.80,tw+6,fs*1.60);
+    ctx.strokeStyle=rgba(SEA2,0.88);ctx.lineWidth=3.2;ctx.strokeText(nm,lx,o.ly);
+    ctx.fillStyle=lit===o.k?FOAM:CREAM;ctx.fillText(nm,lx,o.ly);}
+  ctx.globalAlpha=1;
+}
+
+/* ---------- past the last reading: no road, only wakes ----------
+   Ink that will not hold: three filaments per region that thin and
+   come apart. Nothing out here is labelled, measured or bounded. */
+var FUT=[],futLayer=null,futDone=false;
+function buildFuture(){
+  FUT=[];
+  for(var jj=0;jj<NS;jj++){var v=ships[jj].v,iA=Math.max(0,N-31),yEnd=ys(v[N-1]);
+    var trend=(yEnd-ys(v[iA]))/Math.max(1,N-1-iA),vol=0,c=0;
+    for(var k=iA+1;k<N;k++){var a=v[k-1];if(a>0){vol+=Math.abs(v[k]/a-1);c++;}}vol=c?vol/c:0.02;
+    var br=[],base=(yB-yT)*(0.16+Math.min(0.30,vol*7));
+    for(var b=0;b<3;b++)br.push({dir:[-1,0.14,1][b]*(0.55+hash(jj*13+b*7)*1.05),amp:base*(0.62+hash(jj*23+b*5)*0.86),pw:1.7+hash(jj*7+b*17)*0.95,sd:jj*29+b*11+3});
+    FUT.push({trend:trend,br:br,y0:yEnd});}
+}
+function futureY(jj,b,u){var f=FUT[jj],B=f.br[b];var y=f.y0+f.trend*u*14+B.dir*B.amp*Math.pow(u,B.pw)+fbm(u*4.4+B.sd,B.sd)*Math.pow(u,1.8)*30;var lo=yT+5,hi=yB-4;return y<lo?lo:(y>hi?hi:y);}
+function drawFuture(g,only){
+  var span=xFut-xData;if(span<24)return;var STEPS=mobile?30:60;g.lineCap='round';g.lineJoin='round';
+  for(var jj=0;jj<NS;jj++){if(only!=null&&only!==jj)continue;
+    var c0=lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,N-1));
+    for(var b=0;b<3;b++){for(var bandK=0;bandK<5;bandK++){var uA=bandK/5,uB=(bandK+1)/5,um=(uA+uB)/2,any=false;
+        g.globalAlpha=0.8*Math.pow(1-um,0.78);g.strokeStyle=rgbaArr(lerp3(c0,RGB.ICE,Math.pow(um,0.72)),0.86);g.lineWidth=(mobile?1.1:1.5)*(1-um*0.7);g.beginPath();
+        for(var k=Math.floor(uA*STEPS);k<Math.ceil(uB*STEPS)&&k<STEPS;k++){var u0=k/STEPS,u1=(k+1)/STEPS;
+          if(hash(jj*97+b*31+k*3.7)>1-Math.pow(u0,1.45)*0.96)continue;
+          g.moveTo(xData+u0*span,futureY(jj,b,u0));g.lineTo(xData+u1*span,futureY(jj,b,u1));any=true;}
+        if(any)g.stroke();}
+      var nb=mobile?8:16;g.globalAlpha=0.26;g.fillStyle=rgbaArr(lerp3(c0,RGB.ICE,0.5),1);g.beginPath();
+      for(var q=0;q<nb;q++){var u=0.2+0.78*hash(jj*17+b*53+q*7.3),fx=xData+u*span+fbm(q*1.7+jj,b+2)*10,fy=futureY(jj,b,u)+fbm(q*2.3+b,jj+5)*16,fr=0.5+1.6*hash(q*2.9+b*3);
+        g.moveTo(fx+fr,fy);g.arc(fx,fy,fr,0,6.2832);}
+      g.fill();}}
+  g.globalAlpha=1;
+}
+function future(alpha){
+  if(alpha<=0)return;
+  if(!futLayer)futLayer=document.createElement('canvas');
+  if(futLayer.width!==canvas.width||futLayer.height!==canvas.height){futLayer.width=canvas.width;futLayer.height=canvas.height;futDone=false;}
+  if(!futDone){var g=futLayer.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,futLayer.width,futLayer.height);g.setTransform(dpr,0,0,dpr,0,0);drawFuture(g);
+    /* the quiet word */
+    if(!mobile){g.font=smallFont;g.textAlign='right';g.textBaseline='middle';g.lineJoin='round';g.strokeStyle=rgba(SEA2,0.9);g.lineWidth=3;
+      g.strokeText(tr('open1'),xFut-6,yT+1);g.strokeText(tr('open2'),xFut-6,yT+16);
+      g.fillStyle=rgba(CREAM,0.6);g.fillText(tr('open1'),xFut-6,yT+1);g.fillText(tr('open2'),xFut-6,yT+16);}
+    futDone=true;}
+  ctx.globalAlpha=alpha;ctx.drawImage(futLayer,0,0,W,H);ctx.globalAlpha=1;
+}
+
+/* ---------- the map cartouche ---------- */
+var regionG=[],mapPath;
+function buildMap(){
+  var countries=topojson.feature(TOPO,TOPO.objects.countries).features.filter(function(f){return String(f.id)!=='010';});
+  var MW=200,MH=100;
+  var proj=d3.geoNaturalEarth1().fitSize([MW-4,MH-4],{type:'FeatureCollection',features:countries});
+  proj.translate([proj.translate()[0]+2,proj.translate()[1]+2]);
+  mapPath=d3.geoPath(proj);
+  var svg=d3.select(mapSvg);svg.selectAll('*').remove();
+  svg.append('path').attr('class','frame').attr('d',mapPath({type:'Sphere'}));
+  var groups={},none=[];
+  countries.forEach(function(f){var ri=RG?RG.byId[String(parseInt(f.id,10))]:undefined;
+    if(ri==null||shipOfRegion[ri]==null)none.push(f);else{(groups[ri]=groups[ri]||[]).push(f);}});
+  svg.append('g').selectAll('path').data(none).enter().append('path').attr('class','none').attr('d',mapPath);
+  regionG=[];
+  Object.keys(groups).forEach(function(ri){var jj=shipOfRegion[ri];
+    var g=svg.append('g').attr('class','r').attr('data-j',jj).attr('fill',inkCol(jj,0,0.92));
+    g.selectAll('path').data(groups[ri]).enter().append('path').attr('class','c').attr('d',mapPath)
+      .append('title').text(function(){return NAMES[LANG][ships[jj].name];});
+    regionG[jj]=g.node();});
+  /* map events: a region under the cursor lights its wake, a click pins it */
+  var gs=mapSvg.querySelectorAll('g.r');
+  for(var k=0;k<gs.length;k++)(function(g){var jj=+g.getAttribute('data-j');
+    g.addEventListener('pointerenter',function(e){if(e.pointerType==='touch')return;setHover(jj,idx,'map',e.clientX,e.clientY);});
+    g.addEventListener('pointermove',function(e){if(e.pointerType==='touch')return;setHover(jj,idx,'map',e.clientX,e.clientY);});
+    g.addEventListener('pointerleave',function(e){if(e.pointerType==='touch')return;if(hoverSrc==='map')setHover(-1);});
+    g.addEventListener('click',function(e){e.stopPropagation();togglePin(jj,idx,'map',e.clientX,e.clientY);});
+  })(gs[k]);
+}
+var mapIdx=-1,mapLit=-2;
+function paintMap(k,lit){
+  if(k!==mapIdx){for(var jj=0;jj<NS;jj++)if(regionG[jj])regionG[jj].setAttribute('fill',inkCol(jj,k,0.92));mapIdx=k;mapYear.textContent=YRS[k];}
+  if(lit!==mapLit){for(jj=0;jj<NS;jj++)if(regionG[jj]){regionG[jj].classList.toggle('lit',lit===jj);regionG[jj].classList.toggle('dim',lit>=0&&lit!==jj);}mapLit=lit;}
+}
+
+/* ---------- render ---------- */
+var introAlpha=1;
+function render(){
+  ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=SEA;ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha=introAlpha;ctx.drawImage(chartLayer,0,0,W,H);ctx.globalAlpha=1;
+  var lit=pinned>=0?pinned:hover;
+  band(idx,0.9);
+  partRule(idx>=partIdx?clamp((idx-partIdx)/12):0);
+  onePath(idx,idx>8?clamp((idx-8)/30):0);
+  if(lit>=0){ctx.fillStyle='rgba(9,27,44,0.55)';ctx.fillRect(0,0,W,H);}
+  var heads=new Array(NS);
+  for(j=NS-1;j>=0;j--){var boost=lit===j;
+    var wk=wake(j,idx,lit>=0&&!boost?0.30:1,boost);
+    if(!wk){heads[j]=[xL,yB];continue;}heads[j]=wk.head;
+    shipGlyph(wk.head[0],wk.head[1],wk.ang,(mobile?4.2:5.4)*(boost?1.2:1),lit>=0&&!boost?0.35:1,inkCol(j,idx,1));}
+  /* the clock: a vertical cursor at the year on the slider */
+  var cx=xs(YRS[idx]);
+  ctx.strokeStyle=rgba(CREAM,idx===N-1?0.18:0.42);ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(cx,yT-8);ctx.lineTo(cx,yB+4);ctx.stroke();ctx.setLineDash([]);
+  if(idx===N-1&&endedAt!==null)future(clamp((performance.now()-endedAt)/900));
+  headLabels(heads,idx>6?1:0,lit);
+  /* the reading under the cursor, when it points at a wake in some other year */
+  if(lit>=0&&hoverSrc==='chart'&&hoverIdx!==idx){var px=xs(YRS[hoverIdx]),py=ys(ships[lit].v[hoverIdx]);
+    ctx.strokeStyle=rgba(CREAM,0.26);ctx.beginPath();ctx.moveTo(px,yT-8);ctx.lineTo(px,yB+4);ctx.stroke();
+    ctx.fillStyle=inkCol(lit,hoverIdx,1);ctx.beginPath();ctx.arc(px,py,3.6,0,6.2832);ctx.fill();
+    ctx.strokeStyle=rgba(SEA2,0.9);ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(px,py,3.6,0,6.2832);ctx.stroke();}
+  if(lit>=0){var hx=heads[lit][0],hy=heads[lit][1];ctx.fillStyle=inkCol(lit,idx,1);ctx.beginPath();ctx.arc(hx,hy,3.2,0,6.2832);ctx.fill();}
+  paintMap(idx,lit);
+}
+
+/* ---------- clock ---------- */
+var last=null,raf=null,frames=0,fpsT=0,t0=null;
+function setIdx(k,fromUser){
+  k=Math.round(k);if(k<0)k=0;if(k>N-1)k=N-1;
+  if(k!==idx){idx=k;needDraw=true;}
+  if(idx===N-1){if(endedAt===null)endedAt=performance.now();}else endedAt=null;
+  slider.value=YRS[idx];yearOut.textContent=YRS[idx];
+  if(fromUser&&hover>=0&&hoverSrc==='map')refreshTip();
+  if(fromUser&&pinned>=0&&hoverSrc!=='chart')refreshTip();
+  syncState();
+}
+function syncState(){window.__state={idx:Math.round(idx),year:YRS[Math.round(idx)],playing:playing,pinned:pinned,hover:hover};}
+/* for the QA harness: where a wake sits on screen in a given year */
+window.__wakeXY=function(jj,year){var r=canvas.getBoundingClientRect(),k=YRS.indexOf(year);if(k<0)return null;return [r.left+xs(year),r.top+ys(ships[jj].v[k])];};
+function setPlaying(p){playing=p;playBtn.classList.toggle('playing',p);syncPlayLabel();last=null;if(p)loop();syncState();}
+function syncPlayLabel(){playBtn.setAttribute('aria-label',playing?tr('pause'):tr('play'));playBtn.title=playing?tr('pause'):tr('play');}
+function frame(now){
+  raf=null;
+  if(t0===null){t0=now;fpsT=now;}
+  frames++;if(now-fpsT>=500){window.__fps=Math.round(frames*1000/(now-fpsT));frames=0;fpsT=now;}
+  if(playing){if(last===null)last=now;var dt=Math.min(80,now-last);last=now;
+    var k=idx+dt*RATE;if(k>=N-1){setIdx(N-1);setPlaying(false);}else{idx=k;setIdx(k);needDraw=true;idx=k;}
+    /* keep the fractional clock so the pace is even, but draw the integer year */
   }
-  function closeViewer(){
-    document.body.classList.remove('viewer-open');
-    setCoverInert(false);
-    // Leaving the viewer has to leave a cover URL behind, or a reload of what
-    // looks like the cover would jump straight back into the explorer.
-    if(location.hash){
-      try { history.replaceState(null, '', location.pathname + location.search); } catch(_){}
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  cta.addEventListener('click', (e) => { e.preventDefault(); openViewer(); });
-  // Deep link: land directly in the viewer, with the state the link carries.
-  if(VIEWER_HASH.test(location.hash)) openViewer();
-  // Escape on the cover document. Once the explorer has focus the key event
-  // never reaches us, so the explorer forwards it as a message (below).
-  window.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape' && document.body.classList.contains('viewer-open')) closeViewer();
-  });
-  // The explorer's home button — and its Escape key — post back to us when it's
-  // embedded. See js/app.js (btn-home handler + the Escape forwarder).
-  window.addEventListener('message', (e) => {
-    if(!e.data || (frame.contentWindow && e.source !== frame.contentWindow)) return;
-    if(e.data.type === 'gw-back-to-cover') closeViewer();
-    // The explorer keeps its state in its own fragment. Mirror it here so the
-    // bar of the page the reader is actually looking at is the shareable link,
-    // and so a reload restores what is on screen.
-    if(e.data.type === 'gw-state-hash' && typeof e.data.hash === 'string'
-       && document.body.classList.contains('viewer-open')){
-      try { history.replaceState(null, '', e.data.hash); } catch(_){}
-    }
-  });
-})();
+  introAlpha=clamp((now-t0)/600);if(introAlpha<1)needDraw=true;
+  if(idx===N-1&&endedAt!==null&&now-endedAt<1000)needDraw=true;
+  if(needDraw){var keep=idx;idx=Math.round(idx);render();idx=keep;needDraw=false;}
+  if(playing||introAlpha<1||(idx===N-1&&endedAt!==null&&now-endedAt<1000))raf=requestAnimationFrame(frame);
+}
+function loop(){if(!raf)raf=requestAnimationFrame(frame);}
+function redraw(){needDraw=true;loop();}
 
-/* =========================================================
-   1. Portada mode switcher (Mar / Estelas / Combinada).
-   Persists to localStorage. Each mode toggles body.mode-* — the rest is CSS.
-   --------------------------------------------------------- */
-const MODE_KEY = 'gw_mode';
-(function(){
-  const buttons = document.querySelectorAll('.mode-switcher button');
-  function apply(mode){
-    const m = ['mar','estelas','huellas'].includes(mode) ? mode : 'mar';
-    document.body.classList.remove('mode-mar','mode-estelas','mode-huellas');
-    document.body.classList.add('mode-' + m);
-    buttons.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
-    try { localStorage.setItem(MODE_KEY, m); } catch(e){}
-    window.dispatchEvent(new CustomEvent('gw-mode-change', { detail: { mode: m } }));
-  }
-  buttons.forEach(b => b.addEventListener('click', () => apply(b.dataset.mode)));
-  let initial = 'mar';
-  try {
-    const saved = localStorage.getItem(MODE_KEY);
-    if(['mar','estelas','huellas'].includes(saved)) initial = saved;
-  } catch(e){}
-  apply(initial);
-})();
+/* ---------- pointer: hover, pin, drag ---------- */
+function setHover(jj,k,src,cxp,cyp){
+  hover=jj;if(jj>=0){hoverIdx=k;hoverSrc=src;}else if(pinned<0){hoverSrc='';}
+  if(jj>=0)showTip(jj,k,cxp,cyp,pinned===jj);else if(pinned>=0)refreshTip();else hideTip();
+  syncState();redraw();
+}
+function togglePin(jj,k,src,cxp,cyp){
+  if(pinned===jj){pinned=-1;hover=-1;hoverSrc='';hideTip();}
+  else{pinned=jj;hover=jj;hoverIdx=k;hoverSrc=src;tipX=cxp;tipY=cyp;showTip(jj,k,cxp,cyp,true);}
+  updatePinLabel();syncState();redraw();
+}
+function updatePinLabel(){pinLbl.textContent=pinned>=0?('◆ '+NAMES[LANG][ships[pinned].name]):'';}
+var tipX=0,tipY=0;
+function showTip(jj,k,cxp,cyp,isPinned){
+  var s=ships[jj];tipX=cxp;tipY=cyp;
+  tip.innerHTML='<b>'+NAMES[LANG][s.name]+'</b><span class="yr">'+YRS[k]+'</span><br>'+fmtMoney(s.v[k])+' '+tr('perPerson')+' · '+tr('gdp')+
+    (s.e?'<br><span class="v2">'+(Math.round(s.e[k]*10)/10).toString().replace('.',LANG==='es'?',':'.')+' '+tr('ghg')+'</span>':'')+
+    (isPinned?'<span class="pinned">'+tr(COARSE?'pinnedTap':'pinned')+'</span>':'');
+  tip.classList.add('show');
+  var r=scene.getBoundingClientRect(),bw=tip.offsetWidth,bh=tip.offsetHeight,x,y;
+  /* anchored to the pointer; on touch it rises well above the finger */
+  x=cxp+16;y=cyp-bh-(COARSE?44:14);
+  if(x+bw>r.right-6)x=cxp-bw-16;if(x<r.left+4)x=r.left+4;
+  if(y<r.top+4)y=Math.min(cyp+(COARSE?40:18),r.bottom-bh-4);
+  tip.style.left=x+'px';tip.style.top=y+'px';
+  window.__hoverInfo={region:s.name,year:YRS[k],income:Math.round(s.v[k]),ghg:s.e?Math.round(s.e[k]*10)/10:null,pinned:!!isPinned,src:hoverSrc};
+}
+function refreshTip(){var jj=pinned>=0?pinned:hover;if(jj<0)return;var k=(hoverSrc==='chart'&&hover===jj)?hoverIdx:idx;showTip(jj,k,tipX,tipY,pinned===jj);}
+function hideTip(){tip.classList.remove('show');window.__hoverInfo=null;}
+function pick(mx,my){
+  var tol=COARSE?40:24;
+  if(my<yT-20||my>yB+20||mx<xL-tol||mx>xData+tol)return -1;
+  var k=xToIdx(mx),best=-1,bd=1e9;if(k>idx)k=idx;
+  for(var jj=0;jj<NS;jj++){var d=Math.abs(ys(ships[jj].v[k])-my);if(d<bd){bd=d;best=jj;}}
+  hoverIdx=k;return bd<=tol?best:-1;
+}
+function toLocal(e){var r=canvas.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top];}
+var down=null,dragging=false;
+canvas.addEventListener('pointerdown',function(e){
+  var p=toLocal(e);down={x:p[0],y:p[1],id:e.pointerId,t:e.timeStamp};dragging=false;
+  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+});
+canvas.addEventListener('pointermove',function(e){
+  var p=toLocal(e);
+  if(down&&(dragging||Math.abs(p[0]-down.x)>6)){
+    /* a sideways drag scrubs the years and interrupts the intro */
+    dragging=true;canvas.classList.add('grab');if(playing)setPlaying(false);
+    setIdx(xToIdx(p[0]),true);if(hover>=0&&hoverSrc==='chart')hideTip(),hover=-1;
+    return;}
+  if(e.pointerType==='touch')return;
+  var jj=pick(p[0],p[1]);
+  if(jj>=0)setHover(jj,hoverIdx,'chart',e.clientX,e.clientY);
+  else if(hover>=0&&hoverSrc==='chart')setHover(-1);
+},{passive:true});
+function endPointer(e){
+  if(!down)return;var p=toLocal(e),wasDrag=dragging;down=null;dragging=false;canvas.classList.remove('grab');
+  try{canvas.releasePointerCapture(e.pointerId);}catch(_){}
+  if(wasDrag){if(pinned>=0)refreshTip();return;}
+  /* a plain click or tap */
+  var jj=pick(p[0],p[1]);
+  if(jj>=0)togglePin(jj,hoverIdx,'chart',e.clientX,e.clientY);
+  else if(pinned>=0){pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();}
+  else if(e.pointerType==='touch'&&hover>=0){hover=-1;hideTip();redraw();}
+}
+canvas.addEventListener('pointerup',endPointer);
+canvas.addEventListener('pointercancel',function(){down=null;dragging=false;canvas.classList.remove('grab');});
+canvas.addEventListener('pointerleave',function(e){if(e.pointerType==='touch'||down)return;if(hover>=0&&hoverSrc==='chart'&&pinned<0)setHover(-1);});
+document.addEventListener('pointerdown',function(e){
+  /* a tap outside the scene releases a pinned reading (phones) */
+  if(pinned<0)return;if(e.target.closest&&e.target.closest('#scene,button,a,input'))return;
+  pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();
+});
 
-/* =========================================================
-   2. FX canvas — Mar runs a soft cursor-spotlight on the painting;
-   Combinada runs droplets travelling along the wakes painted INTO sea.png,
-   accelerating and following the cursor when it hovers near one.
+/* ---------- controls ---------- */
+playBtn.addEventListener('click',function(){
+  if(playing){setPlaying(false);return;}
+  if(idx>=N-1)setIdx(0);
+  setPlaying(true);
+});
+slider.addEventListener('input',function(){if(playing)setPlaying(false);setIdx(YRS.indexOf(+slider.value),true);loop();});
+document.addEventListener('keydown',function(e){
+  if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='BUTTON')&&e.key===' ')return;
+  if(e.key===' '){e.preventDefault();playBtn.click();return;}
+  if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(playing)setPlaying(false);
+    setIdx(idx+(e.key==='ArrowRight'?1:-1)*(e.shiftKey?10:1),true);loop();return;}
+  if(e.key==='Escape'&&pinned>=0){pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();}
+});
+document.addEventListener('visibilitychange',function(){if(document.hidden)last=null;else if(playing)loop();});
+var rt=null;
+window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){layout();mapIdx=-1;redraw();},80);});
 
-   Both effects share the same canvas (#spotlight-canvas) and the same cursor
-   state — tick() dispatches by mode and the canvas is cleared on each frame.
-   --------------------------------------------------------- */
-(function(){
-  const canvas = document.getElementById('spotlight-canvas');
-  const heroBg = document.querySelector('.hero-bg');
-  if(!canvas || !heroBg) return;
-  const ctx = canvas.getContext('2d');
-  let W = 0, H = 0, DPR = 1;
-
-  function extractBgUrl(){
-    try {
-      const v = getComputedStyle(heroBg).backgroundImage;
-      const m = v && v.match(/url\((['"]?)(.+?)\1\)/);
-      if(m && m[2] && m[2] !== 'none') return m[2];
-    } catch(_){}
-    return 'img/sea.webp?v=20260905a';
-  }
-  const img = new Image();
-  try { img.crossOrigin = 'anonymous'; } catch(_){}
-
-  function resize(){
-    DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const w = canvas.clientWidth, h = canvas.clientHeight;
-    if(!w || !h) return;
-    W = w; H = h;
-    canvas.width  = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  }
-  if(window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
-  window.addEventListener('resize', resize);
-
-  let mx = -600, my = -600;
-  let targetMx = -600, targetMy = -600;
-  let mouseActive = false;
-  window.addEventListener('pointermove', e => {
-    const rect = canvas.getBoundingClientRect();
-    targetMx = e.clientX - rect.left;
-    targetMy = e.clientY - rect.top;
-    mouseActive = true;
-  });
-  window.addEventListener('pointerleave', () => { mouseActive = false; });
-
-  // Match background-size:cover; background-position:center 60% for the painting.
-  function coverRect(){
-    const iw = img.naturalWidth, ih = img.naturalHeight;
-    if(!iw || !ih) return null;
-    const sR = W / H, iR = iw / ih;
-    let dw, dh, dx, dy;
-    if(iR > sR){ dh = H; dw = H * iR; }
-    else       { dw = W; dh = W / iR; }
-    dx = (W - dw) / 2;
-    dy = (H - dh) * 0.60;
-    return { dx, dy, dw, dh };
-  }
-
-  function tick(){
-    if(mouseActive){
-      mx += (targetMx - mx) * 0.18;
-      my += (targetMy - my) * 0.18;
-    } else {
-      mx += (-800 - mx) * 0.04;
-      my += (-800 - my) * 0.04;
-    }
-    const isMar = document.body.classList.contains('mode-mar');
-    if(isMar && W && H && img.complete && img.naturalWidth){
-      const r = coverRect();
-      if(r){
-        ctx.clearRect(0, 0, W, H);
-        ctx.filter = 'brightness(1.22) saturate(1.28) contrast(1.06)';
-        ctx.drawImage(img, r.dx, r.dy, r.dw, r.dh);
-        ctx.filter = 'none';
-        const R = 260;
-        const grad = ctx.createRadialGradient(mx, my, 0, mx, my, R);
-        grad.addColorStop(0.00, 'rgba(0,0,0,0.85)');
-        grad.addColorStop(0.50, 'rgba(0,0,0,0.60)');
-        grad.addColorStop(0.85, 'rgba(0,0,0,0.18)');
-        grad.addColorStop(1.00, 'rgba(0,0,0,0)');
-        ctx.globalCompositeOperation = 'destination-in';
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, W, H);
-        ctx.globalCompositeOperation = 'source-over';
-      }
-    } else {
-      if(W && H) ctx.clearRect(0, 0, W, H);
-    }
-    requestAnimationFrame(tick);
-  }
-
-  function start(){ resize(); requestAnimationFrame(tick); }
-  img.addEventListener('load', start, { once: true });
-  function startLoad(){
-    const url = extractBgUrl();
-    if(url) img.src = url;
-    else setTimeout(startLoad, 50);
-  }
-  if(document.readyState === 'complete') startLoad();
-  else window.addEventListener('load', startLoad, { once: true });
-  requestAnimationFrame(tick);
-})();
-
-/* =========================================================
-   2b. Huellas — walking wake-lines on a chart-grid sea with a footprint cursor.
-   Lifted from codex's intro-wake-container so the user can pick the exact
-   visual they liked as the third portada option. Render runs once the first
-   time Huellas mode is selected; the cursor trail listens within #huellas-stage.
-   --------------------------------------------------------- */
-(function(){
-  const stage = document.getElementById('huellas-stage');
-  const svgEl = document.getElementById('huellas-svg');
-  if(!stage || !svgEl || typeof d3 === 'undefined') return;
-
-  const WAKE_TRAJECTORIES = [
-    { start:.88, end:.18, c1:.68, c2:.34, x0:-.18, x1:.32, x2:.58, x3:1.12, width:2.6, opacity:.62, dash:'4 18', delay:0,    speed:15, colors:['#496878','#9a7770','#9f504b'], foot:'#a65e55', footprints:9 },
-    { start:.77, end:.32, c1:.50, c2:.52, x0:-.12, x1:.46, x2:.42, x3:1.10, width:2.0, opacity:.48, dash:'2 16', delay:180,  speed:18, colors:['#476977','#6f9287','#2f756e'], foot:'#72c6aa', footprints:0 },
-    { start:.66, end:.12, c1:1.02,c2:.22, x0:-.16, x1:.26, x2:.76, x3:1.14, width:1.7, opacity:.44, dash:'7 22', delay:360,  speed:20, colors:['#5d7480','#a98672','#a25447'], foot:'#e16459', footprints:0 },
-    { start:.98, end:.42, c1:.74, c2:.64, x0:-.20, x1:.58, x2:.36, x3:1.08, width:1.9, opacity:.44, dash:'3 18', delay:540,  speed:17, colors:['#435c6b','#5f8491','#337b8a'], foot:'#82cde0', footprints:0 },
-    { start:.58, end:.22, c1:.90, c2:.10, x0:-.10, x1:.18, x2:.62, x3:1.16, width:1.5, opacity:.34, dash:'5 24', delay:720,  speed:22, colors:['#627985','#bd9a6f','#ae654c'], foot:'#e88764', footprints:0 },
-    { start:.90, end:.54, c1:1.06,c2:.36, x0:-.08, x1:.42, x2:.72, x3:1.06, width:1.4, opacity:.32, dash:'2 20', delay:900,  speed:19, colors:['#3f5868','#b99d68','#b27b56'], foot:'#f4c471', footprints:0 },
-    { start:.72, end:.28, c1:.38, c2:.70, x0:-.14, x1:.30, x2:.54, x3:1.18, width:1.6, opacity:.38, dash:'6 26', delay:1080, speed:18, colors:['#4f6e78','#7ca0a3','#2f756e'], foot:'#8bd4c2', footprints:0 }
-  ];
-  const FOOTPRINT_IMAGE = { x:-36, y:-66, width:72, height:132 };
-  const FOOTPRINT_IMAGE_CACHE = new Map();
-  function footprintImageHref(fill){
-    if(FOOTPRINT_IMAGE_CACHE.has(fill)) return FOOTPRINT_IMAGE_CACHE.get(fill);
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-36 -66 72 132"><g fill="${fill}"><path d="M -16 -22 C -26 -12 -27 10 -20 28 C -14 43 -9 58 4 62 C 18 66 27 54 25 38 C 23 26 16 19 18 7 C 21 -10 14 -28 1 -34 C -6 -37 -12 -32 -16 -22 Z"/><ellipse cx="22" cy="-45" rx="9.2" ry="12.2" transform="rotate(19 22 -45)"/><ellipse cx="10" cy="-54" rx="6.4" ry="8.2" transform="rotate(8 10 -54)"/><ellipse cx="-2" cy="-55" rx="5.7" ry="7.5" transform="rotate(-4 -2 -55)"/><ellipse cx="-13" cy="-50" rx="5.2" ry="6.9" transform="rotate(-17 -13 -50)"/><ellipse cx="-22" cy="-42" rx="4.6" ry="6.2" transform="rotate(-28 -22 -42)"/></g></svg>`;
-    const href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-    FOOTPRINT_IMAGE_CACHE.set(fill, href);
-    return href;
-  }
-  function wakeAnchors(W, H, d, i){
-    return {
-      p0:{ x: W * (d.x0 ?? (-.10 + i * -.018)), y: H * d.start },
-      p1:{ x: W * (d.x1 ?? ( .20 + i *  .018)), y: H * d.c1 },
-      p2:{ x: W * (d.x2 ?? ( .66 + i *  .012)), y: H * d.c2 },
-      p3:{ x: W * (d.x3 ?? (1.08 + i *  .01 )), y: H * d.end }
-    };
-  }
-  function wakePath(W, H, d, i){
-    const p = wakeAnchors(W, H, d, i);
-    return `M ${p.p0.x} ${p.p0.y} C ${p.p1.x} ${p.p1.y}, ${p.p2.x} ${p.p2.y}, ${p.p3.x} ${p.p3.y}`;
-  }
-  function cubicPoint(p, t){
-    const u = 1 - t;
-    return {
-      x: u*u*u*p.p0.x + 3*u*u*t*p.p1.x + 3*u*t*t*p.p2.x + t*t*t*p.p3.x,
-      y: u*u*u*p.p0.y + 3*u*u*t*p.p1.y + 3*u*t*t*p.p2.y + t*t*t*p.p3.y
-    };
-  }
-  function footprintTransform(mark, t){
-    const p = cubicPoint(mark.anchors, t);
-    const next = cubicPoint(mark.anchors, Math.min(.999, t + .01));
-    const angleRad = Math.atan2(next.y - p.y, next.x - p.x);
-    const angle = angleRad * 180 / Math.PI + 90 + mark.turn;
-    const offset = mark.offset * mark.side;
-    const x = p.x + Math.cos(angleRad + Math.PI/2) * offset;
-    const y = p.y + Math.sin(angleRad + Math.PI/2) * offset;
-    return `translate(${x},${y}) rotate(${angle}) scale(${mark.scale * mark.side},${mark.scale})`;
-  }
-  function wakeFootprints(W, H){
-    const marks = [];
-    WAKE_TRAJECTORIES.forEach((d, i) => {
-      const anchors = wakeAnchors(W, H, d, i);
-      const count = d.footprints ?? 5;
-      const cadence = W < 700 ? 720 : 840;
-      const stepPeriod = count * cadence + 2800;
-      for(let j = 0; j < count; j++){
-        const side = j % 2 === 0 ? -1 : 1;
-        marks.push({
-          anchors,
-          phase:    .12 + (j / Math.max(1, count - 1)) * .70,
-          duration: (d.speed + 22) * 1000,
-          offset:   W < 700 ? 13 : 21,
-          side,
-          fill:     d.foot,
-          opacity:  .72,
-          delay:    d.delay,
-          stepDelay: d.delay + j * cadence + i * 260,
-          stepPeriod,
-          turn:     side * (W < 700 ? 5 : 7),
-          scale:    W < 700 ? .30 : .38
-        });
-      }
-    });
-    return marks;
-  }
-  function footprintStepOpacity(mark, elapsed){
-    const appear = 340, hold = 520, fade = 1700;
-    const local = ((elapsed - mark.stepDelay) % mark.stepPeriod + mark.stepPeriod) % mark.stepPeriod;
-    let pulse = 0;
-    if(local < appear) pulse = 1 - Math.pow(1 - (local / appear), 3);
-    else if(local < appear + hold) pulse = 1;
-    else if(local < appear + hold + fade) pulse = Math.pow(1 - ((local - appear - hold) / fade), 2);
-    return mark.opacity * pulse;
-  }
-
-  let rendered = false;
-  function render(){
-    if(rendered) return;
-    const svg = d3.select('#huellas-svg');
-    if(svg.empty()) return;
-    const W = window.innerWidth, H = window.innerHeight;
-    svg.attr('viewBox', `0 0 ${W} ${H}`).attr('preserveAspectRatio', 'none');
-
-    const defs = svg.append('defs');
-    const glow = defs.append('filter').attr('id','h-wake-glow').attr('x','-20%').attr('y','-20%').attr('width','140%').attr('height','140%');
-    glow.append('feGaussianBlur').attr('stdDeviation', 3).attr('result','blur');
-    const merge = glow.append('feMerge');
-    merge.append('feMergeNode').attr('in','blur');
-    merge.append('feMergeNode').attr('in','SourceGraphic');
-
-    WAKE_TRAJECTORIES.forEach((d, i) => {
-      const g = defs.append('linearGradient').attr('id', `h-wake-grad-${i}`)
-        .attr('gradientUnits','userSpaceOnUse')
-        .attr('x1', 0).attr('y1', H).attr('x2', W).attr('y2', 0);
-      g.append('stop').attr('offset', '0%')  .attr('stop-color', d.colors[0]).attr('stop-opacity', .22);
-      g.append('stop').attr('offset', '56%') .attr('stop-color', d.colors[1]).attr('stop-opacity', .52);
-      g.append('stop').attr('offset', '100%').attr('stop-color', d.colors[2]).attr('stop-opacity', .95);
-    });
-
-    svg.selectAll('.h-wake-halo').data(WAKE_TRAJECTORIES).enter().append('path')
-      .attr('class','h-wake-halo')
-      .attr('d', wakePath.bind(null, W, H))
-      .attr('fill','none').attr('stroke','#ffffff')
-      .attr('stroke-width', d => d.width + 10).attr('stroke-linecap','round')
-      .attr('stroke-dasharray', d => d.dash).attr('opacity', .08)
-      .attr('filter','url(#h-wake-glow)')
-      .style('animation-duration', d => `${d.speed + 9}s`)
-      .style('animation-delay',    d => `${-(d.delay / 1000)}s`);
-
-    svg.selectAll('.h-wake-line').data(WAKE_TRAJECTORIES).enter().append('path')
-      .attr('class','h-wake-line')
-      .attr('d', wakePath.bind(null, W, H))
-      .attr('fill','none')
-      .attr('stroke', (d, i) => `url(#h-wake-grad-${i})`)
-      .attr('stroke-width', d => d.width).attr('stroke-linecap','round')
-      .attr('stroke-dasharray', d => d.dash).attr('stroke-dashoffset', 0)
-      .attr('opacity', d => d.opacity).attr('filter','url(#h-wake-glow)')
-      .style('animation-duration', d => `${d.speed}s`)
-      .style('animation-delay',    d => `${-(d.delay / 1000)}s`);
-
-    const footprints = svg.selectAll('.h-wake-footprint')
-      .data(wakeFootprints(W, H)).enter().append('g')
-      .attr('class','h-wake-footprint')
-      .attr('transform', d => footprintTransform(d, d.phase % 1))
-      .attr('opacity', d => d.opacity);
-
-    footprints.append('image')
-      .attr('href',       d => footprintImageHref(d.fill))
-      .attr('xlink:href', d => footprintImageHref(d.fill))
-      .attr('x', FOOTPRINT_IMAGE.x).attr('y', FOOTPRINT_IMAGE.y)
-      .attr('width', FOOTPRINT_IMAGE.width).attr('height', FOOTPRINT_IMAGE.height);
-
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduce){
-      footprints.attr('opacity', d => d.opacity * .5);
-    } else {
-      d3.timer(elapsed => {
-        if(!svgEl.isConnected) return true;
-        footprints.attr('opacity', d => footprintStepOpacity(d, elapsed));
-      });
-    }
-    rendered = true;
-  }
-
-  /* Footprint cursor + trail — within the Huellas stage. */
-  function startCursorTrail(){
-    if(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return;
-    const href = footprintImageHref('#a65e55');
-    const cursor = document.createElement('div');
-    cursor.className = 'wake-cursor-footprint';
-    cursor.style.backgroundImage = `url("${href}")`;
-    cursor.style.opacity = '0';
-    stage.appendChild(cursor);
-    stage.classList.add('footprint-cursor');
-
-    let lastX = null, lastY = null;
-    let lastStepX = null, lastStepY = null;
-    let side = -1, angle = -34, lastStepAt = 0;
-
-    function placeFootstep(x, y, stepAngle){
-      const trail = document.createElement('div');
-      trail.className = 'wake-cursor-trail';
-      trail.style.backgroundImage = `url("${href}")`;
-      trail.style.transform = `translate(${x - 17}px,${y - 31}px) rotate(${stepAngle}deg) scaleX(${side})`;
-      stage.appendChild(trail);
-      const marks = stage.querySelectorAll('.wake-cursor-trail');
-      if(marks.length > 34) marks[0].remove();
-      trail.addEventListener('animationend', () => trail.remove(), { once: true });
-    }
-    stage.addEventListener('pointerenter', e => {
-      cursor.style.opacity = '.78';
-      const r = stage.getBoundingClientRect();
-      lastX = e.clientX - r.left; lastY = e.clientY - r.top;
-      lastStepX = lastX; lastStepY = lastY;
-    });
-    stage.addEventListener('pointerleave', () => {
-      cursor.style.opacity = '0';
-      lastX = lastY = null;
-    });
-    stage.addEventListener('pointermove', e => {
-      if(e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'pen') return;
-      const r = stage.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      if(lastX !== null && lastY !== null){
-        const dx = x - lastX, dy = y - lastY;
-        if(Math.hypot(dx, dy) > 2) angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-      }
-      cursor.style.opacity = '.78';
-      cursor.style.transform = `translate(${x - 17}px,${y - 31}px) rotate(${angle}deg) scaleX(${side})`;
-
-      const now = performance.now();
-      const distance = lastStepX === null ? Infinity : Math.hypot(x - lastStepX, y - lastStepY);
-      if(distance > 46 && now - lastStepAt > 135){
-        const rad = (angle - 90) * Math.PI / 180;
-        const lateral = side * 10;
-        placeFootstep(x + Math.cos(rad + Math.PI/2) * lateral, y + Math.sin(rad + Math.PI/2) * lateral, angle + side * 7);
-        side *= -1;
-        lastStepX = x; lastStepY = y; lastStepAt = now;
-      }
-      lastX = x; lastY = y;
-    });
-  }
-
-  // Render lazily — only when Huellas mode is activated for the first time.
-  function activate(){ if(!rendered) { render(); startCursorTrail(); } }
-  window.addEventListener('gw-mode-change', (e) => {
-    if(e.detail && e.detail.mode === 'huellas') activate();
-  });
-  if(document.body.classList.contains('mode-huellas')) activate();
-})();
-
-/* =========================================================
-   3. Estelas — dashed wake-lines on cream paper.
-   Lines fade in staggered, drift continuously, and brighten on cursor proximity.
-   --------------------------------------------------------- */
-(function(){
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const svg    = document.getElementById('wake-svg');
-  const group  = document.getElementById('wake-group');
-  if(!svg || !group) return;
-  const VB_W = 1600, VB_H = 900;
-  // Wake-lines: all ascending (bottom-left → top-right). Y range clamped to
-  // [120, 880] so no line starts above the title band — keeps the hero copy
-  // readable without lines springing from the very top edge.
-  const RAW = [
-    [[-50, 760], [200, 720], [500, 820], [800, 660], [1200, 540], [1450, 360], [1700, 200]],
-    [[-50, 700], [250, 680], [500, 720], [800, 580], [1100, 470], [1400, 350], [1700, 260]],
-    [[-50, 820], [300, 880], [600, 860], [950, 760], [1250, 640], [1500, 500], [1700, 420]],
-    [[-50, 860], [350, 800], [700, 870], [1000, 760], [1300, 660], [1500, 580], [1700, 500]],
-    [[-50, 600], [200, 580], [450, 640], [780, 500], [1100, 380], [1400, 260], [1700, 180]],
-    [[-50, 540], [300, 510], [620, 580], [950, 460], [1250, 380], [1500, 320], [1700, 280]],
-    [[-30, 880], [250, 880], [580, 830], [900, 870], [1200, 820], [1450, 780], [1700, 720]],
-    [[-50, 660], [300, 600], [600, 700], [950, 540], [1200, 500], [1450, 420], [1700, 340]],
-    [[-50, 460], [280, 420], [560, 480], [850, 380], [1150, 320], [1430, 280], [1700, 240]],
-    // Filler lines for the upper band — kept well below the title.
-    [[-50, 380], [220, 360], [500, 420], [800, 340], [1100, 280], [1400, 220], [1700, 180]],
-    [[-50, 580], [240, 540], [540, 510], [880, 470], [1180, 430], [1450, 400], [1700, 360]],
-    [[-50, 880], [220, 860], [520, 840], [880, 820], [1180, 800], [1450, 780], [1700, 760]]
-  ];
-  const COLORS = [
-    '#c93324','#d4612b','#a44c2c','#7e3f47',
-    '#8b5a3c','#6f4e2a','#a4783a','#c25c4e',
-    '#5c4030','#5e2a2a','#9d6d40','#36454f'
-  ];
-  function pathD(cps){
-    const [p0, c1a, c1b, mid, c2a, c2b, p1] = cps;
-    return `M ${p0[0]} ${p0[1]} C ${c1a[0]} ${c1a[1]}, ${c1b[0]} ${c1b[1]}, ${mid[0]} ${mid[1]} C ${c2a[0]} ${c2a[1]}, ${c2b[0]} ${c2b[1]}, ${p1[0]} ${p1[1]}`;
-  }
-  let defs = svg.querySelector('defs');
-  if(!defs){
-    defs = document.createElementNS(SVG_NS, 'defs');
-    svg.insertBefore(defs, svg.firstChild);
-  }
-  function makeGradient(id, color){
-    const lg = document.createElementNS(SVG_NS, 'linearGradient');
-    lg.setAttribute('id', id);
-    lg.setAttribute('x1', '0%'); lg.setAttribute('y1', '50%');
-    lg.setAttribute('x2', '100%'); lg.setAttribute('y2', '50%');
-    [['0%', color, 0.0],
-     ['25%', color, 0.18],
-     ['65%', color, 0.62],
-     ['100%', color, 0.95]
-    ].forEach(([off, c, op]) => {
-      const s = document.createElementNS(SVG_NS, 'stop');
-      s.setAttribute('offset', off);
-      s.setAttribute('stop-color', c);
-      s.setAttribute('stop-opacity', op);
-      lg.appendChild(s);
-    });
-    defs.appendChild(lg);
-  }
-  const lines = RAW.map((cps, i) => {
-    const gradId = `wg-${i}`;
-    makeGradient(gradId, COLORS[i % COLORS.length]);
-    const el = document.createElementNS(SVG_NS, 'path');
-    el.setAttribute('d', pathD(cps));
-    el.setAttribute('fill', 'none');
-    el.setAttribute('stroke', `url(#${gradId})`);
-    el.setAttribute('stroke-width', 0.9);
-    el.setAttribute('stroke-linecap', 'round');
-    el.setAttribute('stroke-dasharray', '7 11');
-    el.setAttribute('stroke-dashoffset', 0);
-    el.setAttribute('opacity', 0);
-    el.style.transition = 'opacity 1.8s ease';
-    group.appendChild(el);
-    return {
-      el,
-      baseWidth: 0.9,
-      driftBase: 0.16 + Math.random() * 0.10,
-      driftOffset: 0,
-      activation: 0,
-      delay: i * 260
-    };
-  });
-  lines.forEach((l) => { setTimeout(() => { l.el.setAttribute('opacity', 0.85); }, l.delay); });
-  const cursor = { x: -9999, y: -9999, active: false };
-  function updateCursorFromEvent(e){
-    const rect = svg.getBoundingClientRect();
-    cursor.x = ((e.clientX - rect.left) / rect.width)  * VB_W;
-    cursor.y = ((e.clientY - rect.top)  / rect.height) * VB_H;
-    cursor.active = true;
-  }
-  window.addEventListener('pointermove', updateCursorFromEvent);
-  window.addEventListener('pointerleave', () => { cursor.active = false; });
-  const SAMPLES = 28;
-  function nearestDistance(el){
-    const total = el.getTotalLength();
-    if(!total) return Infinity;
-    let minD2 = Infinity;
-    for(let s = 0; s <= SAMPLES; s++){
-      const p = el.getPointAtLength((s / SAMPLES) * total);
-      const dx = p.x - cursor.x, dy = p.y - cursor.y;
-      const d2 = dx*dx + dy*dy;
-      if(d2 < minD2) minD2 = d2;
-    }
-    return Math.sqrt(minD2);
-  }
-  function tick(){
-    if(document.body.classList.contains('mode-estelas')){
-      for(const l of lines){
-        const targetAct = cursor.active ? Math.max(0, 1 - nearestDistance(l.el) / 150) : 0;
-        l.activation += (targetAct - l.activation) * 0.14;
-        l.driftOffset -= l.driftBase * (1 + l.activation * 2.4);
-        l.el.setAttribute('stroke-dashoffset', l.driftOffset.toFixed(1));
-        const w = l.baseWidth + l.activation * 1.2;
-        l.el.setAttribute('stroke-width', w.toFixed(2));
-        l.el.setAttribute('opacity', (0.72 + l.activation * 0.28).toFixed(3));
-      }
-    }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-})();
-
-/* =========================================================
-   4. Audio — Footprints, muted-autoplay, unmute on first interaction.
-   The iframe is layered behind the chip at the same screen rectangle so
-   YouTube sees a "visible" iframe (autoplay allowed) but the user only sees
-   the elegant chip. We poll YT.PlayerState to drive the chip pause/play UI.
-   --------------------------------------------------------- */
-(function(){
-  const TRACK = {
-    title:'Footprints', artist:'Wayne Shorter · 1966',
-    ids:['IFvOEPF7Yhc','5jhq5dXmRGE','XJtj4_5GdkA','oxqEx3CtMug','LgaIUqH0w6c']
-  };
-  const chip = document.getElementById('audio-chip');
-  const mount = document.getElementById('audio-mount');
-
-  let player = null;
-  let idx = 0;
-  let unmuted = false;
-  let paused  = false;
-  let playerReady = false;
-
-  function setChipState(){
-    if(!chip) return;
-    chip.classList.toggle('muted',    !unmuted);
-    chip.classList.toggle('unmuted',   unmuted);
-    chip.classList.toggle('paused',    paused);
-  }
-  setChipState();
-
-  // Load the IFrame API — we always try, even under file://. Modern browsers
-  // refuse the embed there, but the chip click still opens the song on YouTube.
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-
-  window.onYouTubeIframeAPIReady = function(){
-    try {
-      player = new YT.Player('yt-player', {
-        host: 'https://www.youtube.com',
-        width: '240', height: '46',
-        videoId: TRACK.ids[idx],
-        playerVars:{
-          autoplay:1, mute:1, controls:0, modestbranding:1, rel:0,
-          playsinline:1, iv_load_policy:3, fs:0,
-          loop:1, playlist: TRACK.ids[idx]
-        },
-        events: {
-          onReady: (e) => {
-            playerReady = true;
-            try { e.target.playVideo(); } catch(_){}
-            // If the user has already gestured, unmute right away.
-            if(unmuted){
-              try { e.target.unMute(); e.target.setVolume(60); e.target.playVideo(); } catch(_){}
-            }
-          },
-          onError: () => {
-            // Try the next candidate ID (uploader-blocked embeds throw 101/150/153).
-            idx++;
-            if(player && idx < TRACK.ids.length){
-              player.loadVideoById(TRACK.ids[idx]);
-              if(!unmuted) player.mute(); else { player.unMute(); player.setVolume(60); }
-            }
-          },
-          onStateChange: (e) => {
-            if(e.data === 1){ paused = false; setChipState(); }
-            if(e.data === 2){ paused = true;  setChipState(); }
-            if(e.data === 0 && player && player.playVideo) player.playVideo();
-          }
-        }
-      });
-    } catch(_){}
-  };
-
-  // First user interaction anywhere on the page → unmute the embed.
-  function unmuteOnce(){
-    if(unmuted) return;
-    unmuted = true;
-    setChipState();
-    if(player && player.unMute){
-      try { player.unMute(); player.setVolume(60); player.playVideo(); } catch(_){}
-    }
-    window.removeEventListener('pointerdown', unmuteOnce, true);
-    window.removeEventListener('keydown',     unmuteOnce, true);
-    window.removeEventListener('touchstart',  unmuteOnce, true);
-  }
-  window.addEventListener('pointerdown', unmuteOnce, true);
-  window.addEventListener('keydown',     unmuteOnce, true);
-  window.addEventListener('touchstart',  unmuteOnce, true);
-
-  // Click on chip → play/pause toggle. Under file:// the iframe never loads —
-  // fall back to opening the song on youtube.com.
-  if(chip){
-    chip.addEventListener('click', () => {
-      if(window.location.protocol === 'file:'){
-        window.open(`https://www.youtube.com/watch?v=${TRACK.ids[0]}`, '_blank', 'noopener');
-        return;
-      }
-      if(!playerReady || !player) return;
-      try {
-        const st = player.getPlayerState();
-        if(st === 1) player.pauseVideo();
-        else         player.playVideo();
-      } catch(_){}
-    });
-  }
-})();
-
-/* =========================================================
-   5. Language switcher (EN / ES / 中文)
-   --------------------------------------------------------- */
-(function(){
-  const dict = {
-    en: {
-      modeLabel:'Cover',
-      modeCombined:'Hybrid',
-      audioHint:'Click to hear',
-      trackFootprints:'Wayne Shorter · 1966',
-      kicker:'Historical trajectories — 1820 to today',
-      subtitle:'An interactive viewer of historical data on economic development, resource use and environmental impacts since 1820. It traces — country by country — the trajectories of GDP, human development, greenhouse gas emissions, land use and material flows, alongside the methodological choices used to reconstruct them.',
-      subtitleMin:'Historical series on development and the environment.',
-      quote:'<em>… sino estelas en la mar.</em> <span class="quote-src">Antonio Machado</span>',
-      ctaPrimary:'Explore the trajectories'
-    },
-    es: {
-      modeLabel:'Portada',
-      modeCombined:'Combinada',
-      audioHint:'Toca para escuchar',
-      trackFootprints:'Wayne Shorter · 1966',
-      kicker:'Trayectorias históricas — de 1820 a hoy',
-      subtitle:'Un visor interactivo de datos históricos sobre desarrollo económico, uso de recursos e impactos ambientales desde 1820. Recorre — país por país — las trayectorias del PIB, el desarrollo humano, las emisiones de gases de efecto invernadero, el uso del suelo y los flujos de materiales, junto con las decisiones metodológicas usadas para reconstruirlas.',
-      subtitleMin:'Series históricas de desarrollo y medio ambiente.',
-      quote:'<em>… sino estelas en la mar.</em> <span class="quote-src">Antonio Machado</span>',
-      ctaPrimary:'Explorar las trayectorias'
-    },
-    zh: {
-      modeLabel:'封面',
-      modeCombined:'混合',
-      audioHint:'点击试听',
-      trackFootprints:'Wayne Shorter · 1966',
-      kicker:'历史轨迹 — 1820年至今',
-      subtitle:'一个关于自1820年以来经济发展、资源使用与环境影响的交互式历史数据浏览器。它逐国追踪 GDP、人类发展、温室气体排放、土地使用与物质流的轨迹，以及在重建这些数据时所采用的方法选择。',
-      subtitleMin:'发展与环境的历史序列。',
-      quote:'<em>……海上的航迹。</em> <span class="quote-src">安东尼奥·马查多</span>',
-      ctaPrimary:'探索轨迹'
-    }
-  };
-  function applyLang(code){
-    const d = dict[code]; if(!d) return;
-    document.documentElement.lang = code === 'zh' ? 'zh' : code;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const k = el.dataset.i18n;
-      if(d[k] != null) el.textContent = d[k];
-    });
-    document.querySelectorAll('[data-i18n-html]').forEach(el => {
-      const k = el.dataset.i18nHtml;
-      if(d[k] != null) el.innerHTML = d[k];
-    });
-    document.querySelectorAll('.lang-switcher button').forEach(b => {
-      b.classList.toggle('active', b.dataset.lang === code);
-    });
-    try { localStorage.setItem('gw_lang', code); } catch(e){}
-  }
-  document.querySelectorAll('.lang-switcher button').forEach(b => {
-    b.addEventListener('click', () => applyLang(b.dataset.lang));
-  });
-  let initial = 'en';
-  try {
-    const saved = localStorage.getItem('gw_lang');
-    if(saved && dict[saved]) initial = saved;
-    else if(navigator.language){
-      const l = navigator.language.toLowerCase();
-      if(l.startsWith('es')) initial = 'es';
-      else if(l.startsWith('zh')) initial = 'zh';
-    }
-  } catch(e){}
-  applyLang(initial);
+/* ---------- boot ---------- */
+function start(){
+  setLang(LANG,false);
+  layout();buildMap();
+  if(RM){setIdx(N-1);setPlaying(false);endedAt=performance.now()-2000;redraw();return;}
+  setIdx(0);setPlaying(true);
+}
+(function boot(){var done=false;function go(){if(done)return;done=true;start();}
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);setTimeout(go,700);}else go();})();
 })();
 </script>
 </body>

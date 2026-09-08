@@ -113,7 +113,7 @@ const LANGUAGES = {
         navExplore: 'Explore',
         navAnalysis: 'Analysis',
         navAbout: 'About',
-        homeTitle: 'Back to intro',
+        homeTitle: 'Back to cover',
         footerBrand: "Growth's Wake · Infante-Amate, Aguilera & Travieso ·",
         footerAbout: 'About & sources',
         aboutTabAbout: 'About',
@@ -152,7 +152,7 @@ const LANGUAGES = {
         navExplore: 'Explorar',
         navAnalysis: 'Análisis',
         navAbout: 'Acerca de',
-        homeTitle: 'Volver a la intro',
+        homeTitle: 'Volver a la portada',
         footerBrand: 'Estelas del crecimiento · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: 'Acerca de y fuentes',
         aboutTabAbout: 'Acerca de',
@@ -662,19 +662,11 @@ applyLanguage(document);
 
 // ---- HEADER ACTIONS ---- //
 document.getElementById('btn-home').addEventListener('click', () => {
-    // Embedded inside the landing iframe → ask the parent to close us instead
-    // of rebuilding codex's intro overlay (which would feel like a second portada).
-    if (window !== window.parent) {
-        try { window.parent.postMessage({ type: 'gw-back-to-cover' }, '*'); } catch(_) {}
-        return;
-    }
-    // Standalone explorer build — keep the original behaviour.
-    const overlay = document.createElement('div');
-    overlay.className = 'intro-overlay';
-    overlay.id = 'intro-overlay';
-    document.body.appendChild(overlay);
-    appEl.style.display = 'none';
-    buildStaticWake(overlay);
+    // The cover is index.html, a page of its own (portada V6, 2026-09-08).
+    // Until then the explorer lived inside the cover's iframe and posted a
+    // message up; standalone it rebuilt codex's intro overlay, which would
+    // now be a second cover. Both paths retired: go back to the cover.
+    location.href = 'index.html';
 });
 document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
 
@@ -707,33 +699,11 @@ document.getElementById('footer-csv').addEventListener('click', () => {
     exportCSV(rows, `cascorro_data_${countries.join('_')}.csv`);
 });
 
-// ---- EMBEDDED MODE + MOBILE SHELL (sprint visores 2026-09) ---- //
-// When the explorer runs inside the cover's iframe we (a) tag the body so the
-// footer/timeline can reserve the bottom-right gutter used by the cover's
-// collapsed audio chip, and (b) forward Escape to the parent, because once the
-// iframe has focus the parent never sees the key.
-const IS_EMBEDDED = window !== window.parent;
-if (IS_EMBEDDED) document.body.classList.add('embedded');
-
-function isTypingTarget(el) {
-    if (!el) return false;
-    const tag = el.tagName;
-    return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
-}
-
-// Escape closes, in order of priority: an open overlay/sheet/dropdown (handled
-// by the components that own them), then the viewer itself.
-document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape' || e.defaultPrevented) return;
-    if (isTypingTarget(document.activeElement)) return;
-    if (document.fullscreenElement) return;                       // let the browser exit fullscreen
-    if (document.getElementById('cpicker-overlay')?.classList.contains('open')) return;
-    if (document.getElementById('explore-right-panel')?.classList.contains('open')) return;
-    if (document.querySelector('.dropdown.visible, .search-results.visible')) return;
-    if (IS_EMBEDDED) {
-        try { window.parent.postMessage({ type: 'gw-back-to-cover' }, '*'); } catch (_) {}
-    }
-});
+// ---- MOBILE SHELL (sprint visores 2026-09) ---- //
+// The embedded mode (body.embedded, the Escape forwarder and the gutter for
+// the cover's audio chip) was removed on 2026-09-08: the cover no longer
+// wraps the explorer in an iframe. Escape is owned by the components that
+// open overlays, sheets and dropdowns.
 
 // ---- EXPLORE SETTINGS BOTTOM SHEET (phones) ---- //
 (function wireExploreSheet() {
@@ -801,21 +771,16 @@ async function init() {
         loadingScreen.classList.add('hidden');
         setTimeout(() => loadingScreen.remove(), 500);
 
-        // The single-document landing (index.html) gates entry via its own CTA;
-        // when explorer.html is loaded inside that landing's iframe we want to
-        // arrive directly on the globe, skipping codex's wake-intro overlay.
-        // animateWakeIntro() is preserved for the standalone explorer build.
-        if (window !== window.parent) {
-            // Embedded inside the landing iframe → go straight to the app.
-            if (introOverlay) introOverlay.classList.add('hidden');
-            appEl.style.display = 'flex';
-            setTimeout(() => {
-                import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
-            }, 100);
-            setTimeout(() => introOverlay && introOverlay.remove(), 600);
-        } else {
-            animateWakeIntro();
-        }
+        // The cover (index.html, portada V6) gates entry via its own CTA and
+        // links here as a page of its own, so the reader arrives directly on
+        // the globe: codex's wake-intro overlay would be a second cover.
+        // animateWakeIntro() is kept in the file, unused, for reference.
+        if (introOverlay) introOverlay.classList.add('hidden');
+        appEl.style.display = 'flex';
+        setTimeout(() => {
+            import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
+        }, 100);
+        setTimeout(() => introOverlay && introOverlay.remove(), 600);
 
         console.log("Growth's Wake initialized successfully");
 
@@ -889,23 +854,12 @@ function buildStateHash() {
 }
 
 function permalinkURL() {
-    // Inside the cover's iframe the useful link is the cover, not the frame.
-    const base = (window !== window.parent)
-        ? location.origin + location.pathname.replace(/explorer\.html$/, 'index.html')
-        : location.origin + location.pathname;
-    return base + buildStateHash();
+    return location.origin + location.pathname + buildStateHash();
 }
 
 function writeURLNow() {
     const h = buildStateHash();
     try { history.replaceState(null, '', h); } catch (e) { /* link button still works */ }
-    // Embedded, the address bar the reader sees belongs to the cover, not to
-    // this frame. Send the state up so index.html can mirror it; otherwise the
-    // only shareable link is the one the "Link" button builds, and copying the
-    // bar gives a URL that restores nothing.
-    if (IS_EMBEDDED) {
-        try { window.parent.postMessage({ type: 'gw-state-hash', hash: h }, '*'); } catch (e) { /* ignore */ }
-    }
 }
 
 function scheduleURLSync() {

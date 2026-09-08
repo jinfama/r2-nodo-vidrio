@@ -10,7 +10,9 @@ Destino: organización GitHub pendiente de definir.
 ## Estructura
 ```
 cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido)
-index.html              ← Versión modular (desarrollo, NO desplegar directamente)
+index.html              ← Portada V6 (2026-09-08): estelas regionales interactivas; CTA → explorer.html
+explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08 (sin iframe ni audio)
+portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py)
 js/                     ← Módulos ES6 (23 archivos, 380K)
 ├── app.js              ← Controlador principal, routing por hash
 ├── state.js            ← Gestión de estado
@@ -98,8 +100,8 @@ Los `::placeholder` de los tres buscadores van a `--cl` con `opacity:1`
 (`.ctrl-input`, `.cpicker-search input`, `#globe-search-input`): sin regla propia
 heredaban el gris del navegador, `#757575`, 3.9:1.
 
-`index.html` usa los mismos valores bajo sus nombres: `--paper/--paper-2/--ink/--ink-soft/
---ink-mute/--rule/--warm/--warm-ink`. **Si cambias uno, cambia el otro.**
+`index.html` (portada V6, 2026-09-08) pinta crema sobre mar con los tokens literales de la portada
+(`--sea/--sea2/--line/--line2/--cream/--cream2/--muted/--foam/--verm/--ice`). **Si cambias uno, cambia el otro.**
 
 El mar oscuro sobrevive en un sitio: el raíl de Explore (`.explore-sidebar`), pintado en
 `--sea2` con marcador activo en `--verm` (6.2:1 inactivo, 9.5:1 activo).

@@ -5,16 +5,14 @@
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Growth's Wake: Historical Trajectories of Development and Environment</title>
-<!-- When this page is opened inside the landing iframe we skip codex's wake
-     intro entirely so the user lands directly on the globe — no flash. -->
-<script>
-  if (window !== window.parent) {
-    document.documentElement.classList.add('gw-embedded');
-  }
-</script>
+<!-- The cover is index.html (portada V6, 2026-09-08) and links here as a page
+     of its own, so codex's wake intro is skipped: the reader lands directly on
+     the globe, no flash. (Until 2026-09-08 this only happened inside the
+     cover's iframe; the iframe and the audio chip are gone.) -->
+<script>document.documentElement.classList.add('gw-direct');</script>
 <style>
-  html.gw-embedded .intro-overlay { display: none !important; }
-  html.gw-embedded #app           { display: flex !important; }
+  html.gw-direct .intro-overlay { display: none !important; }
+  html.gw-direct #app           { display: flex !important; }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -448,7 +446,8 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
 /* ============================================================
    MOBILE PASS (sprint visores 2026-09)
    F2 bottom nav | F3 Explore settings as a bottom sheet |
-   F4 self-scrolling sub-tab bars | F7 gutter for the cover's audio chip.
+   F4 self-scrolling sub-tab bars. (F7, the gutter for the cover's audio
+   chip, was removed on 2026-09-08 with the iframe and the chip.)
    Nothing here applies above 900 px, so the desktop layout is untouched.
    ============================================================ */
 
@@ -532,12 +531,6 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
   }
   .right-panel-country-list{max-height:38vh;max-height:38dvh}
 }
-
-/* --- F7: reserve the bottom-right gutter for the cover's collapsed audio chip
-   (index.html shrinks it to 44 px when the viewer is open). Only when embedded. --- */
-body.embedded .app-footer{padding-right:58px}
-body.embedded .timeline-bar{padding-right:58px}
-body.embedded .mobile-bottom-nav{padding-right:58px}
 
 /* --- F8 (partial): touch targets that were plainly unusable with a finger.
    Phone-only, so the desktop pixel layout is untouched. --- */
@@ -1841,6 +1834,6 @@ For more information on data sources, methodology, and citations, see <a href="#
 </div>
 </div>
 
-<script type="module" src="js/app.js?v=20260906m"></script>
+<script type="module" src="js/app.js?v=20260908a"></script>
 </body>
 </html>
