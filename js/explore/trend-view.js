@@ -3,9 +3,9 @@
 // Supports absolute values, % of world total, and GHG stacked area decomposition
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -19,8 +19,7 @@ import {
     getColorForIndex,
     inkFor,
     formatValue,
-    resolveIndicatorValue
-} from '../utils.js?v=20260906m';
+    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260908c';
 
 let currentContainer = null;
 let drawMode = 'line';       // 'line' | 'stacked'
@@ -332,6 +331,13 @@ export function destroyTrendView() {
 // Standard chart rendering (line/area per country)
 // ============================================================================
 
+// Right margin that fits the longest end label, within reason: at least the
+// old 60 px, at most 42 % of the width (a phone with six long names).
+function endLabelMargin(labels, width) {
+    const longest = labels.reduce((m, l) => Math.max(m, textWidthPx(l, '600 10px Geist, system-ui, sans-serif')), 0);
+    return Math.min(Math.max(60, Math.ceil(longest) + 12), Math.floor(width * 0.42));
+}
+
 function renderChart(vMode = 'abs') {
     const container = currentContainer;
     container.innerHTML = '';
@@ -350,7 +356,9 @@ function renderChart(vMode = 'abs') {
     const rect = container.getBoundingClientRect();
     const width = rect.width || 700;
     const height = rect.height || 400;
-    const margin = { top: 15, right: Math.min(100, Math.max(60, width * 0.08)), bottom: 35, left: 65 };
+    // The right margin must hold the longest end label (a phone clipped
+    // "United Kingdom" at 60 px); it is measured, not guessed.
+    const margin = { top: 15, right: endLabelMargin(countries.map(iso => (DataLoader.getMetadata(iso) || {}).name || iso), width), bottom: 35, left: 65 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     if (w <= 0 || h <= 0) return;
@@ -508,7 +516,7 @@ function renderChart(vMode = 'abs') {
 
     // Resolve label collisions
     endLabels.sort((a, b) => a.y - b.y);
-    const labelHeight = 12;
+    const labelHeight = 13;   // the label is 10 px type; 12 let two neighbours touch
     for (let i = 1; i < endLabels.length; i++) {
         const prev = endLabels[i - 1];
         const curr = endLabels[i];
@@ -517,6 +525,7 @@ function renderChart(vMode = 'abs') {
         }
     }
 
+    const labelLimit = w + margin.right - 2;
     endLabels.forEach(lbl => {
         g.append('text')
             .attr('class', 'end-label')
@@ -524,7 +533,11 @@ function renderChart(vMode = 'abs') {
             .attr('y', lbl.y)
             // the name is text on paper: ink, not the line colour (utils.js)
             .attr('fill', inkFor(lbl.color))
-            .text(lbl.label);
+            .text(lbl.label)
+            .each(function () {
+                const len = this.getComputedTextLength();
+                if (lbl.x + len > labelLimit) d3.select(this).attr('x', Math.max(0, labelLimit - len));
+            });
     });
 
     // Hover interaction
@@ -1339,7 +1352,10 @@ function renderMultiGasLines(selectedGases, vMode = 'abs', axisIndicator = 'ghg'
     const rect = container.getBoundingClientRect();
     const width = rect.width || 700;
     const height = rect.height || 400;
-    const margin = { top: 15, right: Math.min(100, Math.max(60, width * 0.08)), bottom: 35, left: 65 };
+    const mgLabels = [];
+    countries.forEach(iso3 => { const mt = DataLoader.getMetadata(iso3); const nm = mt ? mt.name : iso3;
+        components.forEach(gc => mgLabels.push(countries.length > 1 ? `${nm} — ${gc.label}` : gc.label)); });
+    const margin = { top: 15, right: endLabelMargin(mgLabels, width), bottom: 35, left: 65 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     if (w <= 0 || h <= 0) return;
@@ -1441,9 +1457,14 @@ function renderMultiGasLines(selectedGases, vMode = 'abs', axisIndicator = 'ghg'
     for (let i = 1; i < endLabels.length; i++) {
         if (endLabels[i].y - endLabels[i - 1].y < 11) endLabels[i].y = endLabels[i - 1].y + 11;
     }
+    const mgLimit = w + margin.right - 2;
     endLabels.forEach(lbl => {
         g.append('text').attr('class', 'end-label').attr('x', lbl.x).attr('y', lbl.y)
-            .attr('fill', inkFor(lbl.color)).text(lbl.label);
+            .attr('fill', inkFor(lbl.color)).text(lbl.label)
+            .each(function () {
+                const len = this.getComputedTextLength();
+                if (lbl.x + len > mgLimit) d3.select(this).attr('x', Math.max(0, mgLimit - len));
+            });
     });
 
     addHoverInteraction(g, svgEl, series, xScale, yScale, w, h, axisIndicator, vMode);

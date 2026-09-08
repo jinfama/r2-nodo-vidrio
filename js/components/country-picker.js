@@ -2,9 +2,9 @@
 // COUNTRY PICKER - OWID-style slide panel for selecting countries & regions
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import { getColorForIndex } from '../utils.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import { getColorForIndex } from '../utils.js?v=20260908c';
 
 const CountryPicker = (() => {
 

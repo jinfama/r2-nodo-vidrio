@@ -3,10 +3,10 @@
 // Waterfall chart with optional faceting by country
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
-import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
+import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260908c';
 
 const MARGIN = { top: 24, right: 24, bottom: 64, left: 64 };
 const FACTOR_COLORS = {
@@ -379,12 +379,13 @@ function renderFacetedWaterfall(decompositions) {
 
     const [startYear, endYear] = State.get('driversPeriod');
     const n = decompositions.length;
-    const cols = n <= 2 ? n : n <= 4 ? 2 : n <= 9 ? 3 : 4;
-    const rows = Math.ceil(n / cols);
-
     const wrapRect = wrapper.getBoundingClientRect();
     const totalW = wrapRect.width || 800;
     const totalH = wrapRect.height || 480;
+    // On a phone three cells across leave 10 px per bar and the labels pile
+    // up; two across, and the grid scrolls if the rows do not fit.
+    const cols = totalW < 560 ? Math.min(n, 2) : n <= 2 ? n : n <= 4 ? 2 : n <= 9 ? 3 : 4;
+    const rows = Math.ceil(n / cols);
     const cellW = Math.floor(totalW / cols);
     const cellH = Math.max(180, Math.floor(totalH / rows));
 
@@ -406,7 +407,7 @@ function renderFacetedWaterfall(decompositions) {
     globalMin = Math.min(globalMin * 1.2, 0);
 
     const grid = document.createElement('div');
-    grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);width:100%;height:100%`;
+    grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);width:100%;height:100%;overflow-y:auto;overscroll-behavior:contain`;
     wrapper.appendChild(grid);
 
     decompositions.forEach(dec => {
@@ -459,10 +460,18 @@ function renderFacetedWaterfall(decompositions) {
             .domain([globalMin, globalMax])
             .range([h, 0]);
 
-        facetSvg.append('g')
+        // Narrow bars: the five labels cannot sit side by side, so they turn.
+        const tight = xScale.bandwidth() < 26;
+        const xAxisG = facetSvg.append('g')
             .attr('transform', `translate(0,${h})`)
-            .call(d3.axisBottom(xScale).tickFormat((d, i) => barData[i]?.label || ''))
-            .selectAll('text').attr('font-size', 8);
+            .call(d3.axisBottom(xScale).tickFormat((d, i) => barData[i]?.label || ''));
+        xAxisG.selectAll('text').attr('font-size', 8);
+        if (tight) {
+            xAxisG.selectAll('text')
+                .attr('text-anchor', 'end')
+                .attr('transform', 'rotate(-45)')
+                .attr('dx', '-0.4em').attr('dy', '0.35em');
+        }
 
         facetSvg.append('g')
             .call(d3.axisLeft(yScale).ticks(4).tickFormat(d => {
@@ -508,13 +517,16 @@ function renderFacetedWaterfall(decompositions) {
                 .attr('stroke', COLORS.lightGray).attr('stroke-dasharray', '2,2');
         }
 
-        // Percentage labels
+        // Percentage labels. When the bars are narrower than the label the
+        // neighbours are staggered (one high, one low) so they never touch.
+        let stagger = 0;
         barData.forEach((d, i) => {
             if (d.isYear) return;
             const pctText = (d.pct >= 0 ? '+' : '') + (d.pct * 100).toFixed(0) + '%';
+            const lift = tight ? (stagger++ % 2 ? 13 : 3) : 3;
             facetSvg.append('text')
                 .attr('x', xScale(i) + xScale.bandwidth() / 2)
-                .attr('y', yScale(Math.max(d.start, d.end)) - 3)
+                .attr('y', Math.max(8, yScale(Math.max(d.start, d.end)) - lift))
                 .attr('text-anchor', 'middle')
                 .attr('font-size', 8).attr('font-weight', 600)
                 .attr('fill', FACTOR_COLORS[d.factor])

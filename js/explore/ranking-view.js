@@ -3,9 +3,9 @@
 // Maddison-style with quartile zones, configurable indicator + scope
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -13,8 +13,7 @@ import {
     inkFor,
     formatValue,
     formatRank,
-    resolveIndicatorValue
-} from '../utils.js?v=20260906m';
+    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260908c';
 
 let currentContainer = null;
 
@@ -121,10 +120,20 @@ function renderBumpChart() {
     );
 
     // Dimensions
+    // The container carries 20 px of side padding (explorer.html); the border
+    // box is not the drawing width, or the SVG runs 20 px past the right edge
+    // and the end labels are cut there.
     const rect = container.getBoundingClientRect();
-    const width = rect.width || 700;
-    const height = rect.height || 500;
-    const margin = { top: 30, right: 100, bottom: 35, left: 50 };
+    const cs = getComputedStyle(container);
+    const padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    const width = Math.max(0, (rect.width || 700) - padX) || 700;
+    const height = Math.max(0, (rect.height || 500) - padY) || 500;
+    // The right margin holds the end labels: measure the longest selected name
+    // so a phone does not clip "United Kingdom"; the ticks thin out with the width.
+    const selNames = selectedCountries.map(iso => (DataLoader.getMetadata(iso) || {}).name || iso);
+    const longest = selNames.reduce((m, n) => Math.max(m, textWidthPx(n, '700 10px Geist, system-ui, sans-serif')), 0);
+    const margin = { top: 30, right: Math.min(Math.max(60, Math.ceil(longest) + 14), Math.floor(width * 0.42)), bottom: 35, left: 50 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     if (w <= 0 || h <= 0) return;
@@ -182,11 +191,11 @@ function renderBumpChart() {
     g.append('g')
         .attr('transform', `translate(0,${h})`)
         .attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(10).tickFormat(d3.format('d')));
+        .call(d3.axisBottom(xScale).ticks(Math.max(3, Math.floor(w / 64))).tickFormat(d3.format('d')));
 
     g.append('g')
         .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(10).tickFormat(d3.format('d')));
+        .call(d3.axisLeft(yScale).ticks(Math.max(4, Math.floor(h / 36))).tickFormat(d3.format('d')));
 
     // Y-axis label
     const scopeLabel = scope === 'cumulative' ? 'cumulative' : '';
@@ -278,6 +287,9 @@ function renderBumpChart() {
             selectedLabels[i].y = selectedLabels[i - 1].y + labelH;
         }
     }
+    // The margin was measured for the longest name; this clamp is the belt to
+    // that brace, for the frame where the web font is not yet in.
+    const labelLimit = w + margin.right - 2;
     selectedLabels.forEach(lbl => {
         g.append('text')
             .attr('x', lbl.x)
@@ -285,16 +297,23 @@ function renderBumpChart() {
             .style('font-size', '10px')
             .style('font-weight', '700')
             .style('fill', inkFor(lbl.color))
-            .text(lbl.name);
+            .text(lbl.name)
+            .each(function () {
+                const len = this.getComputedTextLength();
+                if (lbl.x + len > labelLimit) d3.select(this).attr('x', Math.max(0, labelLimit - len));
+            });
     });
 
     // Footer - interface text, so it takes the chrome ink. COLORS.lightGray
     // stays above on the current-year rule and on the unselected trajectories,
     // which are data.
+    const footNote = width < 560
+        ? `${trajectories.length} countries \u00b7 rank 1 = highest`
+        : `Showing ${trajectories.length} countries \u2014 Rank 1 = highest ${indLabel}`;
     g.append('text')
         .attr('x', 0).attr('y', h + 30)
         .style('font-size', '10px').style('fill', COLORS.uiText)
-        .text(`Showing ${trajectories.length} countries \u2014 Rank 1 = highest ${indLabel}`);
+        .text(footNote);
 }
 
 // ============================================================================

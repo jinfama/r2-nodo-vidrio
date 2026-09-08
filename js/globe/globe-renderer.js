@@ -2,14 +2,14 @@
 // GLOBE RENDERER - Globe.gl wrapper for multi-indicator visualization
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260906m';
-import State from '../state.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260908c';
+import State from '../state.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatRank, formatRatio,
     getMapColor, MAP_NO_DATA, buildMapLegendHTML, resolveIndicatorValue,
     INDICATOR_LABELS, INDICATOR_UNITS
-} from '../utils.js?v=20260906m';
+} from '../utils.js?v=20260908c';
 
 let globe = null;
 let currentColorFn = null;

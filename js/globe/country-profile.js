@@ -2,13 +2,13 @@
 // COUNTRY PROFILE - Side panel with multi-indicator mini charts + waterfall
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260906m';
-import State from '../state.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260908c';
+import State from '../state.js?v=20260908c';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatMFA, formatCrops,
     formatRank, formatRatio,
     formatPercent, getAbsoluteColorScale, INDICATOR_LABELS
-} from '../utils.js?v=20260906m';
+} from '../utils.js?v=20260908c';
 
 let currentIso3 = null;
 
@@ -23,10 +23,14 @@ function ensureEndTicks(ticks, first, last, minGap) {
     return t;
 }
 
-// Ensure Y-axis always shows first + last domain value
-function ensureYEndTicks(ticks, yDom) {
+// Ensure Y-axis always shows first + last domain value. A generated tick that
+// sits within 14 % of the span from either end is dropped, or it prints on top
+// of the end value (800 under 900, 0.80 under 0.90).
+function ensureYEndTicks(ticks, yDom, h) {
     const lo = yDom[0], hi = yDom[1];
-    let t = [lo, ...ticks.filter(v => v !== lo && v !== hi), hi];
+    // 14 % of the span, or 13 px of it when the card is short (a phone row)
+    const gap = (hi - lo) * Math.max(0.14, h ? 13 / h : 0);
+    let t = [lo, ...ticks.filter(v => v !== lo && v !== hi && v - lo >= gap && hi - v >= gap), hi];
     return [...new Set(t)].sort((a, b) => a - b);
 }
 
@@ -241,7 +245,9 @@ function renderMiniChart(containerId, iso3, field) {
     // Scale font sizes relative to chart size (viewBox scaling makes them too big)
     const fontSize = Math.max(7, Math.min(9, height / 15));
 
-    const margin = { top: 12, right: 32, bottom: 14, left: 28 };
+    // bottom: the year labels hang 9 px under the axis and are 10 px tall; 14
+    // clipped their lower half against the card edge.
+    const margin = { top: 12, right: 34, bottom: 24, left: 30 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     if (w <= 0 || h <= 0) return;
@@ -331,7 +337,7 @@ function renderMiniChart(containerId, iso3, field) {
                     };
 
     // Y-axis: always show first + last domain value (Maddison style)
-    const yTicks = ensureYEndTicks(yScale.ticks(3), yDom);
+    const yTicks = ensureYEndTicks(yScale.ticks(3), yDom, h);
     g.append('g')
         .call(d3.axisLeft(yScale).tickValues(yTicks).tickFormat(yTickFormat))
         .attr('class', 'axis');
@@ -953,7 +959,7 @@ function renderMiniWaterfall(containerId, iso3, mode) {
         .selectAll('text').style('font-size', '8px');
 
     const wfYDom = yScale.domain();
-    const wfYTicks = ensureYEndTicks(yScale.ticks(3), wfYDom);
+    const wfYTicks = ensureYEndTicks(yScale.ticks(3), wfYDom, h);
     g.append('g')
         .call(d3.axisLeft(yScale).tickValues(wfYTicks).tickFormat(d => {
             if (Math.abs(d) >= 1000) return (d / 1000).toFixed(1) + 'G';

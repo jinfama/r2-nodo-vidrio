@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="color-scheme" content="dark">
-<title>Estelas · Global Change &amp; Human Development Explorer</title>
+<title>Growth's Wake · Global Change &amp; Human Development Explorer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap">
 <style>
-/* Portada V6 (2026-09-08). Tokens de la portada aprobada V5 (wakes in the sea),
-   los mismos que el explorador re-asienta sobre papel: ver explorer.html :root. */
+/* Portada V7 (2026-09-08). Same tokens as V5/V6 (wakes in the sea); the explorer
+   re-seats them on paper: see explorer.html :root. If you change one, change the other. */
 :root{
   --sea:#0E2C48; --sea2:#0A2136; --line:#1E4463; --line2:#2F5C7E;
   --cream:#EFE4CC; --cream2:#C6CFD6; --muted:#8AA3B7; --foam:#EDF4F7; --verm:#C4502F; --ice:#7FA6C2;
   --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --sans:Geist,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
+  --chart:"Cormorant Garamond","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
 }
 *{box-sizing:border-box;border-radius:0}
 html,body{height:100%}
@@ -42,7 +43,8 @@ button{font:inherit;color:inherit}
 .lang button.on{background:var(--cream);color:var(--sea);border-color:var(--cream)}
 .lang button:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
 h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,"wdth" 88;
-  font-size:clamp(56px,5.6vw,96px);line-height:.86;letter-spacing:-.04em;margin:0;color:var(--cream)}
+  font-size:clamp(50px,5vw,86px);line-height:.88;letter-spacing:-.04em;margin:0;color:var(--cream);text-wrap:balance}
+html[lang="es"] h1{font-size:clamp(40px,3.7vw,64px);line-height:.92}
 .sub{margin:0;font-size:clamp(14px,1.05vw,17px);font-weight:500;letter-spacing:-.01em;color:var(--cream)}
 .lede{margin:0;color:var(--cream2);font-size:clamp(13px,.98vw,15px);max-width:44ch;text-wrap:pretty}
 
@@ -50,7 +52,6 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
   background:var(--cream);color:var(--sea);min-height:60px;padding:0 20px;
   font-family:var(--display);font-weight:640;font-variation-settings:"opsz" 32,"wdth" 92;font-size:20px;letter-spacing:-.015em;
   border:2px solid var(--cream);transition:background .15s,color .15s}
-.cta small{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.75;margin-left:auto}
 .cta svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
 .cta:hover,.cta:focus-visible{background:var(--verm);border-color:var(--verm);color:var(--foam);outline:none}
 
@@ -63,68 +64,65 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
 .index a:hover span.h,.index a:focus-visible span.h{color:var(--verm)}
 
 .poem{margin:auto 0 0;padding:0 0 0 14px;border-left:2px solid var(--verm);max-width:40ch}
-.poem p{margin:0;font-family:var(--display);font-variation-settings:"opsz" 24,"wdth" 92;font-style:italic;
-  font-size:clamp(15px,1.25vw,19px);line-height:1.25;color:var(--cream);letter-spacing:-.01em}
+.poem p{margin:0;font-family:var(--chart);font-weight:500;font-style:italic;
+  font-size:clamp(17px,1.4vw,21px);line-height:1.2;color:var(--cream);letter-spacing:0}
 .poem .src{display:block;margin-top:.45em;font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .poem .gloss{display:block;margin-top:.25em;font-family:var(--sans);font-style:normal;font-size:12.5px;color:var(--muted)}
 
 /* ---------- stage ---------- */
 .stage{display:flex;flex-direction:column;min-width:0;min-height:0}
-.cap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px clamp(14px,1.6vw,24px) 8px;
+.cap{display:flex;align-items:center;gap:14px;padding:11px clamp(14px,1.6vw,24px) 7px;min-height:38px;
   font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream)}
+.cap .what{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .cap b{font-weight:600;color:var(--cream)}
-.cap .pin{color:var(--verm);font-weight:600}
+.cap .pin{color:var(--verm);font-weight:600;white-space:nowrap}
 .cap .pin:empty{display:none}
-.cap .hint{margin-left:auto;color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px}
+.cap .hint{margin-left:auto;color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px;white-space:nowrap}
+.cap.has-pin .hint{display:none}
 #scene{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;touch-action:pan-y}
 #chart{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
 #chart.grab{cursor:ew-resize}
 
-/* map inset: a cartouche in the open water of the early centuries */
-#mapbox{position:absolute;left:0;top:0;width:200px;display:flex;flex-direction:column;gap:6px;
-  background:rgba(10,33,54,.72);border:1px solid rgba(239,228,204,.28);padding:8px 8px 7px;pointer-events:auto}
-#mapcap{font-family:var(--mono);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--cream);line-height:1.3}
-#mapcap b{color:var(--foam)}
+/* map inset: a small cartouche in the open water of the early centuries */
+#mapbox{position:absolute;left:0;top:0;width:180px;padding:5px;pointer-events:auto;
+  background:rgba(10,33,54,.55);border:1px solid rgba(239,228,204,.42);outline:1px solid rgba(239,228,204,.16);outline-offset:2px}
+#mapcap{font-family:var(--chart);font-style:italic;font-weight:600;font-size:12px;letter-spacing:.04em;color:var(--cream);line-height:1.2;
+  text-align:center;margin-bottom:3px;opacity:.85}
 #map{display:block;width:100%;height:auto}
 #map .c{stroke:rgba(10,33,54,.9);stroke-width:.45px;vector-effect:non-scaling-stroke}
 #map g.r{cursor:pointer}
 #map g.r.dim{opacity:.32}
 #map g.r.lit .c{stroke:var(--foam);stroke-width:1.1px}
 #map .none{fill:rgba(198,207,214,.10);stroke:rgba(198,207,214,.35);stroke-width:.4px;vector-effect:non-scaling-stroke;pointer-events:none}
-#map .frame{fill:none;stroke:rgba(239,228,204,.5);stroke-width:.8px;vector-effect:non-scaling-stroke}
-.legend{font-family:var(--mono);font-size:12px;letter-spacing:.03em;color:var(--cream2);display:flex;flex-direction:column;gap:5px}
-.legend .ramp{display:flex;align-items:center;gap:7px}
-.legend .bar{flex:1 1 auto;height:8px;background:linear-gradient(90deg,#EDF4F7 0%,#D8A98E 50%,#C4502F 100%);border:1px solid rgba(239,228,204,.3)}
-.legend .note{font-family:var(--sans);letter-spacing:0;color:var(--muted);font-size:12px;line-height:1.3}
-.legend .note-short{display:none}
+#map .frame{fill:none;stroke:rgba(239,228,204,.45);stroke-width:.8px;vector-effect:non-scaling-stroke}
 
 /* tooltip (HTML, over the canvas) */
 .tip{position:fixed;z-index:5;pointer-events:none;background:rgba(8,22,37,.95);border:1px solid var(--cream);color:var(--cream);
   padding:8px 11px;font-size:12.5px;line-height:1.45;max-width:260px;display:none}
 .tip.show{display:block}
-.tip b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
-.tip .yr{color:var(--muted);font-family:var(--mono);font-size:12px}
+.tip b{display:block;font-family:var(--chart);font-style:italic;font-weight:600;font-size:15px;letter-spacing:.03em;margin-bottom:1px}
+.tip .yr{color:var(--muted);font-family:var(--mono);font-size:12px;margin-left:6px}
 .tip .v2{color:var(--verm)}
 .tip .pinned{display:block;margin-top:3px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
 
-/* time bar */
-.timebar{display:flex;align-items:center;gap:14px;padding:10px clamp(14px,1.6vw,24px) 14px;border-top:1px solid var(--line)}
-#play{width:48px;height:48px;flex:0 0 auto;background:var(--cream);color:var(--sea);border:2px solid var(--cream);cursor:pointer;
+/* time bar: one button, one thin line, the year */
+.timebar{display:flex;align-items:center;gap:14px;padding:8px clamp(14px,1.6vw,24px) 12px;border-top:1px solid var(--line)}
+#play{width:44px;height:44px;flex:0 0 auto;background:transparent;color:var(--cream);border:1px solid var(--cream2);cursor:pointer;
   display:flex;align-items:center;justify-content:center}
-#play svg{width:20px;height:20px;fill:currentColor}
-#play:hover,#play:focus-visible{background:var(--verm);border-color:var(--verm);color:var(--foam);outline:none}
+#play svg{width:18px;height:18px;fill:currentColor}
+#play:hover,#play:focus-visible{background:var(--cream);border-color:var(--cream);color:var(--sea);outline:none}
 #play .ic-pause{display:none}
 #play.playing .ic-play{display:none}
 #play.playing .ic-pause{display:block}
 #slider{flex:1 1 auto;min-width:0;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
-#slider::-webkit-slider-runnable-track{height:3px;background:var(--line2)}
-#slider::-moz-range-track{height:3px;background:var(--line2)}
-#slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;margin-top:-9.5px;background:var(--cream);border:2px solid var(--sea)}
-#slider::-moz-range-thumb{width:22px;height:22px;background:var(--cream);border:2px solid var(--sea)}
+#slider::-webkit-slider-runnable-track{height:1px;background:var(--line2)}
+#slider::-moz-range-track{height:1px;background:var(--line2)}
+#slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-6.5px;background:var(--cream);border:1px solid var(--sea);transform:rotate(45deg)}
+#slider::-moz-range-thumb{width:14px;height:14px;background:var(--cream);border:1px solid var(--sea);border-radius:0}
 #slider:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
-.yr-wrap{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;min-width:5.2ch}
-#year{font-family:var(--mono);font-weight:600;font-size:clamp(34px,3vw,44px);line-height:1;letter-spacing:-.02em;color:var(--cream);font-variant-numeric:tabular-nums}
-.yr-wrap small{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.yr-wrap{display:flex;align-items:baseline;gap:8px;flex:0 0 auto;min-width:5ch;justify-content:flex-end}
+#year{font-family:var(--chart);font-weight:600;font-size:clamp(30px,2.6vw,38px);line-height:1;letter-spacing:.01em;color:var(--cream);font-variant-numeric:tabular-nums lining-nums}
+.yr-wrap small{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .mob-only{display:none}
 
 /* ---------- portrait / phone ---------- */
@@ -133,17 +131,18 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
   .page{display:block;height:auto;overflow:visible}
   .col{border-right:0;padding:16px 16px 6px;gap:8px;overflow:visible;background:none}
   .col .cta,.col .index,.col .poem{display:none}
-  h1{font-size:clamp(52px,15vw,70px)}
+  h1{font-size:clamp(48px,13vw,66px)}
+  html[lang="es"] h1{font-size:clamp(38px,10vw,52px)}
   .lede{font-size:13.5px;max-width:none}
   .stage{display:block}
-  .cap{padding:8px 14px 6px;font-size:12px}
+  .cap{padding:8px 14px 6px;font-size:12px;min-height:0;flex-wrap:wrap;gap:2px 14px}
+  .cap .what{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
   .cap .hint{display:none}
-  #scene{height:52vh;height:52dvh;min-height:380px}
-  .legend .note{display:none}
-  .legend .note-short{display:block}
-  #mapbox{padding:6px 7px 6px;gap:4px}
+  #scene{height:55vh;height:55dvh;min-height:380px}
+  #mapbox{padding:3px}
+  #mapcap{display:none}
   .timebar{padding:8px 14px 12px}
-  #year{font-size:36px}
+  #year{font-size:32px}
   .mob-only{display:flex}
   .mob-cta{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 14px calc(8px + env(safe-area-inset-bottom));
     background:linear-gradient(180deg,rgba(14,44,72,0) 0%,rgba(14,44,72,.96) 30%)}
@@ -165,9 +164,9 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
         <button type="button" data-lang="es" aria-label="Español">ES</button>
       </span>
     </p>
-    <h1>Estelas</h1>
+    <h1><span data-es="Estelas del crecimiento">Growth's Wake</span></h1>
     <p class="sub" data-es="Explorador de cambio global y desarrollo humano">Global Change &amp; Human Development Explorer</p>
-    <p class="lede" data-es="Series históricas de 199 países y ocho regiones del mundo desde 1750: renta, población, desarrollo humano, emisiones de gases de efecto invernadero, tierra cultivada y uso de materiales. Las ocho regiones zarpan de la misma agua en 1750; durante siglo y medio sus estelas se trenzan en un solo rumbo y después se separan.">Historical series for 199 countries and eight world regions since 1750: income, population, human development, greenhouse gas emissions, cropland and material use. The eight regions leave the same water in 1750; for a century and a half their wakes braid into one course, and then they part.</p>
+    <p class="lede" data-es="Series históricas de 199 países y ocho regiones del mundo desde 1750: renta, población, desarrollo humano, emisiones de gases de efecto invernadero, tierra cultivada y uso de materiales. Las ocho regiones zarpan de la misma agua en 1750, durante siglo y medio sus estelas se trenzan en un solo rumbo y después se separan. Más allá del último dato la carta queda en blanco: mar abierta, nada trazado.">Historical series for 199 countries and eight world regions since 1750: income, population, human development, greenhouse gas emissions, cropland and material use. The eight regions leave the same water in 1750, braid into one course for a century and a half, and then part. Past the last reading the chart goes blank: open water, nothing charted.</p>
 
     <a class="cta" id="cta" href="explorer.html#globe">
       <span data-es="Entrar al visor">Enter the explorer</span>
@@ -191,25 +190,20 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
 
   <section class="stage" aria-label="Scene">
     <div class="cap" id="cap">
-      <span><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="$ internacionales de 2011 por persona">2011 international $ per person</span> · <span data-es="ocho regiones del mundo">eight world regions</span> · 1750–2024</span>
+      <span class="what"><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="ocho regiones del mundo">eight world regions</span> · 1750–2024 · <span data-es="tinta y mapa: GEI por persona">ink and map: greenhouse gas per person</span></span>
       <span class="pin" id="pinlbl"></span>
-      <span class="hint" id="hint" data-es="Pasa el cursor por una estela o una región del mapa; clic para fijarla. Arrastra para recorrer los años.">Point at a wake or a region on the map; click to pin it. Drag sideways to move through the years.</span>
+      <span class="hint" id="hint" data-es="Señala una estela; arrastra para recorrer los años">Point at a wake; drag to move through the years</span>
     </div>
     <div id="scene">
-      <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024"></canvas>
+      <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024, then open water"></canvas>
       <div id="mapbox">
-        <div id="mapcap"><b data-es="Gases de efecto invernadero por persona">Greenhouse gas per person</b> · t CO₂e · <span id="mapyear">1750</span></div>
+        <div id="mapcap" data-es="GEI por persona">GHG per person</div>
         <svg id="map" viewBox="0 0 200 100" aria-label="World map by region"></svg>
-        <div class="legend">
-          <div class="ramp"><span>1</span><span class="bar" aria-hidden="true"></span><span>≥ 20 t</span></div>
-          <div class="note" data-es="Altura de cada estela: PIB per cápita · Tinta y mapa: GEI por persona · Estimaciones anuales, sin interpolar.">Height of each wake: GDP per capita · Ink and map: greenhouse gas per person · Annual estimates, no interpolation.</div>
-          <div class="note note-short" data-es="Altura: PIB per cápita · Tinta y mapa: GEI por persona · Datos anuales.">Height: GDP per capita · Ink and map: GHG per person · Annual data.</div>
-        </div>
       </div>
       <div class="tip" id="tip" role="status" aria-live="polite"></div>
     </div>
     <div class="timebar">
-      <button id="play" type="button" class="playing" aria-label="Pause" data-es-label="Pausa" data-en-label="Pause" data-es-play="Reproducir" data-en-play="Play">
+      <button id="play" type="button" class="playing" aria-label="Pause">
         <svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l12 7-12 7z"/></svg>
         <svg class="ic-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h4v14H4zM12 3h4v14h-4z"/></svg>
       </button>
@@ -246,22 +240,27 @@ h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,
 (function(){
 'use strict';
 /* ------------------------------------------------------------------
-   Estelas · portada V6. Eight world regions leave the same shore in
-   1750. The height of each wake is that region's GDP per capita; the
-   colour of its ink is the greenhouse gas its people release, and the
-   world map in the open water of the early centuries shows that same
-   ink, region by region, for the year on the clock.
+   Growth's Wake · portada V7. A nautical chart. Eight world regions
+   leave the same shore in 1750; the height of each wake is that
+   region's GDP per capita, the colour of its ink the greenhouse gas
+   its people release. The chart is drawn up to the last reading
+   (2024), which sits at 60 % of the width. Past it there is open
+   water: for every region several ghost wakes fan out and disagree —
+   some climb, some sink, some waver — fraying and widening the
+   further out they go. Nothing out there is measured, labelled or
+   bounded; it is a figure of speech, not a projection.
    ------------------------------------------------------------------ */
 var D=window.CASCORRO, TOPO=window.WORLD110, RG=window.CASCORRO_REGIONS;
 var canvas=document.getElementById('chart'), scene=document.getElementById('scene');
 var mapbox=document.getElementById('mapbox'), mapSvg=document.getElementById('map');
 var tip=document.getElementById('tip'), playBtn=document.getElementById('play'), slider=document.getElementById('slider');
-var yearOut=document.getElementById('year'), mapYear=document.getElementById('mapyear'), pinLbl=document.getElementById('pinlbl');
+var yearOut=document.getElementById('year'), pinLbl=document.getElementById('pinlbl');
 var RM=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 var COARSE=!!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
 window.__fps=0;window.__state=null;
 if(!D||!D.regions||!canvas.getContext||typeof d3==='undefined'||typeof topojson==='undefined')return;
 var ctx=canvas.getContext('2d');
+var HAS_LS=('letterSpacing' in ctx);
 
 /* ---------- language ---------- */
 var LANG_KEY='growthWake.language';           /* the explorer's own key (js/app.js) */
@@ -270,10 +269,12 @@ try{if(localStorage.getItem(LANG_KEY)==='es')LANG='es';}catch(e){}
 var T={
   en:{perPerson:'per person',gdp:'GDP per capita',ghg:'t CO₂e per person',pinned:'pinned · click again to release',pinnedTap:'pinned · tap again to release',
       part:'the wakes part',partShort:'they part',partSub:function(g,g0){return 'richest region earns '+g+'× the poorest ('+g0+'× in 1750)';},
-      onePath:'one path',open1:'open water:',open2:'nothing charted',play:'Play',pause:'Pause'},
+      open:'open water — nothing charted',openShort:'open water · nothing charted',last:'last reading',play:'Play',pause:'Pause',
+      title:"Growth's Wake · Global Change & Human Development Explorer"},
   es:{perPerson:'por persona',gdp:'PIB per cápita',ghg:'t CO₂e por persona',pinned:'fijada · clic de nuevo para soltar',pinnedTap:'fijada · toca de nuevo para soltar',
       part:'las estelas se separan',partShort:'se separan',partSub:function(g,g0){return 'la región más rica gana '+g+'× la más pobre ('+g0+'× en 1750)';},
-      onePath:'un solo rumbo',open1:'mar abierta:',open2:'nada trazado',play:'Reproducir',pause:'Pausa'}
+      open:'mar abierta — nada trazado',openShort:'mar abierta · nada trazado',last:'último dato',play:'Reproducir',pause:'Pausa',
+      title:'Estelas del crecimiento · Explorador de cambio global y desarrollo humano'}
 };
 var NAMES={
   en:{'East Asia & Pacific':'East Asia & Pacific','Europe & Central Asia':'Europe & Central Asia','Latin America & Caribbean':'Latin America & Caribbean',
@@ -283,18 +284,18 @@ var NAMES={
       'Middle East & North Africa':'Oriente Medio y Norte de África','North America':'América del Norte','South Asia':'Asia Meridional',
       'Sub-Saharan Africa':'África Subsahariana','Western Europe':'Europa Occidental'}
 };
+/* chart names: the short forms a sea chart would print */
 var SHORT={
-  en:{'East Asia & Pacific':'E. ASIA & PACIFIC','North America':'N. AMERICA','Europe & Central Asia':'EUROPE & C. ASIA','Western Europe':'W. EUROPE',
-      'Latin America & Caribbean':'LATIN AMERICA','Middle East & North Africa':'MID. EAST & N. AFR.','Sub-Saharan Africa':'SUB-SAHARAN AFR.','South Asia':'SOUTH ASIA'},
-  es:{'East Asia & Pacific':'ASIA OR. Y PACÍFICO','North America':'AMÉRICA DEL NORTE','Europe & Central Asia':'EUROPA Y ASIA C.','Western Europe':'EUROPA OCC.',
-      'Latin America & Caribbean':'AMÉRICA LATINA','Middle East & North Africa':'OR. MEDIO Y N. ÁFRICA','Sub-Saharan Africa':'ÁFRICA SUBSAH.','South Asia':'ASIA MERIDIONAL'}
+  en:{'East Asia & Pacific':'East Asia & Pacific','North America':'North America','Europe & Central Asia':'Europe & C. Asia','Western Europe':'Western Europe',
+      'Latin America & Caribbean':'Latin America','Middle East & North Africa':'Mid. East & N. Africa','Sub-Saharan Africa':'Sub-Saharan Africa','South Asia':'South Asia'},
+  es:{'East Asia & Pacific':'Asia Or. y Pacífico','North America':'América del Norte','Europe & Central Asia':'Europa y Asia C.','Western Europe':'Europa Occ.',
+      'Latin America & Caribbean':'América Latina','Middle East & North Africa':'Or. Medio y N. África','Sub-Saharan Africa':'África Subsahariana','South Asia':'Asia Meridional'}
 };
-/* on a phone the open water past the last reading is narrow: shorter plates */
 var TINY={
-  en:{'East Asia & Pacific':'E. ASIA & PAC.','North America':'N. AMERICA','Europe & Central Asia':'EUR. & C. ASIA','Western Europe':'W. EUROPE',
-      'Latin America & Caribbean':'LATIN AMERICA','Middle East & North Africa':'MENA','Sub-Saharan Africa':'AFRICA (SSA)','South Asia':'SOUTH ASIA'},
-  es:{'East Asia & Pacific':'ASIA OR. Y PAC.','North America':'AMÉRICA N.','Europe & Central Asia':'EUR. Y ASIA C.','Western Europe':'EUROPA OCC.',
-      'Latin America & Caribbean':'AMÉRICA LAT.','Middle East & North Africa':'OR. MEDIO','Sub-Saharan Africa':'ÁFRICA SUBS.','South Asia':'ASIA MERID.'}
+  en:{'East Asia & Pacific':'E. Asia & Pac.','North America':'N. America','Europe & Central Asia':'Eur. & C. Asia','Western Europe':'W. Europe',
+      'Latin America & Caribbean':'Latin America','Middle East & North Africa':'MENA','Sub-Saharan Africa':'Africa (SSA)','South Asia':'South Asia'},
+  es:{'East Asia & Pacific':'Asia Or. y Pac.','North America':'América N.','Europe & Central Asia':'Eur. y Asia C.','Western Europe':'Europa Occ.',
+      'Latin America & Caribbean':'América Lat.','Middle East & North Africa':'Or. Medio','Sub-Saharan Africa':'África Subs.','South Asia':'Asia Merid.'}
 };
 function tr(k){return T[LANG][k];}
 function setLang(l,save){
@@ -306,16 +307,16 @@ function setLang(l,save){
     el.innerHTML=LANG==='es'?el.dataset.es:el.dataset.en;}
   var bs=document.querySelectorAll('.lang button');
   for(i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].dataset.lang===LANG);
-  document.title=LANG==='es'?'Estelas · Explorador de cambio global y desarrollo humano':'Estelas · Global Change & Human Development Explorer';
+  document.title=tr('title');
   if(save){try{localStorage.setItem(LANG_KEY,LANG);}catch(e){}}
   syncPlayLabel();updatePinLabel();
-  if(chartLayer)buildChart();futDone=false;needDraw=true;
+  if(chartLayer){buildChart();needDraw=true;loop();}
 }
 document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.lang,true);});});
 
 /* ---------- colour helpers ---------- */
-var SEA='#0E2C48',SEA2='#0A2136',LINE2='#2F5C7E',CREAM='#EFE4CC',MUTED='#8AA3B7',FOAM='#EDF4F7',VERM='#C4502F';
-var RGB={FOAM:[237,244,247],VERM:[196,80,47],ICE:[127,166,194],CREAM:[239,228,204]};
+var SEA='#0E2C48',SEA2='#0A2136',LINE2='#2F5C7E',CREAM='#EFE4CC',FOAM='#EDF4F7',VERM='#C4502F';
+var RGB={FOAM:[237,244,247],VERM:[196,80,47],ICE:[127,166,194],CREAM:[239,228,204],MUTED:[138,163,183]};
 function lerp3(a,b,t){t=t<0?0:t>1?1:t;return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
 function rgbaArr(c,al){return 'rgba('+Math.round(c[0])+','+Math.round(c[1])+','+Math.round(c[2])+','+al+')';}
 function rgba(c,a){var p=parseInt(c.slice(1),16);return 'rgba('+((p>>16)&255)+','+((p>>8)&255)+','+(p&255)+','+a+')';}
@@ -324,8 +325,10 @@ function smooth(t){return t*t*(3-2*t);}
 function noise(x,sd){var i0=Math.floor(x),f=x-i0,a=hash(i0+sd*131.7),b=hash(i0+1+sd*131.7);return (a+(b-a)*smooth(f))*2-1;}
 function fbm(x,sd){return noise(x,sd)*0.62+noise(x*2.31,sd+7)*0.26+noise(x*4.7,sd+19)*0.12;}
 function clamp(x){return x<0?0:x>1?1:x;}
-function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
 function fmtMoney(v){return '$'+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,LANG==='es'?'.':',');}
+function chartFont(px,italic,weight){return (italic?'italic ':'')+(weight||600)+' '+px+'px "Cormorant Garamond", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif';}
+function monoFont(px,weight){return (weight||500)+' '+px+'px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';}
+function spaced(g,em){if(HAS_LS)g.letterSpacing=em;}
 
 /* ---------- the eight courses ---------- */
 var YRS=D.world.years,N=YRS.length,Y0=YRS[0],Y1=YRS[N-1];
@@ -346,8 +349,9 @@ var shipOfRegion={};for(j=0;j<NS;j++)shipOfRegion[ships[j].ri]=j;
 /* ink: how far along cream -> vermilion a rate of t CO2e per person sits (1 -> 20 t, capped) */
 function heat(t){if(t==null)return 0;var u=(t-1)/19;return u<0?0:(u>1?1:Math.pow(u,0.82));}
 function inkAt(jj,idx){var s=ships[jj];return s.e?heat(s.e[idx]):0;}
-function inkCol(jj,idx,al){return rgbaArr(lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,idx)),al);}
-var vMax=0;for(j=0;j<NS;j++)for(i=0;i<N;i++)if(ships[j].v[i]>vMax)vMax=ships[j].v[i];vMax*=1.06;
+function inkRGB(jj,idx){return lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,idx));}
+function inkCol(jj,idx,al){return rgbaArr(inkRGB(jj,idx),al);}
+var vMax=0;for(j=0;j<NS;j++)for(i=0;i<N;i++)if(ships[j].v[i]>vMax)vMax=ships[j].v[i];vMax*=1.08;
 /* the year the wakes part: first year the richest region earns ten times the poorest */
 var GAP=10,ratio=new Array(N);
 for(i=0;i<N;i++){var lo=Infinity,hi=-Infinity;for(j=0;j<NS;j++){var w=ships[j].v[i];if(w<lo)lo=w;if(w>hi)hi=w;}ratio[i]=lo>0?hi/lo:1;}
@@ -360,7 +364,7 @@ var RATE=(N-1)/5800;                       /* years per ms: the whole run in 5.8
 var endedAt=null;                          /* when the clock last reached 2024, for the open-water fade */
 
 /* ---------- layout ---------- */
-var W,H,dpr,mobile,xL,xData,xFut,yB,yT,chartLayer=null,tinyFont,smallFont,roseX,roseY,roseR,MB;
+var W,H,dpr,mobile,xL,xData,xFut,yB,yT,chartLayer=null,roseX,roseY,roseR,MB,WAVES=[],SOUND=[];
 function xs(y){return xL+(y-Y0)/(Y1-Y0)*(xData-xL);}
 function ys(v){return yB-(v/vMax)*(yB-yT);}
 function pt(jj,k){return [xs(YRS[k]),ys(ships[jj].v[k])+fbm(k*0.07+jj*9,jj)*(mobile?0.9:1.4)];}
@@ -372,73 +376,130 @@ function layout(){
   dpr=Math.min(2,window.devicePixelRatio||1);
   canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
   mobile=window.innerWidth<900;
-  tinyFont='500 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';
-  smallFont='500 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';
-  xL=mobile?18:26;xFut=W-(mobile?10:22);
-  xData=Math.round(xL+(xFut-xL)*(mobile?0.70:0.86));
-  yT=mobile?22:30;yB=H-(mobile?30:34);
-  /* the map cartouche sits in the open water of the early centuries, where no wake ever climbs */
-  var mw=Math.round((xData-xL)*(mobile?0.58:0.42));mw=Math.max(150,Math.min(mw,mobile?210:400));
+  xL=mobile?16:30;xFut=W-(mobile?10:26);
+  xData=Math.round(xL+(xFut-xL)*0.60);          /* the charted world ends at 60 %; the rest is open water */
+  yT=mobile?26:34;yB=H-(mobile?30:40);
+  /* the map cartouche: small, top-left, in water no wake ever reaches */
+  var mw=Math.round(W*(mobile?0.30:0.175));mw=Math.max(mobile?104:150,Math.min(mw,mobile?124:200));
   MB={x:xL+10,y:yT+6,w:mw};
   mapbox.style.left=MB.x+'px';mapbox.style.top=MB.y+'px';mapbox.style.width=MB.w+'px';
-  roseX=Math.round(xL+(xData-xL)*0.66);roseY=Math.round(yT+(yB-yT)*0.34);roseR=Math.min(mobile?34:64,(yB-yT)*0.14);
+  /* the rose lives in the open water */
+  roseR=Math.min(mobile?30:60,(yB-yT)*0.13);
+  roseX=Math.round(xData+(xFut-xData)*0.56);roseY=Math.round(yT+(yB-yT)*0.30);
   TICKS=(xData-xL)<520?TICKS_TIGHT:TICKS_WIDE;
-  buildChart();buildFuture();futDone=false;gradCache={};needDraw=true;
+  buildWaves();buildChart();buildFuture();gradCache={};needDraw=true;
 }
 
+/* ---------- the chart sheet (static) ---------- */
 function buildChart(){
   chartLayer=document.createElement('canvas');chartLayer.width=canvas.width;chartLayer.height=canvas.height;
   var g=chartLayer.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
   g.fillStyle=SEA;g.fillRect(0,0,W,H);
-  var rg=g.createRadialGradient(W*0.30,H*0.25,10,W*0.55,H*0.6,Math.max(W,H)*0.95);
-  rg.addColorStop(0,'rgba(31,76,113,0.55)');rg.addColorStop(1,'rgba(6,20,34,0.78)');
+  var rg=g.createRadialGradient(W*0.28,H*0.22,10,W*0.55,H*0.6,Math.max(W,H)*0.95);
+  rg.addColorStop(0,'rgba(31,76,113,0.55)');rg.addColorStop(1,'rgba(6,20,34,0.80)');
   g.fillStyle=rg;g.fillRect(0,0,W,H);
   var k;
   for(k=0;k<(mobile?260:700);k++){g.globalAlpha=0.03+0.07*hash(k*1.3);g.fillStyle=hash(k*2.1)>0.5?'#BFD6E6':'#04101C';g.fillRect(hash(k*3.7)*W,hash(k*8.1)*H,1,1);}
   g.globalAlpha=1;
-  /* rhumb web of a portolan */
-  g.strokeStyle=rgba(LINE2,0.40);g.lineWidth=0.7;
-  for(k=0;k<32;k++){var a=k*Math.PI/16;g.beginPath();g.moveTo(roseX,roseY);g.lineTo(roseX+Math.cos(a)*Math.max(W,H)*1.6,roseY+Math.sin(a)*Math.max(W,H)*1.6);g.stroke();}
-  /* wave hatching */
-  g.strokeStyle=rgba('#8FB6CF',0.14);g.lineWidth=0.75;
-  for(k=0;k<(mobile?30:80);k++){var hx=hash(k*5.1)*(W-70)+20,hy=hash(k*9.3)*(H-60)+20,hw=9+hash(k*2.7)*16;
-    g.beginPath();for(var hq=0;hq<=6;hq++)g.lineTo(hx+hw*hq/6,hy+Math.sin(hq*1.05)*1.6);g.stroke();}
-  /* compass rose, faint */
-  rose(g,roseX,roseY,roseR,0.34);
+  /* open water beyond the last reading: darker, and darker still the further out */
+  var span=xFut-xData;
+  var gd=g.createLinearGradient(xData-span*0.15,0,xFut,0);
+  gd.addColorStop(0,'rgba(6,20,34,0)');gd.addColorStop(0.5,'rgba(6,20,34,0.30)');gd.addColorStop(1,'rgba(4,14,26,0.55)');
+  g.fillStyle=gd;g.fillRect(xData-span*0.15,0,span*1.15+40,H);
+  /* chart graticule: parallels at each $10k, meridians at each 25 years, the charted world only */
+  var m=mobile?4:8;
+  g.lineWidth=0.6;
+  var step=10000,v;
+  for(v=step;v<vMax;v+=step){var yy=ys(v),major=(v%20000===0);
+    g.strokeStyle=rgba(CREAM,major?0.16:0.07);g.beginPath();g.moveTo(xL,yy);g.lineTo(xData,yy);g.stroke();}
+  for(var yr=1775;yr<Y1;yr+=25){var tx=xs(yr);g.strokeStyle=rgba(CREAM,yr%50===0?0.13:0.06);g.beginPath();g.moveTo(tx,yT-12);g.lineTo(tx,yB+6);g.stroke();}
+  /* rhumb web of a portolan, from the rose out in the open water */
+  g.strokeStyle=rgba(LINE2,0.42);g.lineWidth=0.7;
+  for(k=0;k<32;k++){var a=k*Math.PI/16;g.globalAlpha=k%2?0.45:0.85;g.beginPath();g.moveTo(roseX,roseY);g.lineTo(roseX+Math.cos(a)*Math.max(W,H)*1.6,roseY+Math.sin(a)*Math.max(W,H)*1.6);g.stroke();}
+  g.globalAlpha=1;
+  rose(g,roseX,roseY,roseR,0.42);
+  /* soundings: the small depth figures of a sea chart, only where no wake will ever pass */
+  soundings(g);
   /* the shore of 1750 */
   g.strokeStyle=rgba(CREAM,0.5);g.lineWidth=1.2;g.lineJoin='round';
   var sxs=[];for(k=0;k<=44;k++)sxs.push([xL-9+fbm(k*0.45,21)*4.5,yT-10+(yB+16-(yT-10))*k/44]);
   g.beginPath();g.moveTo(sxs[0][0],sxs[0][1]);for(k=1;k<sxs.length;k++)g.lineTo(sxs[k][0],sxs[k][1]);g.stroke();
-  /* meridians + year scale, stopping at the last reading */
-  g.font=tinyFont;g.textAlign='center';g.textBaseline='top';
-  for(k=0;k<TICKS.length;k++){var tx=xs(TICKS[k]);
-    g.strokeStyle=rgba(LINE2,k===0?0:0.4);g.lineWidth=0.7;g.beginPath();g.moveTo(tx,yT-10);g.lineTo(tx,yB+6);g.stroke();
-    g.fillStyle=rgba(CREAM,0.8);g.fillText(TICKS[k],Math.min(xData-8,Math.max(xL+14,tx)),yB+11);}
-  /* value scale, in thousands of $, tucked just inside the last reading so the
-     name plates past the heads never sit on it */
-  g.textAlign='right';g.textBaseline='bottom';g.fillStyle=rgba(CREAM,0.55);
-  var step=vMax>40000?20000:10000;
-  for(var v=step;v<vMax;v+=step){var yy=ys(v);
-    g.strokeStyle=rgba(LINE2,0.35);g.beginPath();g.moveTo(xL,yy);g.lineTo(xData,yy);g.stroke();
-    g.fillText('$'+(v/1000)+'k',xData-12,yy-2);}
-  /* open water beyond the last reading */
-  var span=xFut-xData;
-  if(span>24){var gd=g.createLinearGradient(xData-span*0.2,0,xFut,0);
-    gd.addColorStop(0,'rgba(8,24,40,0)');gd.addColorStop(1,'rgba(6,20,34,0.42)');
-    g.fillStyle=gd;g.fillRect(xData-span*0.2,yT-14,span*1.2,yB-yT+26);
-    g.strokeStyle=rgba(CREAM,0.34);g.lineWidth=1;g.beginPath();g.moveTo(xData,yB+2);g.lineTo(xData,yB+9);g.stroke();}
-  /* neatline */
-  g.strokeStyle=rgba(CREAM,0.22);g.lineWidth=1;var m=mobile?4:8;g.strokeRect(m+0.5,m+0.5,W-2*m-1,H-2*m-1);
+  g.strokeStyle=rgba(CREAM,0.22);g.lineWidth=0.8;
+  g.beginPath();g.moveTo(sxs[0][0]-4,sxs[0][1]);for(k=1;k<sxs.length;k++)g.lineTo(sxs[k][0]-4+fbm(k*0.6,33)*1.5,sxs[k][1]);g.stroke();
+  /* year scale, in the hand of a chart, stopping at the last reading */
+  g.font=chartFont(mobile?13:14,false,600);g.textAlign='center';g.textBaseline='top';spaced(g,'0.04em');
+  for(k=0;k<TICKS.length;k++){var tx2=xs(TICKS[k]);
+    g.strokeStyle=rgba(CREAM,k===0?0:0.35);g.lineWidth=0.8;g.beginPath();g.moveTo(tx2,yB);g.lineTo(tx2,yB+5);g.stroke();
+    g.fillStyle=rgba(CREAM,0.82);g.fillText(String(TICKS[k]),Math.min(xData-8,Math.max(xL+14,tx2)),yB+8);}
+  spaced(g,'0px');
+  /* the edge of the charted world */
+  g.setLineDash([2,4]);g.strokeStyle=rgba(CREAM,0.30);g.lineWidth=1;g.beginPath();g.moveTo(xData,yT-12);g.lineTo(xData,yB+6);g.stroke();g.setLineDash([]);
+  /* the quiet word in the open water */
+  g.font=chartFont(mobile?12:14,true,600);g.textAlign='right';g.textBaseline='bottom';spaced(g,'0.06em');
+  g.strokeStyle=rgba(SEA2,0.9);g.lineWidth=3;g.lineJoin='round';
+  var ow=mobile?tr('openShort'):tr('open');
+  g.strokeText(ow,xFut-6,yB+(mobile?22:24));g.fillStyle=rgba(CREAM,0.66);g.fillText(ow,xFut-6,yB+(mobile?22:24));
+  spaced(g,'0px');
+  /* neatline with the alternating border bands of a chart */
+  neatline(g,m);
+}
+function neatline(g,m){
+  g.strokeStyle=rgba(CREAM,0.28);g.lineWidth=1;g.strokeRect(m+0.5,m+0.5,W-2*m-1,H-2*m-1);
+  g.strokeRect(m+4.5,m+4.5,W-2*m-9,H-2*m-9);
+  var seg=mobile?24:36,k,n,x,y;g.fillStyle=rgba(CREAM,0.34);
+  n=Math.floor((W-2*m-8)/seg);
+  for(k=0;k<n;k+=2){x=m+4+k*seg;g.fillRect(x,m+1,Math.min(seg,W-m-4-x),3);g.fillRect(x,H-m-4,Math.min(seg,W-m-4-x),3);}
+  n=Math.floor((H-2*m-8)/seg);
+  for(k=0;k<n;k+=2){y=m+4+k*seg;g.fillRect(m+1,y,3,Math.min(seg,H-m-4-y));g.fillRect(W-m-4,y,3,Math.min(seg,H-m-4-y));}
 }
 function rose(g,cx,cy,R,alpha){
   if(R<16)return;g.save();g.globalAlpha=alpha;g.lineJoin='miter';
-  g.strokeStyle=rgba(CREAM,0.45);g.lineWidth=1;
+  g.strokeStyle=rgba(CREAM,0.5);g.lineWidth=1;
   [1,0.78,0.30].forEach(function(f){g.beginPath();g.arc(cx,cy,R*f,0,6.2832);g.stroke();});
+  g.strokeStyle=rgba(CREAM,0.3);g.lineWidth=0.6;
+  for(var t=0;t<64;t++){var a0=t*Math.PI/32,r0=t%8===0?R*0.86:t%4===0?R*0.92:R*0.96;g.beginPath();g.moveTo(cx+Math.cos(a0)*r0,cy+Math.sin(a0)*r0);g.lineTo(cx+Math.cos(a0)*R,cy+Math.sin(a0)*R);g.stroke();}
   var k,a;
-  for(k=0;k<16;k++){a=k*Math.PI/8-Math.PI/2;g.fillStyle=k%2?rgba(CREAM,0.26):rgba(CREAM,0.5);g.beginPath();
+  for(k=0;k<16;k++){a=k*Math.PI/8-Math.PI/2;g.fillStyle=k%2?rgba(CREAM,0.26):rgba(CREAM,0.55);g.beginPath();
     g.moveTo(cx+Math.cos(a)*R*(k%2?0.62:0.86),cy+Math.sin(a)*R*(k%2?0.62:0.86));
     g.lineTo(cx+Math.cos(a+0.055)*R*0.18,cy+Math.sin(a+0.055)*R*0.18);g.lineTo(cx+Math.cos(a-0.055)*R*0.18,cy+Math.sin(a-0.055)*R*0.18);g.closePath();g.fill();}
-  g.fillStyle=VERM;g.beginPath();g.arc(cx,cy,R*0.055,0,6.2832);g.fill();g.restore();
+  /* the fleur at north, in vermilion */
+  g.fillStyle=VERM;g.beginPath();g.moveTo(cx,cy-R*0.86);g.lineTo(cx+R*0.06,cy-R*0.62);g.lineTo(cx-R*0.06,cy-R*0.62);g.closePath();g.fill();
+  g.beginPath();g.arc(cx,cy,R*0.055,0,6.2832);g.fill();
+  g.font=chartFont(Math.max(12,Math.round(R*0.26)),false,600);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.7);
+  g.fillText('N',cx,cy-R*1.12);g.fillText('S',cx,cy+R*1.12);g.fillText('E',cx+R*1.12,cy);g.fillText('W',cx-R*1.12,cy);
+  g.restore();
+}
+function soundings(g){
+  SOUND=[];var n=mobile?6:26,tries=0,k,jj;
+  var top=yT+12,bot=yB-16;
+  while(SOUND.length<n&&tries<600){tries++;
+    var x=xL+30+hash(tries*3.1+5)*(xData-xL-60),y=top+hash(tries*7.7+2)*(bot-top),ok=true;
+    if(x>MB.x-14&&x<MB.x+MB.w+14&&y<MB.y+MB.w*0.55+30)ok=false;                   /* under the map */
+    if(Math.abs(x-xs(partYear))<40&&y<yT+50)ok=false;                              /* the parting label */
+    if(ok){var kk=xToIdx(x);for(jj=0;jj<NS&&ok;jj++){var yy=ys(ships[jj].v[kk]);if(y>yy-26)ok=false;}}
+    if(ok){for(k=0;k<SOUND.length;k++)if(Math.abs(SOUND[k][0]-x)<34&&Math.abs(SOUND[k][1]-y)<18){ok=false;break;}}
+    if(ok)SOUND.push([x,y,Math.round(3+hash(tries*1.9)*46)]);
+  }
+  g.font=chartFont(12,true,500);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.34);
+  for(k=0;k<SOUND.length;k++)g.fillText(String(SOUND[k][2]),SOUND[k][0],SOUND[k][1]);
+}
+
+/* ---------- the water (alive) ---------- */
+function buildWaves(){
+  WAVES=[];var n=mobile?34:88,k;
+  for(k=0;k<n;k++)WAVES.push({x:hash(k*5.1)*(W-70)+20,y:hash(k*9.3)*(H-60)+20,w:9+hash(k*2.7)*18,ph:hash(k*4.4)*6.28,sp:0.5+hash(k*6.6)*0.8,am:1.2+hash(k*8.2)*1.4});
+}
+function water(t){
+  /* a slow swell: a soft highlight that wanders across the sheet */
+  var hx=W*0.42+Math.sin(t*0.11)*W*0.12,hy=H*0.55+Math.cos(t*0.083)*H*0.12;
+  var g=ctx.createRadialGradient(hx,hy,0,hx,hy,Math.max(W,H)*0.55);
+  g.addColorStop(0,'rgba(127,166,194,0.075)');g.addColorStop(1,'rgba(127,166,194,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=rgba('#8FB6CF',0.16);ctx.lineWidth=0.8;ctx.lineCap='round';
+  for(var k=0;k<WAVES.length;k++){var wv=WAVES[k],x0=wv.x+Math.sin(t*0.21+wv.ph)*3;
+    ctx.globalAlpha=0.55+0.45*Math.sin(t*wv.sp*0.7+wv.ph);
+    ctx.beginPath();for(var q=0;q<=6;q++)ctx.lineTo(x0+wv.w*q/6,wv.y+Math.sin(q*1.05+t*wv.sp+wv.ph)*wv.am);ctx.stroke();}
+  ctx.globalAlpha=1;
 }
 
 /* ---------- one wake, up to the clock ---------- */
@@ -456,9 +517,9 @@ function wake(jj,upto,alpha,boost){
   var head=pts[pts.length-1],prev=pts[pts.length-2],ang=Math.atan2(head[1]-prev[1],head[0]-prev[0]);
   var W1=boost?2.1:1,A1=boost?1:0.8;
   ctx.lineCap='round';ctx.lineJoin='round';
-  ctx.globalAlpha=alpha*A1;ctx.strokeStyle=inkGradient(jj,A1);ctx.lineWidth=(mobile?1.3:1.6)*W1;
+  ctx.globalAlpha=alpha*A1;ctx.strokeStyle=inkGradient(jj,A1);ctx.lineWidth=(mobile?1.3:1.7)*W1;
   ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(k=1;k<pts.length;k++)ctx.lineTo(pts[k][0],pts[k][1]);ctx.stroke();
-  var sprd=mobile?3.2:4.6;
+  var sprd=mobile?3.2:5;
   for(var sgn=-1;sgn<=1;sgn+=2){
     ctx.globalAlpha=alpha*0.42;ctx.strokeStyle=inkGradient(jj,0.46);ctx.lineWidth=(mobile?0.65:0.85)*W1;ctx.beginPath();
     for(k=0;k<pts.length;k++){var t=k/(pts.length-1),p=pts[k],pn=pts[Math.min(pts.length-1,k+1)];
@@ -480,101 +541,109 @@ function shipGlyph(x,y,ang,sc,alpha,col){
 function band(upto,alpha){
   if(alpha<=0||upto<2)return;
   var step=Math.max(1,Math.round(upto/(mobile?70:130))),k;
-  ctx.globalAlpha=alpha;ctx.fillStyle=rgba(FOAM,0.10);ctx.beginPath();
+  ctx.globalAlpha=alpha;ctx.fillStyle=rgba(FOAM,0.09);ctx.beginPath();
   for(k=0;k<=upto;k+=step){var lo=Infinity;for(j=0;j<NS;j++){var v=ships[j].v[k];if(v<lo)lo=v;}var x=xs(YRS[k]),y=ys(lo);if(k===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}
   for(k=Math.floor(upto/step)*step;k>=0;k-=step){var hi=-Infinity;for(j=0;j<NS;j++){var v2=ships[j].v[k];if(v2>hi)hi=v2;}ctx.lineTo(xs(YRS[k]),ys(hi));}
   ctx.closePath();ctx.fill();ctx.globalAlpha=1;
 }
 function partRule(alpha){
   if(alpha<=0)return;ctx.globalAlpha=alpha;var x=xs(partYear);
-  ctx.setLineDash([3,4]);ctx.strokeStyle=rgba(CREAM,0.55);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,yT-6);ctx.lineTo(x,yB+4);ctx.stroke();ctx.setLineDash([]);
-  ctx.font='600 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.textAlign='left';ctx.textBaseline='top';ctx.lineJoin='round';
-  var l1='◆ '+partYear+' · '+tr('part'),l2=tr('partSub')(GAP,gap0),ly=yT+6,tx=x+6;
+  ctx.setLineDash([3,4]);ctx.strokeStyle=rgba(CREAM,0.5);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,yT-6);ctx.lineTo(x,yB+4);ctx.stroke();ctx.setLineDash([]);
+  ctx.lineJoin='round';
   if(mobile){
-    /* on a phone the map cartouche owns the top-left and the plates the right,
-       so the label runs up the rule itself, clear of the wakes of 1885 */
+    /* on a phone the cartouche owns the top-left, so the label runs up the rule itself */
     ctx.save();ctx.translate(x-4,yB-42);ctx.rotate(-Math.PI/2);ctx.textAlign='left';ctx.textBaseline='bottom';
-    l1=partYear+' · '+tr('partShort');
+    ctx.font=chartFont(13,true,600);spaced(ctx,'0.05em');var l1=partYear+' · '+tr('partShort');
     ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,0,0);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,0,0);
-    ctx.restore();ctx.globalAlpha=1;return;}
-  ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,tx,ly);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,tx,ly);
-  if(!mobile){ctx.font='400 12px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.strokeText(l2,tx,ly+16);ctx.fillStyle=rgba(CREAM,0.7);ctx.fillText(l2,tx,ly+16);}
-  ctx.textAlign='left';ctx.globalAlpha=1;
+    spaced(ctx,'0px');ctx.restore();ctx.globalAlpha=1;return;}
+  var tx=x+7,ly=yT+4;
+  ctx.font=chartFont(15,true,600);ctx.textAlign='left';ctx.textBaseline='top';spaced(ctx,'0.05em');
+  var l1b='✦ '+partYear+' · '+tr('part'),l2=tr('partSub')(GAP,gap0);
+  ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1b,tx,ly);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1b,tx,ly);
+  ctx.font=chartFont(13,true,500);spaced(ctx,'0.02em');ctx.strokeText(l2,tx,ly+19);ctx.fillStyle=rgba(CREAM,0.68);ctx.fillText(l2,tx,ly+19);
+  spaced(ctx,'0px');ctx.textAlign='left';ctx.globalAlpha=1;
 }
-function onePath(upto,alpha){
-  if(alpha<=0)return;var iA=0,iB=Math.min(upto,partIdx);if(iB<=iA+6)return;
-  var off=mobile?9:12,k,env=[];
-  for(k=iA;k<=iB;k+=Math.max(1,Math.round((iB-iA)/60))){var hi=-Infinity;for(j=0;j<NS;j++)if(ships[j].v[k]>hi)hi=ships[j].v[k];env.push([xs(YRS[k]),ys(hi)-off]);}
-  if(env.length<2)return;
-  ctx.globalAlpha=alpha;ctx.strokeStyle=rgba(CREAM,0.45);ctx.lineWidth=0.9;ctx.lineJoin='round';
-  ctx.beginPath();ctx.moveTo(env[0][0],env[0][1]+5);ctx.lineTo(env[0][0],env[0][1]);for(k=1;k<env.length;k++)ctx.lineTo(env[k][0],env[k][1]);
-  ctx.lineTo(env[env.length-1][0],env[env.length-1][1]+5);ctx.stroke();
-  var mi=(env.length*(mobile?0.3:0.6))|0,mx=env[mi][0],my=env[mi][1];
-  ctx.font=smallFont;ctx.textAlign='center';ctx.textBaseline='bottom';
-  ctx.strokeStyle=rgba(SEA2,0.9);ctx.lineWidth=3;ctx.strokeText(tr('onePath'),mx,my-6);ctx.fillStyle=rgba(CREAM,0.85);ctx.fillText(tr('onePath'),mx,my-6);
-  ctx.globalAlpha=1;
-}
-/* name plates just past each head */
+/* name plates just past each head, in the italic hand of a chart */
 function headLabels(heads,alpha,lit){
   if(alpha<=0)return;
-  var gap=mobile?17:20,ord=heads.map(function(h,k){return {k:k,y:h[1],x:h[0]};}).sort(function(a,b){return a.y-b.y;});
+  var gap=mobile?16:19,ord=heads.map(function(h,k){return {k:k,y:h[1],x:h[0]};}).sort(function(a,b){return a.y-b.y;});
   var top=yT+2,bot=yB-2,k,prev=-1e9;
   for(k=0;k<ord.length;k++){ord[k].ly=Math.max(ord[k].y,prev+gap,top);prev=ord[k].ly;}
   prev=1e9;for(k=ord.length-1;k>=0;k--){ord[k].ly=Math.min(ord[k].ly,prev-gap,bot);prev=ord[k].ly;}
-  ctx.textBaseline='middle';ctx.textAlign='left';var fs=12;
-  ctx.font='600 '+fs+'px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';ctx.lineJoin='round';
-  for(k=0;k<ord.length;k++){var o=ord[k],lx=o.x+(mobile?9:12),nm=(mobile?TINY:SHORT)[LANG][ships[o.k].name]||ships[o.k].name;
+  ctx.textBaseline='middle';ctx.textAlign='left';var fs=mobile?13:14;
+  ctx.font=chartFont(fs,true,600);spaced(ctx,'0.06em');ctx.lineJoin='round';
+  for(k=0;k<ord.length;k++){var o=ord[k],lx=o.x+(mobile?10:14),nm=((mobile?TINY:SHORT)[LANG][ships[o.k].name]||ships[o.k].name).toUpperCase();
     var a=alpha*(lit<0||lit===o.k?1:0.42);ctx.globalAlpha=a;
     var tw=ctx.measureText(nm).width;
-    if(lx+tw+4>W-4){lx=o.x-tw-(mobile?9:12);ctx.textAlign='left';}
+    if(lx+tw+4>W-4){lx=o.x-tw-(mobile?9:12);}
     if(Math.abs(o.ly-o.y)>2.5){ctx.strokeStyle=rgba(CREAM,0.32);ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(o.x+3,o.y);ctx.lineTo(lx-2,o.ly);ctx.stroke();}
-    ctx.fillStyle=rgba(SEA2,0.72);ctx.fillRect(lx-3,o.ly-fs*0.80,tw+6,fs*1.60);
-    ctx.strokeStyle=rgba(SEA2,0.88);ctx.lineWidth=3.2;ctx.strokeText(nm,lx,o.ly);
+    ctx.fillStyle=rgba(SEA2,0.7);ctx.fillRect(lx-3,o.ly-fs*0.62,tw+6,fs*1.25);
+    ctx.strokeStyle=rgba(SEA2,0.88);ctx.lineWidth=3;ctx.strokeText(nm,lx,o.ly);
     ctx.fillStyle=lit===o.k?FOAM:CREAM;ctx.fillText(nm,lx,o.ly);}
-  ctx.globalAlpha=1;
+  spaced(ctx,'0px');ctx.globalAlpha=1;
 }
 
-/* ---------- past the last reading: no road, only wakes ----------
-   Ink that will not hold: three filaments per region that thin and
-   come apart. Nothing out here is labelled, measured or bounded. */
-var FUT=[],futLayer=null,futDone=false;
+/* ---------- past the last reading: open water ----------
+   For every region, several ghost wakes that disagree. Each one is a
+   kind of course — climb, sink, waver, drift, wild — with its own
+   curvature and its own swell; every region gets at least one that
+   climbs hard and one that sinks hard, so nobody's future is settled.
+   The fan around each course widens with distance and the ink frays
+   into gaps. Nothing here is a number. */
+var FUT=[],NB=5,NF=4,STEPS=60;
+function shuffleBy(arr,seed){var a=arr.slice(),k,r,t;for(k=a.length-1;k>0;k--){r=Math.floor(hash(seed*7.3+k*3.1)*(k+1));t=a[k];a[k]=a[r];a[r]=t;}return a;}
 function buildFuture(){
-  FUT=[];
-  for(var jj=0;jj<NS;jj++){var v=ships[jj].v,iA=Math.max(0,N-31),yEnd=ys(v[N-1]);
-    var trend=(yEnd-ys(v[iA]))/Math.max(1,N-1-iA),vol=0,c=0;
-    for(var k=iA+1;k<N;k++){var a=v[k-1];if(a>0){vol+=Math.abs(v[k]/a-1);c++;}}vol=c?vol/c:0.02;
-    var br=[],base=(yB-yT)*(0.16+Math.min(0.30,vol*7));
-    for(var b=0;b<3;b++)br.push({dir:[-1,0.14,1][b]*(0.55+hash(jj*13+b*7)*1.05),amp:base*(0.62+hash(jj*23+b*5)*0.86),pw:1.7+hash(jj*7+b*17)*0.95,sd:jj*29+b*11+3});
-    FUT.push({trend:trend,br:br,y0:yEnd});}
+  FUT=[];NB=mobile?4:5;NF=mobile?3:4;STEPS=mobile?32:64;
+  var pool=['osc','drift','wild','up2','down2'];
+  for(var jj=0;jj<NS;jj++){var v=ships[jj].v,y0=ys(v[N-1]);
+    var iA=Math.max(0,N-31),trend=(y0-ys(v[iA]))/Math.max(1,N-1-iA);         /* px per year, recent */
+    var up=Math.max(8,y0-(yT+8)),down=Math.max(8,(yB-8)-y0),room=Math.min(up,down);
+    var kinds=['up','down'].concat(shuffleBy(pool,jj+1).slice(0,NB-2));
+    kinds=shuffleBy(kinds,jj*3+11);
+    var br=[];
+    for(var b=0;b<NB;b++){var s=jj*31+b*17,h=function(q){return hash(s*1.7+q*13.9+0.5);},K=kinds[b],dy=0,pw=1,amp=0,fr=1;
+      if(K==='up'){dy=-up*(0.55+0.42*h(1));pw=1.05+0.9*h(2);amp=room*0.06*h(3);fr=1+h(4);}
+      else if(K==='up2'){dy=-up*(0.22+0.3*h(1));pw=1.5+1.1*h(2);amp=room*0.10*h(3);fr=1+1.5*h(4);}
+      else if(K==='down'){dy=down*(0.5+0.45*h(1));pw=1.0+1.0*h(2);amp=room*0.06*h(3);fr=1+h(4);}
+      else if(K==='down2'){dy=down*(0.2+0.3*h(1));pw=1.5+1.1*h(2);amp=room*0.10*h(3);fr=1+1.5*h(4);}
+      else if(K==='osc'){dy=(h(1)-0.5)*room*0.5;pw=1;amp=room*(0.28+0.34*h(2));fr=1.6+2.6*h(3);}
+      else if(K==='drift'){dy=Math.max(-up*0.32,Math.min(down*0.32,trend*18*(0.5+h(1))));pw=1;amp=room*0.08;fr=1+h(3);}
+      else{dy=(h(1)<0.5?-up:down)*(0.3+0.5*h(2));pw=1.15+h(5);amp=room*(0.22+0.3*h(3));fr=3+3*h(4);}
+      br.push({dy:dy,pw:pw,amp:amp,fr:fr,ph:h(6)*6.28,sd:s+3,spread:(mobile?15:26)*(0.7+0.6*h(7)),drop:0.55+0.4*h(8),sh:0.2+0.8*h(9)});}
+    FUT.push({y0:y0,br:br});}
 }
-function futureY(jj,b,u){var f=FUT[jj],B=f.br[b];var y=f.y0+f.trend*u*14+B.dir*B.amp*Math.pow(u,B.pw)+fbm(u*4.4+B.sd,B.sd)*Math.pow(u,1.8)*30;var lo=yT+5,hi=yB-4;return y<lo?lo:(y>hi?hi:y);}
-function drawFuture(g,only){
-  var span=xFut-xData;if(span<24)return;var STEPS=mobile?30:60;g.lineCap='round';g.lineJoin='round';
-  for(var jj=0;jj<NS;jj++){if(only!=null&&only!==jj)continue;
-    var c0=lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,N-1));
-    for(var b=0;b<3;b++){for(var bandK=0;bandK<5;bandK++){var uA=bandK/5,uB=(bandK+1)/5,um=(uA+uB)/2,any=false;
-        g.globalAlpha=0.8*Math.pow(1-um,0.78);g.strokeStyle=rgbaArr(lerp3(c0,RGB.ICE,Math.pow(um,0.72)),0.86);g.lineWidth=(mobile?1.1:1.5)*(1-um*0.7);g.beginPath();
-        for(var k=Math.floor(uA*STEPS);k<Math.ceil(uB*STEPS)&&k<STEPS;k++){var u0=k/STEPS,u1=(k+1)/STEPS;
-          if(hash(jj*97+b*31+k*3.7)>1-Math.pow(u0,1.45)*0.96)continue;
-          g.moveTo(xData+u0*span,futureY(jj,b,u0));g.lineTo(xData+u1*span,futureY(jj,b,u1));any=true;}
-        if(any)g.stroke();}
-      var nb=mobile?8:16;g.globalAlpha=0.26;g.fillStyle=rgbaArr(lerp3(c0,RGB.ICE,0.5),1);g.beginPath();
-      for(var q=0;q<nb;q++){var u=0.2+0.78*hash(jj*17+b*53+q*7.3),fx=xData+u*span+fbm(q*1.7+jj,b+2)*10,fy=futureY(jj,b,u)+fbm(q*2.3+b,jj+5)*16,fr=0.5+1.6*hash(q*2.9+b*3);
-        g.moveTo(fx+fr,fy);g.arc(fx,fy,fr,0,6.2832);}
-      g.fill();}}
-  g.globalAlpha=1;
-}
-function future(alpha){
-  if(alpha<=0)return;
-  if(!futLayer)futLayer=document.createElement('canvas');
-  if(futLayer.width!==canvas.width||futLayer.height!==canvas.height){futLayer.width=canvas.width;futLayer.height=canvas.height;futDone=false;}
-  if(!futDone){var g=futLayer.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,futLayer.width,futLayer.height);g.setTransform(dpr,0,0,dpr,0,0);drawFuture(g);
-    /* the quiet word */
-    if(!mobile){g.font=smallFont;g.textAlign='right';g.textBaseline='middle';g.lineJoin='round';g.strokeStyle=rgba(SEA2,0.9);g.lineWidth=3;
-      g.strokeText(tr('open1'),xFut-6,yT+1);g.strokeText(tr('open2'),xFut-6,yT+16);
-      g.fillStyle=rgba(CREAM,0.6);g.fillText(tr('open1'),xFut-6,yT+1);g.fillText(tr('open2'),xFut-6,yT+16);}
-    futDone=true;}
-  ctx.globalAlpha=alpha;ctx.drawImage(futLayer,0,0,W,H);ctx.globalAlpha=1;
+function futureY(jj,b,u,t){var f=FUT[jj],B=f.br[b];
+  var y=f.y0+B.dy*Math.pow(u,B.pw)+B.amp*Math.sin(u*B.fr*Math.PI+B.ph+t*0.33)*u+fbm(u*3.4+B.sd+t*0.05,B.sd)*Math.pow(u,1.6)*(mobile?12:20);
+  var lo=yT+4,hi=yB-4;return y<lo?lo:(y>hi?hi:y);}
+function drawFuture(alpha,lit,t){
+  var span=xFut-xData;if(span<24)return;ctx.lineCap='round';ctx.lineJoin='round';
+  var fade=ctx.createLinearGradient(xData,0,xFut,0);
+  for(var jj=0;jj<NS;jj++){var c0=inkRGB(jj,N-1),dimmed=lit>=0&&lit!==jj,A=Math.min(1,alpha*(dimmed?0.22:1)*(mobile?1.3:1));
+    var cMid=lerp3(c0,RGB.ICE,0.45);
+    for(var b=0;b<NB;b++){var B=FUT[jj].br[b],k,u,y;
+      /* the fan: a soft wash between the outer filaments, gone by the horizon */
+      var fg=ctx.createLinearGradient(xData,0,xFut,0);fg.addColorStop(0,rgbaArr(cMid,0.13*A));fg.addColorStop(0.5,rgbaArr(cMid,0.045*A));fg.addColorStop(1,rgbaArr(cMid,0));
+      ctx.fillStyle=fg;ctx.beginPath();
+      for(k=0;k<=STEPS;k++){u=k/STEPS;y=futureY(jj,b,u,t);var sp=2+B.spread*Math.pow(u,1.5);if(k===0)ctx.moveTo(xData,y);else ctx.lineTo(xData+u*span,y-sp);}
+      for(k=STEPS;k>=0;k--){u=k/STEPS;y=futureY(jj,b,u,t);ctx.lineTo(xData+u*span,y+2+B.spread*Math.pow(u,1.5));}
+      ctx.closePath();ctx.fill();
+      /* the filaments, fraying */
+      for(var f=0;f<NF;f++){var off=(NF===1?0:(f/(NF-1))*2-1)*(0.85+0.3*hash(jj*9+b*5+f*2.3)),central=Math.abs(off)<0.4;
+        for(var bandK=0;bandK<5;bandK++){var uA=bandK/5,uB=(bandK+1)/5,um=(uA+uB)/2,any=false;
+          ctx.lineWidth=(mobile?1.2:1.9)*(central?1:0.7)*(1-um*0.5);
+          ctx.globalAlpha=A*(central?0.95:0.55)*Math.pow(1-um,0.85);ctx.strokeStyle=rgbaArr(lerp3(c0,RGB.ICE,Math.pow(um,1.1)),0.92);ctx.beginPath();
+          for(k=Math.floor(uA*STEPS);k<Math.ceil(uB*STEPS)&&k<STEPS;k++){var u0=k/STEPS,u1=(k+1)/STEPS;
+            if(hash(jj*97+b*31+f*7+k*3.7)<Math.pow(u0,1.5)*B.drop)continue;
+            var s0=2+B.spread*Math.pow(u0,1.5),s1=2+B.spread*Math.pow(u1,1.5);
+            ctx.moveTo(xData+u0*span,futureY(jj,b,u0,t)+off*s0+fbm(u0*9+f*3+B.sd,B.sd+f)*s0*0.35);
+            ctx.lineTo(xData+u1*span,futureY(jj,b,u1,t)+off*s1+fbm(u1*9+f*3+B.sd,B.sd+f)*s1*0.35);any=true;}
+          if(any)ctx.stroke();}}
+      /* spray */
+      var nb=mobile?5:10;ctx.globalAlpha=0.28*A;ctx.fillStyle=rgbaArr(lerp3(c0,RGB.ICE,0.5),1);ctx.beginPath();
+      for(var q=0;q<nb;q++){var uq=0.25+0.74*hash(jj*17+b*53+q*7.3),fx=xData+uq*span+fbm(q*1.7+jj+t*0.03,b+2)*10,fy=futureY(jj,b,uq,t)+fbm(q*2.3+b,jj+5)*(B.spread*0.9),fr2=0.5+1.4*hash(q*2.9+b*3);
+        ctx.moveTo(fx+fr2,fy);ctx.arc(fx,fy,fr2,0,6.2832);}
+      ctx.fill();}}
+  ctx.globalAlpha=1;
 }
 
 /* ---------- the map cartouche ---------- */
@@ -597,7 +666,6 @@ function buildMap(){
     g.selectAll('path').data(groups[ri]).enter().append('path').attr('class','c').attr('d',mapPath)
       .append('title').text(function(){return NAMES[LANG][ships[jj].name];});
     regionG[jj]=g.node();});
-  /* map events: a region under the cursor lights its wake, a click pins it */
   var gs=mapSvg.querySelectorAll('g.r');
   for(var k=0;k<gs.length;k++)(function(g){var jj=+g.getAttribute('data-j');
     g.addEventListener('pointerenter',function(e){if(e.pointerType==='touch')return;setHover(jj,idx,'map',e.clientX,e.clientY);});
@@ -608,30 +676,36 @@ function buildMap(){
 }
 var mapIdx=-1,mapLit=-2;
 function paintMap(k,lit){
-  if(k!==mapIdx){for(var jj=0;jj<NS;jj++)if(regionG[jj])regionG[jj].setAttribute('fill',inkCol(jj,k,0.92));mapIdx=k;mapYear.textContent=YRS[k];}
+  if(k!==mapIdx){for(var jj=0;jj<NS;jj++)if(regionG[jj])regionG[jj].setAttribute('fill',inkCol(jj,k,0.92));mapIdx=k;}
   if(lit!==mapLit){for(jj=0;jj<NS;jj++)if(regionG[jj]){regionG[jj].classList.toggle('lit',lit===jj);regionG[jj].classList.toggle('dim',lit>=0&&lit!==jj);}mapLit=lit;}
 }
 
 /* ---------- render ---------- */
 var introAlpha=1;
-function render(){
+function render(now){
+  var t=now/1000;
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
   ctx.fillStyle=SEA;ctx.fillRect(0,0,W,H);
   ctx.globalAlpha=introAlpha;ctx.drawImage(chartLayer,0,0,W,H);ctx.globalAlpha=1;
+  if(!RM)water(t);
   var lit=pinned>=0?pinned:hover;
   band(idx,0.9);
   partRule(idx>=partIdx?clamp((idx-partIdx)/12):0);
-  onePath(idx,idx>8?clamp((idx-8)/30):0);
-  if(lit>=0){ctx.fillStyle='rgba(9,27,44,0.55)';ctx.fillRect(0,0,W,H);}
+  if(lit>=0){ctx.fillStyle='rgba(9,27,44,0.5)';ctx.fillRect(0,0,W,H);}
+  var futA=(idx===N-1&&endedAt!==null)?clamp((now-endedAt)/900):0;
+  if(futA>0)drawFuture(futA,lit,RM?0:t);
   var heads=new Array(NS);
   for(j=NS-1;j>=0;j--){var boost=lit===j;
     var wk=wake(j,idx,lit>=0&&!boost?0.30:1,boost);
     if(!wk){heads[j]=[xL,yB];continue;}heads[j]=wk.head;
     shipGlyph(wk.head[0],wk.head[1],wk.ang,(mobile?4.2:5.4)*(boost?1.2:1),lit>=0&&!boost?0.35:1,inkCol(j,idx,1));}
+  /* value marks, tucked just inside the last reading, skipped where a head sits */
+  ctx.font=chartFont(12,true,600);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=rgba(CREAM,0.5);
+  for(var vv=20000;vv<vMax;vv+=20000){var vy=ys(vv),free=true;for(j=0;j<NS;j++)if(Math.abs(heads[j][1]-vy)<11&&heads[j][0]>xData-40){free=false;break;}
+    if(free)ctx.fillText('$'+(vv/1000)+'k',xData-6,vy-1);}
   /* the clock: a vertical cursor at the year on the slider */
   var cx=xs(YRS[idx]);
-  ctx.strokeStyle=rgba(CREAM,idx===N-1?0.18:0.42);ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(cx,yT-8);ctx.lineTo(cx,yB+4);ctx.stroke();ctx.setLineDash([]);
-  if(idx===N-1&&endedAt!==null)future(clamp((performance.now()-endedAt)/900));
+  ctx.strokeStyle=rgba(CREAM,idx===N-1?0.0:0.42);ctx.lineWidth=1;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(cx,yT-8);ctx.lineTo(cx,yB+4);ctx.stroke();ctx.setLineDash([]);
   headLabels(heads,idx>6?1:0,lit);
   /* the reading under the cursor, when it points at a wake in some other year */
   if(lit>=0&&hoverSrc==='chart'&&hoverIdx!==idx){var px=xs(YRS[hoverIdx]),py=ys(ships[lit].v[hoverIdx]);
@@ -643,7 +717,7 @@ function render(){
 }
 
 /* ---------- clock ---------- */
-var last=null,raf=null,frames=0,fpsT=0,t0=null;
+var last=null,raf=null,frames=0,fpsT=0,t0=null,lastDraw=0;
 function setIdx(k,fromUser){
   k=Math.round(k);if(k<0)k=0;if(k>N-1)k=N-1;
   if(k!==idx){idx=k;needDraw=true;}
@@ -653,23 +727,27 @@ function setIdx(k,fromUser){
   if(fromUser&&pinned>=0&&hoverSrc!=='chart')refreshTip();
   syncState();
 }
-function syncState(){window.__state={idx:Math.round(idx),year:YRS[Math.round(idx)],playing:playing,pinned:pinned,hover:hover};}
+function syncState(){window.__state={idx:Math.round(idx),year:YRS[Math.round(idx)],playing:playing,pinned:pinned,hover:hover,live:!RM};}
 /* for the QA harness: where a wake sits on screen in a given year */
 window.__wakeXY=function(jj,year){var r=canvas.getBoundingClientRect(),k=YRS.indexOf(year);if(k<0)return null;return [r.left+xs(year),r.top+ys(ships[jj].v[k])];};
+window.__layout=function(){return {W:W,H:H,xL:xL,xData:xData,xFut:xFut,yT:yT,yB:yB,map:MB,rose:[roseX,roseY,roseR]};};
 function setPlaying(p){playing=p;playBtn.classList.toggle('playing',p);syncPlayLabel();last=null;if(p)loop();syncState();}
 function syncPlayLabel(){playBtn.setAttribute('aria-label',playing?tr('pause'):tr('play'));playBtn.title=playing?tr('pause'):tr('play');}
 function frame(now){
   raf=null;
   if(t0===null){t0=now;fpsT=now;}
-  frames++;if(now-fpsT>=500){window.__fps=Math.round(frames*1000/(now-fpsT));frames=0;fpsT=now;}
   if(playing){if(last===null)last=now;var dt=Math.min(80,now-last);last=now;
     var k=idx+dt*RATE;if(k>=N-1){setIdx(N-1);setPlaying(false);}else{idx=k;setIdx(k);needDraw=true;idx=k;}
     /* keep the fractional clock so the pace is even, but draw the integer year */
   }
   introAlpha=clamp((now-t0)/600);if(introAlpha<1)needDraw=true;
-  if(idx===N-1&&endedAt!==null&&now-endedAt<1000)needDraw=true;
-  if(needDraw){var keep=idx;idx=Math.round(idx);render();idx=keep;needDraw=false;}
-  if(playing||introAlpha<1||(idx===N-1&&endedAt!==null&&now-endedAt<1000))raf=requestAnimationFrame(frame);
+  var settling=idx===N-1&&endedAt!==null&&now-endedAt<1000;
+  if(settling)needDraw=true;
+  /* the live state: after the intro the water and the ghost wakes keep moving, at ~30 fps */
+  var live=!RM&&!document.hidden;
+  if(needDraw||(live&&now-lastDraw>=32)){var keep=idx;idx=Math.round(idx);render(now);idx=keep;needDraw=false;lastDraw=now;frames++;}
+  if(now-fpsT>=500){window.__fps=Math.round(frames*1000/(now-fpsT));frames=0;fpsT=now;}
+  if(playing||introAlpha<1||settling||live)raf=requestAnimationFrame(frame);
 }
 function loop(){if(!raf)raf=requestAnimationFrame(frame);}
 function redraw(){needDraw=true;loop();}
@@ -685,16 +763,15 @@ function togglePin(jj,k,src,cxp,cyp){
   else{pinned=jj;hover=jj;hoverIdx=k;hoverSrc=src;tipX=cxp;tipY=cyp;showTip(jj,k,cxp,cyp,true);}
   updatePinLabel();syncState();redraw();
 }
-function updatePinLabel(){pinLbl.textContent=pinned>=0?('◆ '+NAMES[LANG][ships[pinned].name]):'';}
+function updatePinLabel(){pinLbl.textContent=pinned>=0?('✦ '+NAMES[LANG][ships[pinned].name]):'';document.getElementById('cap').classList.toggle('has-pin',pinned>=0);}
 var tipX=0,tipY=0;
 function showTip(jj,k,cxp,cyp,isPinned){
   var s=ships[jj];tipX=cxp;tipY=cyp;
-  tip.innerHTML='<b>'+NAMES[LANG][s.name]+'</b><span class="yr">'+YRS[k]+'</span><br>'+fmtMoney(s.v[k])+' '+tr('perPerson')+' · '+tr('gdp')+
+  tip.innerHTML='<b>'+NAMES[LANG][s.name]+'<span class="yr">'+YRS[k]+'</span></b>'+fmtMoney(s.v[k])+' '+tr('perPerson')+' · '+tr('gdp')+
     (s.e?'<br><span class="v2">'+(Math.round(s.e[k]*10)/10).toString().replace('.',LANG==='es'?',':'.')+' '+tr('ghg')+'</span>':'')+
     (isPinned?'<span class="pinned">'+tr(COARSE?'pinnedTap':'pinned')+'</span>':'');
   tip.classList.add('show');
   var r=scene.getBoundingClientRect(),bw=tip.offsetWidth,bh=tip.offsetHeight,x,y;
-  /* anchored to the pointer; on touch it rises well above the finger */
   x=cxp+16;y=cyp-bh-(COARSE?44:14);
   if(x+bw>r.right-6)x=cxp-bw-16;if(x<r.left+4)x=r.left+4;
   if(y<r.top+4)y=Math.min(cyp+(COARSE?40:18),r.bottom-bh-4);
@@ -722,7 +799,7 @@ canvas.addEventListener('pointermove',function(e){
     /* a sideways drag scrubs the years and interrupts the intro */
     dragging=true;canvas.classList.add('grab');if(playing)setPlaying(false);
     setIdx(xToIdx(p[0]),true);if(hover>=0&&hoverSrc==='chart')hideTip(),hover=-1;
-    return;}
+    loop();return;}
   if(e.pointerType==='touch')return;
   var jj=pick(p[0],p[1]);
   if(jj>=0)setHover(jj,hoverIdx,'chart',e.clientX,e.clientY);
@@ -732,7 +809,6 @@ function endPointer(e){
   if(!down)return;var p=toLocal(e),wasDrag=dragging;down=null;dragging=false;canvas.classList.remove('grab');
   try{canvas.releasePointerCapture(e.pointerId);}catch(_){}
   if(wasDrag){if(pinned>=0)refreshTip();return;}
-  /* a plain click or tap */
   var jj=pick(p[0],p[1]);
   if(jj>=0)togglePin(jj,hoverIdx,'chart',e.clientX,e.clientY);
   else if(pinned>=0){pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();}
@@ -742,7 +818,6 @@ canvas.addEventListener('pointerup',endPointer);
 canvas.addEventListener('pointercancel',function(){down=null;dragging=false;canvas.classList.remove('grab');});
 canvas.addEventListener('pointerleave',function(e){if(e.pointerType==='touch'||down)return;if(hover>=0&&hoverSrc==='chart'&&pinned<0)setHover(-1);});
 document.addEventListener('pointerdown',function(e){
-  /* a tap outside the scene releases a pinned reading (phones) */
   if(pinned<0)return;if(e.target.closest&&e.target.closest('#scene,button,a,input'))return;
   pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();
 });
@@ -759,9 +834,10 @@ document.addEventListener('keydown',function(e){
   if(e.key===' '){e.preventDefault();playBtn.click();return;}
   if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();if(playing)setPlaying(false);
     setIdx(idx+(e.key==='ArrowRight'?1:-1)*(e.shiftKey?10:1),true);loop();return;}
+  if(e.key==='Home'||e.key==='End'){e.preventDefault();if(playing)setPlaying(false);setIdx(e.key==='Home'?0:N-1,true);loop();return;}
   if(e.key==='Escape'&&pinned>=0){pinned=-1;hover=-1;hoverSrc='';hideTip();updatePinLabel();redraw();}
 });
-document.addEventListener('visibilitychange',function(){if(document.hidden)last=null;else if(playing)loop();});
+document.addEventListener('visibilitychange',function(){if(document.hidden)last=null;else{last=null;loop();}});
 var rt=null;
 window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){layout();mapIdx=-1;redraw();},80);});
 
@@ -773,7 +849,10 @@ function start(){
   setIdx(0);setPlaying(true);
 }
 (function boot(){var done=false;function go(){if(done)return;done=true;start();}
-  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);setTimeout(go,700);}else go();})();
+  if(document.fonts&&document.fonts.load){
+    Promise.all([document.fonts.load('italic 600 14px "Cormorant Garamond"'),document.fonts.load('600 14px "Cormorant Garamond"'),document.fonts.load('500 12px "Geist Mono"')]).then(go,go);
+    setTimeout(go,1200);}
+  else go();})();
 })();
 </script>
 </body>

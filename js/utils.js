@@ -437,6 +437,19 @@ export function formatPercent(value) {
     return sign + (value * 100).toFixed(1) + '%';
 }
 
+// Width of a run of text in CSS px, for margins that have to fit a label
+// (end labels on trend and ranking are clipped on phones otherwise).
+let _measureCtx = null;
+export function textWidthPx(text, font) {
+    if (!_measureCtx) {
+        const c = document.createElement('canvas');
+        _measureCtx = c.getContext('2d');
+    }
+    if (!_measureCtx) return String(text).length * 6;
+    _measureCtx.font = font || "600 10px Geist, system-ui, sans-serif";
+    return _measureCtx.measureText(String(text)).width;
+}
+
 export function formatRank(rank, total) {
     return `${rank}/${total}`;
 }
@@ -462,25 +475,34 @@ export function formatRank(rank, total) {
 
 // Nine anchors per family, pale to dark. Do not hand-edit a single value:
 // the ladder was fitted, and the tables in CLAUDE.md are measured against it.
+//
+// V7 (2026-09-08): the author asked for the interior palettes to follow the
+// cover, so every family now starts at the cover's cream (#EFE4CC) and ends in
+// the cover's sea (#0E2C48) or in the oxblood the cover's vermilion (#C4502F)
+// darkens into; the mid-tones are the cover's ice, line2 and vermilion. Built
+// in CIELCh with an even L* ladder (C:/Work/scratch/ephemeral/visores_2026-09/
+// portadas_v7/estelas/ramps_v7.py) and measured on the real data: 16.9 tones
+// separable on average (15.4 deutan, 14.9 protan), never fewer than 10, against
+// 20.3/17.7/17.5 for the 2026-09-06 ramps. Fewer steps, one family: that trade
+// was asked for. No tone comes within dE76 13 of no-data or 9.6 of zero.
 export const MAP_RAMPS = {
-    // emissions - cream, gold, vermilion, oxblood ink
-    ember:  ['#f6e8b6', '#f3ce74', '#f6af41', '#fa8928', '#f1693a', '#d94d42', '#b5363b', '#80252d', '#49171c'],
-    // economy - cream, sage, teal, petrol, sea. Sweeps the blue-yellow axis so
-    // it survives dichromacy (a green-only sweep does not).
-    depth:  ['#feeaaa', '#e3db8f', '#c5cc78', '#93c190', '#6bb1a0', '#1e9eaf', '#007da0', '#005174', '#00213a'],
-    // land use and biodiversity - cream, olive, moss, forest ink
-    moss:   ['#f5e9b3', '#ddd788', '#bec661', '#95b453', '#6ca149', '#428b45', '#0b7540', '#005036', '#002e24'],
+    // emissions - cream, ochre, vermilion, oxblood ink (the cover's wake ink)
+    ember:  ['#f6e6cc', '#f1d0a3', '#eeb67e', '#eb945e', '#db6f48', '#c24b3a', '#9b3933', '#6f2828', '#42181b'],
+    // economy (default) - cream, ice, line2, sea
+    depth:  ['#f4e7cd', '#c4dcca', '#a5cbce', '#83b5c4', '#659db6', '#4685a3', '#276687', '#044667', '#00263e'],
+    // land use and biodiversity - cream, petrol slate, deep sea
+    moss:   ['#f2e7cd', '#c9dbc1', '#a2ccc2', '#7bb4af', '#519ca0', '#33828b', '#106877', '#004858', '#002a38'],
     // human development - cream, gold, bronze, umber
-    bronze: ['#f9e8af', '#f2d27f', '#ecba57', '#e39f43', '#d68336', '#c16830', '#a14d2a', '#723422', '#451f17'],
-    // material flows - ice, cyan, sea blue, indigo ink
-    ink:    ['#a0e3e3', '#76d9e7', '#41cef0', '#00b6e8', '#009dd9', '#0081c7', '#2263b1', '#2a3f78', '#1e2044'],
-    // population - pale rose, violet, indigo ink
-    ameth:  ['#f7c8db', '#f6b6d8', '#f2a4d8', '#dc8ed3', '#c07acf', '#9868c4', '#6b59b6', '#383e81', '#112249'],
-    // signed: sink (ink blue) - zero - source (ember). The centre is a stone,
-    // not the paper: a country sitting on zero has to be visible against the sea
-    // (dE76 10.6 from #f2ede0, worst of the three visions), and #efe9dc was 3.
-    tide:   ['#1e2044', '#2a3f78', '#2263b1', '#0081c7', '#009dd9', '#00b6e8', '#41cef0', '#76d9e7', '#e4d5bd',
-             '#f3ce74', '#f6af41', '#fa8928', '#f1693a', '#d94d42', '#b5363b', '#80252d', '#49171c']
+    bronze: ['#f5e7c6', '#eed39d', '#e9bd76', '#dba35f', '#cd8a4a', '#b6703f', '#9f5834', '#6f3b26', '#422117'],
+    // material flows - ice, steel blue, indigo ink
+    ink:    ['#cbe8ed', '#a6d5e3', '#81c2dc', '#5ea9ce', '#3991c1', '#2875a7', '#185b8e', '#123e6a', '#082347'],
+    // population - cream, mauve, violet, night (the one hue the cover lacks;
+    // kept bluish so it stays clear of the no-data grey under dichromacy)
+    ameth:  ['#fbe0d4', '#f3c9ca', '#e1b5cb', '#c99abe', '#ad82b4', '#8a6da2', '#655990', '#3c3d69', '#162244'],
+    // signed: sink (sea) - zero - source (vermilion). The centre is a stone,
+    // not the paper: a country sitting on zero has to be visible against the sea.
+    tide:   ['#00263e', '#044667', '#276687', '#4685a3', '#659db6', '#83b5c4', '#a5cbce', '#c4dcca', '#e4d5bd',
+             '#f1d0a3', '#eeb67e', '#eb945e', '#db6f48', '#c24b3a', '#9b3933', '#6f2828', '#42181b']
 };
 
 // Two categories that are not values. Both were measured against every tone of

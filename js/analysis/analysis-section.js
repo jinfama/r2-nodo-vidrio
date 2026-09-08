@@ -2,15 +2,15 @@
 // ANALYSIS SECTION - Controller for Intensities, Drivers, Correlations, Recessions
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import { COMPARISON_PALETTE, getColorForIndex } from '../utils.js?v=20260906m';
-import { initIntensities, updateIntensities, destroyIntensities } from './intensities.js?v=20260906m';
-import { initDrivers, updateDrivers, destroyDrivers } from './drivers.js?v=20260906m';
-import { initCorrelations, updateCorrelations, destroyCorrelations } from './correlations.js?v=20260906m';
-import { initRecessions, updateRecessions, destroyRecessions } from './recessions.js?v=20260906m';
-import { initTapioView, updateTapioView, destroyTapioView } from '../explore/tapio-view.js?v=20260906m';
-import Timeline from '../components/timeline.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import { COMPARISON_PALETTE, getColorForIndex } from '../utils.js?v=20260908c';
+import { initIntensities, updateIntensities, destroyIntensities } from './intensities.js?v=20260908c';
+import { initDrivers, updateDrivers, destroyDrivers } from './drivers.js?v=20260908c';
+import { initCorrelations, updateCorrelations, destroyCorrelations } from './correlations.js?v=20260908c';
+import { initRecessions, updateRecessions, destroyRecessions } from './recessions.js?v=20260908c';
+import { initTapioView, updateTapioView, destroyTapioView } from '../explore/tapio-view.js?v=20260908c';
+import Timeline from '../components/timeline.js?v=20260908c';
 
 // Country groups for preset buttons
 const PRESETS = {

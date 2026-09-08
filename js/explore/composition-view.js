@@ -4,8 +4,8 @@
 // Supports viewing for world, single country, or sum of selected countries
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
 import {
     COLORS,
     labelInkOn,
@@ -22,7 +22,7 @@ import {
     CROPS_COMPONENT_KEYS,
     CROPS_COMPONENT_LABELS,
     CROPS_COMPONENT_COLORS
-} from '../utils.js?v=20260906m';
+} from '../utils.js?v=20260908c';
 
 let container = null;
 let resizeObserver = null;

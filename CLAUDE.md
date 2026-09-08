@@ -10,7 +10,7 @@ Destino: organización GitHub pendiente de definir.
 ## Estructura
 ```
 cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido)
-index.html              ← Portada V6 (2026-09-08): estelas regionales interactivas; CTA → explorer.html
+index.html              ← Portada V7 (2026-09-08): carta náutica de las ocho estelas + mar abierta; CTA → explorer.html
 explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08 (sin iframe ni audio)
 portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py)
 js/                     ← Módulos ES6 (23 archivos, 380K)
@@ -38,10 +38,28 @@ build/build.ps1         ← NO DESPLEGAR. Script PowerShell que genera cascorro_
 ## Stack
 - HTML/CSS/JS vanilla (módulos ES6)
 - D3.js v7 + TopoJSON + Globe.gl (CDN)
-- Fuentes: Bricolage Grotesque + Geist + Geist Mono (una sola hoja de Google Fonts)
+- Fuentes: Bricolage Grotesque + Geist + Geist Mono (una sola hoja de Google Fonts); la portada añade a esa misma hoja Cormorant Garamond (la «mano de carta» del lienzo: nombres de región, años, sondas, Machado). El explorador no la usa.
 - Build: PowerShell script que empaqueta todo en un HTML autocontenido
 
-## Paleta y tipografía del cromo (2026-09-06)
+## Paleta y tipografía del cromo (2026-09-06; cromo oscuro desde la V7, 2026-09-08)
+
+> **Regla V7: la paleta del interior es la de la portada.** Cabecera, pie, barras de tiempo
+> y la barra inferior del móvil van en el mar de la portada (`--sea2` de fondo, `--line` de
+> filete, tipo `--cream`/`--cream2`/`--muted`, marcas activas en `--verm`); los lienzos de
+> gráfica siguen en papel (`--bg`). Medido sobre `--sea2`: cream 13,0:1 · cream2 10,4:1 ·
+> muted 6,2:1 · ice 6,3:1 · verm 3,5:1 (solo marcas, nunca texto). Los botones primarios
+> (`.ctrl-btn.active`, `.map-compare-btn`, `.method-indicator-btn.active`) son mar sobre crema
+> (11,3:1). Los subrayados activos de pestañas y sub-pestañas son `--verm`. Si un componente
+> nuevo necesita fondo oscuro, usa estos tokens y no inventes otro azul.
+
+**Portada V7 (`index.html`, 2026-09-08).** Carta náutica: la escena ocupa toda la columna
+derecha; el mundo trazado (1750–2024) termina al 60 % del ancho y el 40 % restante es «mar
+abierta — nada trazado», donde cada región se abre en cuatro o cinco estelas fantasma que
+divergen (sube fuerte / cae fuerte / oscila / deriva / salvaje) con abanicos que se ensanchan
+y trazos que se deshilachan: figura retórica, no proyección; sin cifras ni eje. Mapa en
+cartucho pequeño arriba a la izquierda (GEI por persona en el año). Retícula, rumbos desde la
+rosa, sondas, orla con bandas, oleaje vivo (~30 fps en reposo). Título «Growth's Wake» /
+«Estelas del crecimiento» (toggle ES, clave `growthWake.language`).
 
 **Portada que sigue el visor:**
 `07_temp/portadas_visores_2026-09/estelas/V5_wakes-in-the-sea.html`
@@ -163,7 +181,29 @@ codificación de dato. La decisión es del autor:
 | rótulo de eje de trend y pie de ranking | 1.78:1 → **6.9:1** | corregido: `COLORS.uiText` |
 | `--cl` en su sitio real (`.bn-label`, `.rp-country-iso`, `.profile-unit`) | 4.2–4.4:1 → **4.7–5.2:1** | corregido: `#4a6d85` → `#456580` |
 
-## Escalas de color de los mapas (rehechas 2026-09-06)
+## Escalas de color de los mapas (rehechas 2026-09-06; familia de la portada desde 2026-09-08)
+
+> **V7 (2026-09-08).** Juan pidió que «las paletas interiores se adapten a la portada». Las
+> siete familias se reconstruyeron en CIELCh con el mismo método (escalera de L\* uniforme,
+> `C:/Work/scratch/ephemeral/visores_2026-09/portadas_v7/estelas/ramps_v7.py`) pero ancladas
+> a los tokens de la portada: todas arrancan en `--cream` y terminan en `--sea`/`--sea2` o en
+> el sangre de toro en que oscurece `--verm`; los medios son `--ice`, `--line2` y `--verm`.
+> `ember` (emisiones) = crema → ocre → bermellón → sangre de toro; `depth` (economía, por
+> defecto) = crema → hielo → line2 → mar; `moss` (suelo, RLI) = crema → pizarra petróleo → mar
+> profundo; `bronze` (IDH) = crema → oro → bronce → tierra; `ink` (materiales) = hielo → azul
+> acero → índigo; `ameth` (población) = crema → malva → violeta → noche (el único matiz que
+> la portada no tiene; se mantuvo azulado para que bajo dicromacia no se acerque al gris de
+> «sin dato»); `tide` = mitad de `depth` invertida + piedra `#e4d5bd` + `ember`.
+> **Medido sobre los datos reales** (49 indicadores × 5 años, mismo contador de tonos
+> mutuamente separables ΔE76 ≥ 5): media **16,9** tonos con visión normal, **15,4** deutan,
+> **14,9** protan (antes 20,3 / 17,7 / 17,5); mínimo 10,0 (`hdi_ng`, peor visión). Es un
+> coste consciente: la familia de la portada es más corta perceptualmente y pierde 3–4
+> escalones; el brief pedía ≥ 6 y todas pasan de 10. «Sin dato» `#8f8a7e` queda a ΔE76 ≥ 13,4
+> de todas las rampas y «cero» `#c6baa2` a ≥ 9,6 (256 muestras, tres visiones); la trama de
+> «sin dato» no cambia. **La regla anterior «ningún tono a menos de ΔE 10 de `--verm`» ya no
+> rige para `ember` y `bronze`**: pasan por el bermellón porque eso es lo que se pidió. Las
+> tablas que siguen son las de 2026-09-06 y describen las rampas anteriores; valen como
+> método, no como cifras vigentes.
 
 **Por qué.** Encargo del autor: «las paletas de los mapas ajustar a portadas y colores más
 agradables en general». Objetivo doble: (a) que el mapa **discrimine** —dos valores
@@ -367,7 +407,8 @@ declarado.
 
 ## Pendiente
 - [ ] **`cascorro_explorer.html` está desfasado** (de 2026-05-14; `explorer.html` es de
-      2026-09). No lleva ni el pase móvil de septiembre ni la paleta de la portada V5.
+      2026-09). No lleva ni el pase móvil de septiembre, ni la paleta de la portada V5, ni el
+      cromo oscuro y las rampas de la portada V7 (2026-09-08).
       Regenerarlo con `build/build.ps1` cuando toque distribuir la versión offline.
 - [ ] Crear `.gitignore` (excluir `build/`, `cascorro_explorer.html`, `{}`)
 - [ ] Borrar archivo `{}` (vacío, sin propósito)

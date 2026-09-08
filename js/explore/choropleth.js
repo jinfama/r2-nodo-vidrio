@@ -3,9 +3,9 @@
 // Continuous fill + continuous legend, no country selection in map view
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260906m';
-import State from '../state.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import DataLoader from '../data-loader.js?v=20260908c';
+import State from '../state.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     INDICATOR_LABELS,
     getMapColor,
@@ -17,7 +17,7 @@ import {
     formatEmissions,
     formatGDP,
     resolveIndicatorValue
-} from '../utils.js?v=20260906m';
+} from '../utils.js?v=20260908c';
 
 // ---- Module state ----
 let svg1, g1, projection1, pathGen1, countryPaths1;

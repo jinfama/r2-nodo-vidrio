@@ -4,12 +4,12 @@
 // View 2: Decomposition — Kaya identity (Pop × Income × Intensity)
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     COLORS, getColorForIndex, formatEmissions, shortName
-} from '../utils.js?v=20260906m';
+} from '../utils.js?v=20260908c';
 
 const GREEN_COLOR = '#2a9d8f';     // green growth (decoupling)
 const RECESS_COLOR = '#495057';    // recessive (dark gray)

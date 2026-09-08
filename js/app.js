@@ -2,15 +2,15 @@
 // APP.JS - Application entry point, routing, initialization
 // ============================================================================
 
-import State from './state.js?v=20260906m';
-import DataLoader from './data-loader.js?v=20260906m';
-import { initGlobeSection } from './globe/globe-section.js?v=20260906m';
-import { initExploreSection } from './explore/explore-section.js?v=20260906m';
-import { initAnalysisSection } from './analysis/analysis-section.js?v=20260906m';
-import { toggleFullscreen, exportCSV } from './components/export.js?v=20260906m';
-import CountryPicker from './components/country-picker.js?v=20260906m';
-import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260906m';
-import { INDICATOR_LABELS, INDICATOR_UNITS } from './utils.js?v=20260906m';
+import State from './state.js?v=20260908c';
+import DataLoader from './data-loader.js?v=20260908c';
+import { initGlobeSection } from './globe/globe-section.js?v=20260908c';
+import { initExploreSection } from './explore/explore-section.js?v=20260908c';
+import { initAnalysisSection } from './analysis/analysis-section.js?v=20260908c';
+import { toggleFullscreen, exportCSV } from './components/export.js?v=20260908c';
+import CountryPicker from './components/country-picker.js?v=20260908c';
+import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260908c';
+import { INDICATOR_LABELS, INDICATOR_UNITS } from './utils.js?v=20260908c';
 
 // ---- TAB NAVIGATION ---- //
 const sections = {
@@ -419,7 +419,7 @@ function wireIntroEnter(overlayEl) {
         appEl.style.display = 'flex';
         // Retry globe init now that app is visible
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260908c').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => overlayEl.remove(), 600);
     });
@@ -778,7 +778,7 @@ async function init() {
         if (introOverlay) introOverlay.classList.add('hidden');
         appEl.style.display = 'flex';
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260906m').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260908c').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => introOverlay && introOverlay.remove(), 600);
 

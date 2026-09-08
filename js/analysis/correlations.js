@@ -2,13 +2,12 @@
 // CORRELATIONS - Gapminder-style bubble scatter plot
 // ============================================================================
 
-import State from '../state.js?v=20260906m';
-import DataLoader from '../data-loader.js?v=20260906m';
-import Tooltip from '../components/tooltip.js?v=20260906m';
+import State from '../state.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260908c';
+import Tooltip from '../components/tooltip.js?v=20260908c';
 import {
     COLORS, COMPARISON_PALETTE, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, inkFor, formatValue, resolveIndicatorValue
-} from '../utils.js?v=20260906m';
+    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260908c';
 
 const MARGIN = { top: 24, right: 118, bottom: 52, left: 72 };
 
@@ -385,11 +384,11 @@ function renderBubbles(bubbles) {
 
     svg.select('.x-axis')
         .transition().duration(300)
-        .call(d3.axisBottom(xScale).ticks(6, xTickFormat));
+        .call(d3.axisBottom(xScale).ticks(chartW < 420 ? 3 : 6, xTickFormat));   // a phone: 100 and 200 touched
 
     svg.select('.y-axis')
         .transition().duration(300)
-        .call(d3.axisLeft(yScale).ticks(6, yTickFormat));
+        .call(d3.axisLeft(yScale).ticks(chartH < 300 ? 4 : 6, yTickFormat));
 
     const xLabel = (INDICATOR_LABELS[xInd] || xInd) + (useLogX ? ' [log]' : '');
     const yLabel = (INDICATOR_LABELS[yInd] || yInd) + (useLogY ? ' [log]' : '');
@@ -461,12 +460,31 @@ function renderBubbles(bubbles) {
         .attr('pointer-events', 'none')
         .attr('dy', -2);
 
+    // Where two selected bubbles sit close (Germany, the UK and Spain in
+    // 2024) their names printed on top of each other. Labels that overlap in
+    // both axes are pushed apart vertically, nearest-first, before they move.
+    const placed = labelData.map(d => ({
+        d,
+        x: Math.max(30, Math.min(chartW - 30, xScale(d.x))),
+        y: Math.max(14, yScale(d.y) - sizeScale(d.size) - 4),
+        w: textWidthPx(d.name, '600 10px Geist, system-ui, sans-serif') + 6
+    })).sort((a, b) => a.y - b.y);
+    for (let pass = 0; pass < 3; pass++) {
+        for (let i = 0; i < placed.length; i++) {
+            for (let j = i + 1; j < placed.length; j++) {
+                const a = placed[i], b = placed[j];
+                if (Math.abs(a.x - b.x) < (a.w + b.w) / 2 && b.y - a.y < 13) b.y = a.y + 13;
+            }
+        }
+    }
+    const pos = new Map(placed.map(p => [p.d.iso3, p]));
+
     enterLabels.merge(labels)
         .text(d => d.name)
         .attr('fill', d => inkFor(d.color))
         .transition().duration(dur)
-        .attr('x', d => Math.max(30, Math.min(chartW - 30, xScale(d.x))))
-        .attr('y', d => Math.max(14, yScale(d.y) - sizeScale(d.size) - 4))
+        .attr('x', d => pos.get(d.iso3).x)
+        .attr('y', d => pos.get(d.iso3).y)
         .attr('text-anchor', 'middle');
 
     // Region legend (outside chart area, in right margin)
