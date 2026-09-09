@@ -2,14 +2,14 @@
 // GLOBE RENDERER - Globe.gl wrapper for multi-indicator visualization
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260908c';
-import State from '../state.js?v=20260908c';
-import Tooltip from '../components/tooltip.js?v=20260908c';
+import DataLoader from '../data-loader.js?v=20260909a';
+import State from '../state.js?v=20260909a';
+import Tooltip from '../components/tooltip.js?v=20260909a';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatRank, formatRatio,
     getMapColor, MAP_NO_DATA, buildMapLegendHTML, resolveIndicatorValue,
     INDICATOR_LABELS, INDICATOR_UNITS
-} from '../utils.js?v=20260908c';
+} from '../utils.js?v=20260909a';
 
 let globe = null;
 let currentColorFn = null;
@@ -40,7 +40,13 @@ export function initGlobe(containerId) {
         const features = DataLoader.getGeoFeatures();
 
         globe = Globe()(container)
-            .globeImageUrl('https://cdn.jsdelivr.net/npm/three-globe/example/img/earth-water.png')
+            // V7b (2026-09-09): no sphere texture. The old earth-water.png is a
+            // land/water mask that paints LAND BLACK; the 110m polygons are
+            // coarser than its coastline, so wherever the mask's land ran past
+            // a polygon's edge a black splinter showed along the coast (and,
+            // at a grazing angle, inside Greenland). A plain sphere in the
+            // paper's white does not have a coastline to disagree with.
+            .globeImageUrl(null)
             // the same paper the explorer is printed on (--bg), so the globe
             // is not a white hole in the middle of a cream page
             .backgroundColor('#f2ede0')
@@ -52,11 +58,16 @@ export function initGlobe(containerId) {
             .polygonsData(features)
             .polygonGeoJsonGeometry(d => d.geometry)
             .polygonCapColor(d => getCountryColor(d.properties.iso3))
-            .polygonSideColor(() => 'rgba(14,44,72,0.10)')
+            // V7b: no walls either. The caps sit just off the sphere (0.006
+            // clears z-fighting with the sphere, also on a software renderer)
+            // on fully transparent sides; the dark sea-at-10 % sides of V7 read
+            // as a second set of splinters. Hover and click are raycast against
+            // the caps, so neither changes.
+            .polygonSideColor(() => 'rgba(0,0,0,0)')
             .polygonStrokeColor(() => '#6f6a5f')
             .polygonAltitude(d => {
                 const iso3 = d.properties.iso3;
-                return State.get('selectedCountries').includes(iso3) ? 0.02 : 0.005;
+                return State.get('selectedCountries').includes(iso3) ? 0.015 : 0.006;
             })
             .polygonLabel(() => '')
             .onPolygonClick((polygon) => {
@@ -88,6 +99,10 @@ export function initGlobe(containerId) {
                 }
             })
             .polygonsTransitionDuration(200);
+
+        // The bare sphere: the paper's own white, lit by globe.gl's lights so it
+        // still reads as a ball. (Color.set needs no THREE global.)
+        try { globe.globeMaterial().color.set('#f8f5ee'); } catch (e) { /* older globe.gl */ }
 
         // Initial camera position (altitude controls visual size of globe)
         globe.pointOfView({ lat: 20, lng: 10, altitude: 2.8 });
@@ -245,7 +260,7 @@ export function updateGlobeColors() {
     globe.polygonCapColor(d => getCountryColor(d.properties.iso3));
     globe.polygonAltitude(d => {
         const iso3 = d.properties.iso3;
-        return State.get('selectedCountries').includes(iso3) ? 0.02 : 0.005;
+        return State.get('selectedCountries').includes(iso3) ? 0.015 : 0.006;
     });
 }
 

@@ -485,9 +485,24 @@ export function formatRank(rank, total) {
 // separable on average (15.4 deutan, 14.9 protan), never fewer than 10, against
 // 20.3/17.7/17.5 for the 2026-09-06 ramps. Fewer steps, one family: that trade
 // was asked for. No tone comes within dE76 13 of no-data or 9.6 of zero.
+//
+// V7b (2026-09-09): ember rebuilt. The V7 ember spent its upper three anchors
+// on three dark reds, and on co2ff_pc's [0.02, 50] domain the whole of Europe
+// (3.5-9.2 t) fell into 9 % of the bar: one dark red, and Africa two oranges.
+// Now eight anchors at NON-uniform stops (MAP_RAMP_STOPS.ember) that, on the
+// new co2ff_pc domain [0.1, 50], sit at 0.1 / 0.5 / 1 / 3 / 6 / 10 / 20 / 50 t:
+// sand, light ochre, ochre, amber, vermilion (the cover's), oxblood, plum, ink.
+// Measured (C:/Work/scratch/ephemeral/visores_2026-09/portadas_v7/estelas/
+// retoque/ramp_ember_v7b.py, CIEDE2000 >= 6 on the countries actually painted):
+// adjacent anchors dE00 >= 7.3 in normal, deutan and protan vision; co2ff_pc
+// 2024 9 -> 14 tones (deutan 9 -> 13, protan 9 -> 13), 1950 12 -> 13; Europe
+// 2024 2 -> 4 tones, France vs Germany dE00 5.7 -> 13.3; the other 17 emission
+// indicators all improve (mean 11.9 / 10.6 / 10.8 -> 14.2 / 12.5 / 12.5).
+// No-data stays >= dE00 15.6 from the ramp, zero >= 9.2. The other families
+// were not touched.
 export const MAP_RAMPS = {
-    // emissions - cream, ochre, vermilion, oxblood ink (the cover's wake ink)
-    ember:  ['#f6e6cc', '#f1d0a3', '#eeb67e', '#eb945e', '#db6f48', '#c24b3a', '#9b3933', '#6f2828', '#42181b'],
+    // emissions - sand, ochre, amber, vermilion, oxblood, plum, ink (V7b)
+    ember:  ['#f7ead0', '#ecc68d', '#e7a660', '#df773f', '#c64d38', '#9d363a', '#692b3e', '#1d2039'],
     // economy (default) - cream, ice, line2, sea
     depth:  ['#f4e7cd', '#c4dcca', '#a5cbce', '#83b5c4', '#659db6', '#4685a3', '#276687', '#044667', '#00263e'],
     // land use and biodiversity - cream, petrol slate, deep sea
@@ -502,7 +517,16 @@ export const MAP_RAMPS = {
     // signed: sink (sea) - zero - source (vermilion). The centre is a stone,
     // not the paper: a country sitting on zero has to be visible against the sea.
     tide:   ['#00263e', '#044667', '#276687', '#4685a3', '#659db6', '#83b5c4', '#a5cbce', '#c4dcca', '#e4d5bd',
-             '#f1d0a3', '#eeb67e', '#eb945e', '#db6f48', '#c24b3a', '#9b3933', '#6f2828', '#42181b']
+             '#efce9c', '#eab677', '#e59755', '#df7840', '#c64e38', '#8f333b', '#59293d', '#1d2039']
+};
+
+// Where each anchor of a ramp sits on t (0-1). Only ember is non-uniform - its
+// stops are the log positions of 0.1 / 0.5 / 1 / 3 / 6 / 10 / 20 / 50 t on the
+// co2ff_pc domain, so the decade where Europe, China and North America live
+// gets three steps instead of one. Every other family is read at even steps.
+// A family listed here must have exactly as many stops as anchors.
+export const MAP_RAMP_STOPS = {
+    ember: [0.0000, 0.2590, 0.3705, 0.5473, 0.6588, 0.7410, 0.8526, 1.0000]
 };
 
 // Two categories that are not values. Both were measured against every tone of
@@ -574,11 +598,13 @@ function rampLab(family) {
     if (_rampCache[family]) return _rampCache[family];
     const labs = MAP_RAMPS[family].map(_hexToLab);
     const n = labs.length - 1;
+    const stops = MAP_RAMP_STOPS[family] || labs.map((_, i) => i / n);
     const fn = (t) => {
         t = t <= 0 ? 0 : t >= 1 ? 1 : t;
-        const x = t * n;
-        const i = Math.min(Math.floor(x), n - 1);
-        const u = x - i;
+        let i = 0;
+        while (i < n - 1 && t > stops[i + 1]) i++;
+        const span = stops[i + 1] - stops[i];
+        const u = span > 0 ? Math.max(0, Math.min(1, (t - stops[i]) / span)) : 0;
         const A = labs[i], B = labs[i + 1];
         return _labToHex(A[0] + (B[0] - A[0]) * u, A[1] + (B[1] - A[1]) * u, A[2] + (B[2] - A[2]) * u);
     };
@@ -601,7 +627,7 @@ export const MAP_DOMAINS = {
     ghg:            ['log', 0.1, 5000],
     ghg_pc:         ['log', 0.5, 50],
     co2ff:          ['log', 0.1, 2000],
-    co2ff_pc:       ['log', 0.02, 50],
+    co2ff_pc:       ['log', 0.1, 50],      // V7b: floor at 0.1 t, where the ember anchors start
     ch4:            ['log', 0.1, 1000],
     ch4_pc:         ['log', 0.2, 20],
     n2o:            ['log', 0.1, 200],

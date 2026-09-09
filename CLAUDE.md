@@ -10,8 +10,8 @@ Destino: organización GitHub pendiente de definir.
 ## Estructura
 ```
 cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido)
-index.html              ← Portada V7 (2026-09-08): carta náutica de las ocho estelas + mar abierta; CTA → explorer.html
-explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08 (sin iframe ni audio)
+index.html              ← Portada V7 (2026-09-08; futuros V7b 2026-09-09): carta náutica de las ocho estelas + mar abierta; CTA → explorer.html
+explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08 (sin iframe ni audio); cromo claro V7b (2026-09-09); caché `?v=20260909a`
 portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py)
 js/                     ← Módulos ES6 (23 archivos, 380K)
 ├── app.js              ← Controlador principal, routing por hash
@@ -41,22 +41,38 @@ build/build.ps1         ← NO DESPLEGAR. Script PowerShell que genera cascorro_
 - Fuentes: Bricolage Grotesque + Geist + Geist Mono (una sola hoja de Google Fonts); la portada añade a esa misma hoja Cormorant Garamond (la «mano de carta» del lienzo: nombres de región, años, sondas, Machado). El explorador no la usa.
 - Build: PowerShell script que empaqueta todo en un HTML autocontenido
 
-## Paleta y tipografía del cromo (2026-09-06; cromo oscuro desde la V7, 2026-09-08)
+## Paleta y tipografía del cromo (2026-09-06; cromo claro de nuevo desde la V7b, 2026-09-09)
 
-> **Regla V7: la paleta del interior es la de la portada.** Cabecera, pie, barras de tiempo
-> y la barra inferior del móvil van en el mar de la portada (`--sea2` de fondo, `--line` de
-> filete, tipo `--cream`/`--cream2`/`--muted`, marcas activas en `--verm`); los lienzos de
-> gráfica siguen en papel (`--bg`). Medido sobre `--sea2`: cream 13,0:1 · cream2 10,4:1 ·
-> muted 6,2:1 · ice 6,3:1 · verm 3,5:1 (solo marcas, nunca texto). Los botones primarios
-> (`.ctrl-btn.active`, `.map-compare-btn`, `.method-indicator-btn.active`) son mar sobre crema
-> (11,3:1). Los subrayados activos de pestañas y sub-pestañas son `--verm`. Si un componente
-> nuevo necesita fondo oscuro, usa estos tokens y no inventes otro azul.
+> **Regla V7b (2026-09-09): el interior toma acentos y tipografía de la portada, pero el
+> chrome es claro por decisión de Juan del 9 de septiembre** («el color oscuro en Growth's
+> Wake no me gustaba»; el azulejo de la Plaza de Cascorro no se veía sobre el mar). Cabecera,
+> pestañas, barras de tiempo, pie, pantalla de carga y barra inferior del móvil van en papel
+> (`--bg` de fondo, `--cb` de filete, tipo `--cd` 12,2:1 y `--cl` 5,2:1 medidos en vivo sobre
+> el fondo plano); las marcas activas (subrayado de pestañas y sub-pestañas, filete del
+> indicador activo del perfil, borde superior de la barra móvil) son `--verm`; los botones
+> primarios (`.tl-play`, `.ctrl-btn.active`, `.map-compare-btn`, `.method-indicator-btn.active`,
+> `.lang-btn.active`) son mar sobre crema (11,3:1); `.tl-speed` es un botón perfilado (`--cb`,
+> tinta `--cg`, 6,9:1). **Selector de idioma:** tres botones sueltos (EN · ES · 中文) sin
+> recuadro exterior; el activo es una pastilla de mar con aire interior (26 px de alto, 9 px
+> de lado; 6 px en móvil), nunca una caja alrededor a la que la pastilla toque el borde. En
+> móvil el título del logo cede con elipsis (`.app-logo>div`) para que los tres botones y los
+> dos iconos quepan en ES. El mar oscuro solo sobrevive en el raíl de Explore
+> (`.explore-sidebar`, desde 2026-09-06) y en el tooltip. La V7 oscura del 8 de septiembre
+> queda en `..._backup/explorer.html.20260909-v7b.bak` y `..._backup/js.20260909-v7b/`.
 
-**Portada V7 (`index.html`, 2026-09-08).** Carta náutica: la escena ocupa toda la columna
-derecha; el mundo trazado (1750–2024) termina al 60 % del ancho y el 40 % restante es «mar
-abierta — nada trazado», donde cada región se abre en cuatro o cinco estelas fantasma que
-divergen (sube fuerte / cae fuerte / oscila / deriva / salvaje) con abanicos que se ensanchan
-y trazos que se deshilachan: figura retórica, no proyección; sin cifras ni eje. Mapa en
+**Portada V7 (`index.html`, 2026-09-08; futuros V7b, 2026-09-09).** Carta náutica: la escena
+ocupa toda la columna derecha; el mundo trazado (1750–2024) termina al 60 % del ancho y el
+40 % restante es «mar abierta — nada trazado», donde cada región se abre en **dos o tres**
+estelas fantasma (tres en escritorio, dos en móvil), finas y tenues: una sube, una baja, una
+oscila. En las regiones ricas (`RICH` = Norteamérica y Europa Occidental) la que sube
+**continúa el crecimiento** (66–80 % del aire hasta el borde; `vMax` lleva un 20 % de aire
+para que la estela más alta tenga agua encima); las tres más pobres abren más hacia arriba
+(despegue tardío, `pw` 1,5–2) y su «baja» se lee como quedarse. Abanicos estrechos (11 px),
+un hilo central al 62 % y otro lateral al 28 %, deshilachado hacia el horizonte: figura
+retórica, no proyección; sin cifras ni eje. Juan pidió el 9 de septiembre «más sutiles, dos o
+tres por región, con patrones distintos, y que a Norteamérica no se le quite la opción de
+seguir creciendo»; la V7 (cuatro o cinco por región, `NB=5/NF=4`) está en
+`..._backup/index.html.20260909-v7b.bak`. Mapa en
 cartucho pequeño arriba a la izquierda (GEI por persona en el año). Retícula, rumbos desde la
 rosa, sondas, orla con bandas, oleaje vivo (~30 fps en reposo). Título «Growth's Wake» /
 «Estelas del crecimiento» (toggle ES, clave `growthWake.language`).
@@ -181,7 +197,36 @@ codificación de dato. La decisión es del autor:
 | rótulo de eje de trend y pie de ranking | 1.78:1 → **6.9:1** | corregido: `COLORS.uiText` |
 | `--cl` en su sitio real (`.bn-label`, `.rp-country-iso`, `.profile-unit`) | 4.2–4.4:1 → **4.7–5.2:1** | corregido: `#4a6d85` → `#456580` |
 
-## Escalas de color de los mapas (rehechas 2026-09-06; familia de la portada desde 2026-09-08)
+## Escalas de color de los mapas (rehechas 2026-09-06; familia de la portada desde 2026-09-08; `ember` V7b 2026-09-09)
+
+> **V7b (2026-09-09): `ember` rehecha; el globo sin textura ni paredes.** Juan vio que en CO₂
+> fósil per cápita «Europa entera cae en el mismo rojo oscuro y África en dos naranjas». Causa:
+> la `ember` V7 gastaba sus tres anclas altas en tres rojos oscuros y el dominio `[0,02, 50]`
+> metía a toda Europa (3,5–9,2 t en 2024) en el 9 % de la barra. Ahora `ember` tiene **ocho
+> anclas en paradas NO uniformes** (`MAP_RAMP_STOPS.ember` en `utils.js`; `rampLab()` las lee
+> y las demás familias siguen a pasos iguales) que, sobre el dominio nuevo de `co2ff_pc`
+> `[0,1, 50]`, caen en 0,1 · 0,5 · 1 · 3 · 6 · 10 · 20 · 50 t: arena `#f7ead0` → ocre claro
+> `#ecc68d` → ocre `#e7a660` → ámbar `#df773f` → bermellón `#c64d38` (el de la portada) →
+> sangre de toro `#9d363a` → ciruela `#692b3e` → tinta `#1d2039`. La mitad «fuente» de `tide`
+> se remuestreó de la nueva `ember` (t 0,2→1). Medido con **CIEDE2000 ≥ 6** sobre los países
+> realmente pintados (`C:/Work/scratch/ephemeral/visores_2026-09/portadas_v7/estelas/retoque/ramp_ember_v7b.py`):
+> anclas vecinas ΔE00 ≥ 7,3 en normal, deutan y protan; `co2ff_pc` 2024 **9 → 14** tonos
+> (deutan 9 → 13, protan 9 → 13), 1950 12 → 13; Europa 2024 2 → 4 tonos, Francia frente a
+> Alemania ΔE00 5,7 → 13,3, EE. UU. frente a Alemania 6,7 → 13,8; los otros 17 indicadores de
+> emisiones mejoran todos (media 11,9 / 10,6 / 10,8 → 14,2 / 12,5 / 12,5). «Sin dato» queda a
+> ΔE00 ≥ 15,6 de la rampa y «cero» a ≥ 9,2; ambos siguen con trama/beige. Coste consciente:
+> con el suelo en 0,1 t, en 1950 44 países de 154 (y 59 en 1900) caen en la arena de «≤ 0,1»
+> — eran emisores casi nulos; si alguna vez importa, el suelo es una línea en `MAP_DOMAINS`.
+> Las otras seis familias no se tocaron.
+>
+> **Globo.** Las «astillas negras» de las costas no eran las paredes de los polígonos sino la
+> textura `earth-water.png` de la esfera, una máscara que pinta la tierra de NEGRO y cuya
+> costa es más fina que la de los polígonos 110m: asomaba por cada borde (y por dentro de
+> Groenlandia). `globe-renderer.js` ya no carga textura (`globeImageUrl(null)`, material de
+> la esfera `#f8f5ee`), los lados son transparentes y los casquetes van a altitud 0,006
+> (0,015 el seleccionado). Hover y clic no cambian (raycast sobre los casquetes; comprobado
+> con tooltip). La leyenda del globo lleva 20 px de aire al panel de perfil, a la línea de
+> tiempo y a la esfera, y 12/14/11 px de relleno; la del mapa, 20/20.
 
 > **V7 (2026-09-08).** Juan pidió que «las paletas interiores se adapten a la portada». Las
 > siete familias se reconstruyeron en CIELCh con el mismo método (escalera de L\* uniforme,
@@ -408,7 +453,7 @@ declarado.
 ## Pendiente
 - [ ] **`cascorro_explorer.html` está desfasado** (de 2026-05-14; `explorer.html` es de
       2026-09). No lleva ni el pase móvil de septiembre, ni la paleta de la portada V5, ni el
-      cromo oscuro y las rampas de la portada V7 (2026-09-08).
+      cromo claro V7b, la `ember` de ocho anclas ni el globo sin textura (2026-09-09).
       Regenerarlo con `build/build.ps1` cuando toque distribuir la versión offline.
 - [ ] Crear `.gitignore` (excluir `build/`, `cascorro_explorer.html`, `{}`)
 - [ ] Borrar archivo `{}` (vacío, sin propósito)

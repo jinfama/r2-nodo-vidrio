@@ -73,48 +73,55 @@
 body{font-family:var(--ff);background:var(--bg);color:var(--cd);font-size:13px;line-height:1.5;overflow:hidden;height:100vh;height:100dvh}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 /* Header */
-/* V7 (2026-09-08): the chrome is the cover's — header, footer, time bars and
-   the phone's bottom nav are painted in the cover's sea with its cream type and
-   its vermilion marks; the charts stay on paper. Measured on the sea2 ground:
-   cream 13.0:1, cream2 10.4:1, muted 6.2:1, ice 6.3:1, verm 3.5:1 (marks only,
-   never text). */
-.app-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;min-height:52px;border-bottom:1px solid var(--line);background:var(--sea2);color:var(--cream);z-index:100}
-.app-logo{font-family:var(--ff-display);font-size:17px;font-weight:600;font-variation-settings:"opsz" 24,"wdth" 92;color:var(--cream);letter-spacing:-.024em;white-space:nowrap}
-.app-logo span{font-family:var(--ff);color:var(--muted);font-weight:400;margin-left:7px;font-size:11.5px;letter-spacing:-.005em}
+/* V7b (2026-09-09): the chrome is LIGHT again, by the author's decision after
+   seeing the dark V7 ("el color oscuro en Growth's Wake no me gustaba"; the
+   Cascorro tile did not read on the sea). The interior keeps the cover's type,
+   its vermilion for active marks and its sea for text and primary buttons, on
+   the chart paper: header, tabs, time bars, footer and the phone's bottom nav
+   are --bg ground, --cb hairline, --cd / --cl type (12.2:1 / 4.7:1). */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;min-height:52px;border-bottom:1px solid var(--cb);background:var(--bg);color:var(--cd);z-index:100}
+.app-logo{font-family:var(--ff-display);font-size:17px;font-weight:600;font-variation-settings:"opsz" 24,"wdth" 92;color:var(--cd);letter-spacing:-.024em;white-space:nowrap}
+.app-logo span{font-family:var(--ff);color:var(--cl);font-weight:400;margin-left:7px;font-size:11.5px;letter-spacing:-.005em}
 .tab-nav{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .tab-nav::-webkit-scrollbar{display:none}
-.tab-btn{padding:0 17px;height:52px;border:none;background:transparent;color:var(--muted);font-size:11px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);text-transform:uppercase;letter-spacing:.085em;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
-.tab-btn:hover{color:var(--cream2)}
-.tab-btn.active{color:var(--cream);border-bottom-color:var(--verm)}
+.tab-btn{padding:0 17px;height:52px;border:none;background:transparent;color:var(--cl);font-size:11px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);text-transform:uppercase;letter-spacing:.085em;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.tab-btn:hover{color:var(--cg)}
+.tab-btn.active{color:var(--cd);border-bottom-color:var(--verm)}
 .header-actions{display:flex;gap:6px}
-.header-btn{width:36px;height:36px;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center}
-.header-btn:hover{color:var(--cream);background:rgba(239,228,204,.10)}
+.header-btn{width:36px;height:36px;border:none;background:transparent;color:var(--cl);cursor:pointer;transition:var(--tr);display:flex;align-items:center;justify-content:center}
+.header-btn:hover{color:var(--verm-ink);background:var(--bgl)}
 .header-btn svg{width:18px;height:18px}
-.lang-switcher{display:flex;align-items:center;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.08);backdrop-filter:blur(8px)}
-.header-actions .lang-switcher{border-color:var(--line2);background:transparent;backdrop-filter:none}
-.lang-btn{height:28px;min-width:34px;padding:0 8px;border:none;border-right:1px solid rgba(239,228,204,.22);background:transparent;color:var(--cream2);font-size:10px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;letter-spacing:.06em;transition:var(--tr)}
-.lang-btn:last-child{border-right:none}
-.header-actions .lang-btn{color:var(--muted);border-right-color:var(--line2)}
-.lang-btn:hover,.lang-btn.active{background:rgba(239,228,204,.18);color:var(--cream)}
-.header-actions .lang-btn:hover{background:rgba(239,228,204,.12);color:var(--cream)}
-.header-actions .lang-btn.active{background:var(--cream);color:var(--sea)}
+/* Language (V7b): three plain buttons and no outer box — the V7 box had the
+   active pill flush against its own border. The active one is a sea tablet
+   with air inside it (26 px tall, 9 px sides); the others are bare type. */
+.lang-switcher{display:flex;align-items:center;gap:3px}
+.lang-btn{height:26px;min-width:34px;padding:0 9px;border:none;background:transparent;color:var(--cl);font-size:10px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;letter-spacing:.06em;transition:var(--tr)}
+.lang-btn:hover{background:var(--bgl);color:var(--cd)}
+.lang-btn.active{background:var(--sea);color:var(--cream)}
+.lang-btn.active:hover{background:var(--cg);color:var(--cream)}
+.lang-btn{white-space:nowrap;flex-shrink:0}
+.header-actions{flex-shrink:0}
+/* On a phone the Spanish title ("Estelas del crecimiento") pushed the language
+   buttons into two lines and the fullscreen icon off the edge: the title now
+   yields (ellipsis) and the actions never shrink. */
+@media(max-width:700px){.app-logo{min-width:0;flex:1 1 auto}.app-logo>div{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 /* Sections */
 .section-container{flex:1;position:relative;overflow:hidden}
 .section{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow:hidden}
 .section.active{display:flex}
 /* Footer */
-.app-footer{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:36px;min-height:36px;border-top:1px solid var(--line);background:var(--sea2);font-size:11px;color:var(--muted);z-index:100;gap:12px;overflow:hidden}
-.app-footer a{color:var(--cream2)}
+.app-footer{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:36px;min-height:36px;border-top:1px solid var(--cb);background:var(--bg);font-size:11px;color:var(--cl);z-index:100;gap:12px;overflow:hidden}
+.app-footer a{color:var(--cg)}
 .footer-actions{display:flex;gap:4px}
-.footer-btn{padding:4px 10px;border:none;background:transparent;color:var(--muted);font-size:9.5px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);text-transform:uppercase;letter-spacing:.085em}
-.footer-btn:hover{color:var(--cream)}
+.footer-btn{padding:4px 10px;border:none;background:transparent;color:var(--cl);font-size:9.5px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);text-transform:uppercase;letter-spacing:.085em}
+.footer-btn:hover{color:var(--verm-ink)}
 /* Loading */
-.loading-screen{position:fixed;inset:0;background:var(--sea);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s ease}
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s ease}
 .loading-screen.hidden{opacity:0;pointer-events:none;visibility:hidden;transition:opacity .4s ease,visibility 0s .4s}
-.loading-title{font-family:var(--ff-display);font-size:22px;font-weight:600;font-variation-settings:"opsz" 32,"wdth" 90;letter-spacing:-.026em;color:var(--cream);margin-bottom:8px}
-.loading-subtitle{font-size:13px;color:var(--muted);margin-bottom:30px}
-.loading-bar{width:200px;height:2px;background:var(--line2);position:relative;overflow:hidden}
-.loading-bar::after{content:'';position:absolute;left:-40%;width:40%;height:100%;background:var(--cream);animation:ls 1.2s ease-in-out infinite}
+.loading-title{font-family:var(--ff-display);font-size:22px;font-weight:600;font-variation-settings:"opsz" 32,"wdth" 90;letter-spacing:-.026em;color:var(--cd);margin-bottom:8px}
+.loading-subtitle{font-size:13px;color:var(--cl);margin-bottom:30px}
+.loading-bar{width:200px;height:2px;background:var(--cb);position:relative;overflow:hidden}
+.loading-bar::after{content:'';position:absolute;left:-40%;width:40%;height:100%;background:var(--cd);animation:ls 1.2s ease-in-out infinite}
 @keyframes ls{0%{left:-40%}100%{left:100%}}
 /* Controls */
 .ctrl-btn{padding:0 8px;height:22px;border:1px solid var(--cb);border-right-width:0;background:var(--bg);color:var(--cl);cursor:pointer;font-size:11px;font-weight:500;transition:var(--tr);text-align:center;display:flex;align-items:center;justify-content:center;font-family:var(--ff);letter-spacing:0}
@@ -171,30 +178,32 @@ body{font-family:var(--ff);background:var(--bg);color:var(--cd);font-size:13px;l
 .chip-remove{cursor:pointer;color:var(--cg);font-size:14px;line-height:1;margin-left:2px}
 .chip-remove:hover{color:var(--verm-ink)}
 .chips-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-/* Timeline: the cover's time bar — sea ground, cream button and handle */
-.timeline-bar{display:flex;align-items:center;gap:10px;padding:8px 20px;border-top:1px solid var(--line);background:var(--sea2);color:var(--cream);min-height:44px}
-.tl-play{width:32px;height:32px;border:1px solid var(--cream2);background:transparent;color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
-.tl-play:hover{background:var(--cream);border-color:var(--cream);color:var(--sea)}
+/* Timeline (V7b): paper ground; the play button is the primary, sea on cream */
+.timeline-bar{display:flex;align-items:center;gap:10px;padding:8px 20px;border-top:1px solid var(--cb);background:var(--bg);color:var(--cd);min-height:44px}
+.tl-play{width:32px;height:32px;border:1px solid var(--sea);background:var(--sea);color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
+.tl-play:hover{background:var(--cg);border-color:var(--cg);color:var(--cream)}
 .tl-play svg{width:14px;height:14px}
 .tl-track{flex:1;height:24px;position:relative;cursor:pointer;display:flex;align-items:center}
-.tl-rail{position:absolute;left:0;right:0;height:1px;background:var(--line2)}
-.tl-progress{position:absolute;left:0;height:1px;background:var(--cream)}
+.tl-rail{position:absolute;left:0;right:0;height:2px;background:var(--cb)}
+.tl-progress{position:absolute;left:0;height:2px;background:var(--cd)}
 .tl-progress{pointer-events:none}
-.tl-handle{position:absolute;width:12px;height:12px;background:var(--cream);border:1px solid var(--sea);border-radius:50%;transform:translate(-50%,0);cursor:grab;z-index:2}
+.tl-handle{position:absolute;width:12px;height:12px;background:var(--cd);border:1px solid var(--bg);border-radius:50%;transform:translate(-50%,0);cursor:grab;z-index:2}
 .tl-handle:active{cursor:grabbing}
-.tl-year{font-family:var(--ff-mono);font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--cream);min-width:46px;text-align:center;flex-shrink:0}
-.tl-speed{width:32px;height:32px;border:1px solid var(--line2);background:transparent;color:var(--cream2);font-size:10px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.tl-speed:hover{background:rgba(239,228,204,.12);color:var(--cream)}
+.tl-year{font-family:var(--ff-mono);font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--cd);min-width:46px;text-align:center;flex-shrink:0}
+.tl-speed{width:32px;height:32px;border:1px solid var(--cb);background:var(--bg);color:var(--cg);font-size:10px;font-weight:600;font-family:var(--ff-mono);cursor:pointer;transition:var(--tr);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.tl-speed:hover{background:var(--bgl);color:var(--cd)}
 .tl-speed-dropdown{color:var(--cd)}
 .tl-speed-opt:hover{background:var(--bgl)}
-.tl-range{position:absolute;left:0;height:4px;background:rgba(239,228,204,.16);pointer-events:none;top:50%;transform:translateY(-50%)}
-.tl-handle-from{background:var(--muted);opacity:.85}
+.tl-range{position:absolute;left:0;height:4px;background:rgba(14,44,72,.12);pointer-events:none;top:50%;transform:translateY(-50%)}
+.tl-handle-from{background:var(--cg);opacity:.85}
 .tl-handle-from:hover{opacity:1}
 /* Globe */
 .globe-container{flex:1;position:relative;overflow:hidden}
 #globe-mount{position:absolute;right:0;top:0;width:45%;height:calc(100% - 96px)}
 #globe-year-display{position:absolute;top:12px;right:0;width:45%;text-align:center;font-family:var(--ff-mono);font-size:28px;font-weight:600;color:rgba(14,44,72,.13);pointer-events:none;z-index:10}
-#globe-legend{position:absolute;bottom:14px;left:calc(55% + 24px);right:24px;z-index:10;min-width:0;max-width:270px}
+/* V7b: 20 px of air from the profile panel, the timeline and the sphere
+   (the sphere ends >= 28 px above the card at 1100-1440 wide, measured). */
+#globe-legend{position:absolute;bottom:20px;left:calc(55% + 20px);right:20px;z-index:10;min-width:0;max-width:270px}
 .country-profile{position:absolute;top:0;left:0;width:55%;height:100%;background:var(--bg);border-right:1px solid var(--cb);z-index:20;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .3s ease;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
 .country-profile::-webkit-scrollbar{display:none}
 .country-profile.open{transform:translateX(0)}
@@ -247,7 +256,7 @@ body{font-family:var(--ff);background:var(--bg);color:var(--cd);font-size:13px;l
    the markup and keep their faint tone. Do not darken: at 48px they would
    read as a headline and fight the map. */
 .map-year-display{position:absolute;top:6px;right:20px;font-family:var(--ff-mono);font-size:48px;font-weight:600;color:rgba(14,44,72,.11);pointer-events:none;z-index:5;line-height:1}
-.map-legend{position:absolute;bottom:16px;left:20px;z-index:5;background:rgba(242,237,224,.95);border:1px solid var(--cb);padding:8px 12px}
+.map-legend{position:absolute;bottom:20px;left:20px;z-index:5;background:rgba(242,237,224,.95);border:1px solid var(--cb);padding:12px 14px 11px}
 .map-legend-title{font-family:var(--ff-mono);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.075em;color:var(--cg);margin-bottom:6px}
 .map-selected-bar{display:flex;align-items:center;gap:8px;padding:6px 20px;border-top:1px solid var(--cb);min-height:36px}
 .map-compare-btn{padding:5px 14px;border:1px solid var(--sea);background:var(--sea);color:var(--cream);font-size:10.5px;font-weight:600;font-family:var(--ff-mono);text-transform:uppercase;letter-spacing:.075em;cursor:pointer;transition:var(--tr);margin-left:auto}
@@ -342,9 +351,9 @@ body{font-family:var(--ff);background:var(--bg);color:var(--cd);font-size:13px;l
 .intro-wake-svg{position:absolute;inset:0;width:100%;height:100%}
 .intro-wake-copy{position:relative;z-index:2;color:#24343d;width:min(1120px,calc(100vw - 56px));padding:0 28px;text-shadow:0 1px 0 rgba(255,255,255,.26)}
 .intro-lang-switcher{position:fixed;top:22px;right:24px;z-index:3}
-.intro-lang-switcher.lang-switcher{border-color:rgba(35,52,61,.22);background:rgba(244,239,224,.32);backdrop-filter:blur(8px)}
-.intro-lang-switcher .lang-btn{color:#0e2c48;border-right-color:rgba(14,44,72,.24)}
-.intro-lang-switcher .lang-btn:hover,.intro-lang-switcher .lang-btn.active{background:rgba(14,44,72,.14);color:#0e2c48}
+.intro-lang-switcher .lang-btn{color:#0e2c48}
+.intro-lang-switcher .lang-btn:hover{background:rgba(14,44,72,.10);color:#0e2c48}
+.intro-lang-switcher .lang-btn.active{background:#0e2c48;color:#efe4cc}
 .intro-wake-header{max-width:760px;margin-bottom:28px}
 .intro-wake-kicker{font-family:var(--ff-mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:#1b3346;margin-bottom:14px;opacity:0}
 .intro-wake-copy h1{font-family:var(--ff-display);font-size:80px;font-weight:620;font-variation-settings:"opsz" 96,"wdth" 88;line-height:.88;margin-bottom:0;letter-spacing:-.04em;opacity:0;color:#0e2c48}
@@ -439,7 +448,7 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
 @media(max-width:1500px) and (min-width:901px){
   .country-profile{width:58%}
   #globe-mount,#globe-year-display{width:42%}
-  #globe-legend{left:calc(58% + 18px);right:18px;max-width:250px}
+  #globe-legend{left:calc(58% + 20px);right:20px;max-width:250px}
   .profile-charts-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(145px,1fr)}
   .profile-chart-section{border-right:1px solid var(--cb)}
   .profile-chart-section:nth-child(3n){border-right:1px solid var(--cb)}
@@ -447,7 +456,7 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
 }
 @media(max-width:1100px) and (min-width:901px){
   #globe-mount{height:calc(100% - 110px)}
-  #globe-legend{bottom:12px;max-width:240px;padding:7px 10px}
+  #globe-legend{bottom:20px;max-width:240px;padding:10px 12px 9px}
   .map-legend-ticks span{font-size:8.5px}
 }
 @media(max-width:900px){.country-profile{width:100%}#globe-mount,#globe-year-display{display:none}#globe-legend{display:none}.chart-options-bar{gap:8px}.explore-sidebar{width:50px;min-width:50px}.sidebar-tile span{display:none}}
@@ -468,7 +477,7 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
   .app-header{padding:0 10px;gap:8px}
   .mobile-bottom-nav{
     display:flex;align-items:stretch;justify-content:space-around;
-    border-top:1px solid var(--line);background:var(--sea2);
+    border-top:1px solid var(--cb);background:var(--bg);
     flex-shrink:0;z-index:110;
     padding-bottom:env(safe-area-inset-bottom);
   }
@@ -565,7 +574,7 @@ textarea:focus-visible,[tabindex]:focus-visible{
   transition-duration:0s}
 /* one exception: on the dark rail the vermilion ring would sink into the
    water, so it borrows the cover's cream instead */
-.explore-sidebar button:focus-visible,.app-header button:focus-visible,.app-footer button:focus-visible,.timeline-bar button:focus-visible,.mobile-bottom-nav button:focus-visible{outline-color:var(--cream)}
+.explore-sidebar button:focus-visible{outline-color:var(--cream)}
 /* About */
 .about-heading{font-family:var(--ff-mono);font-size:10px;font-weight:600;color:var(--cg);text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid var(--cb);padding-bottom:6px;margin-bottom:16px}
 .about-story{padding:24px;background:var(--bgl);border:1px solid var(--cb);margin-bottom:32px;display:flex;gap:24px;align-items:flex-start}
@@ -676,7 +685,7 @@ For more information on data sources, methodology, and citations, see <a href="#
 <!-- APP -->
 <div id="app" style="display:none">
 <header class="app-header">
-<div class="app-logo" style="display:flex;align-items:center;gap:10px"><img src="img/cascorro.jpg" alt="Growth's Wake" style="width:32px;height:32px;object-fit:cover;flex-shrink:0;border:1px solid var(--line2)"><div data-i18n-html="logoHtml">Growth's Wake <span>Development &amp; Environment</span></div></div>
+<div class="app-logo" style="display:flex;align-items:center;gap:10px"><img src="img/cascorro.jpg" alt="Growth's Wake" style="width:32px;height:32px;object-fit:cover;flex-shrink:0;border:1px solid var(--cb)"><div data-i18n-html="logoHtml">Growth's Wake <span>Development &amp; Environment</span></div></div>
 <nav class="tab-nav">
 <button class="tab-btn active" data-section="globe" data-i18n="navProfile">Country Profile</button>
 <button class="tab-btn" data-section="explore" data-i18n="navExplore">Explore</button>
@@ -1844,6 +1853,6 @@ For more information on data sources, methodology, and citations, see <a href="#
 </div>
 </div>
 
-<script type="module" src="js/app.js?v=20260908c"></script>
+<script type="module" src="js/app.js?v=20260909a"></script>
 </body>
 </html>

@@ -2,12 +2,12 @@
 // CORRELATIONS - Gapminder-style bubble scatter plot
 // ============================================================================
 
-import State from '../state.js?v=20260908c';
-import DataLoader from '../data-loader.js?v=20260908c';
-import Tooltip from '../components/tooltip.js?v=20260908c';
+import State from '../state.js?v=20260909a';
+import DataLoader from '../data-loader.js?v=20260909a';
+import Tooltip from '../components/tooltip.js?v=20260909a';
 import {
     COLORS, COMPARISON_PALETTE, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260908c';
+    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260909a';
 
 const MARGIN = { top: 24, right: 118, bottom: 52, left: 72 };
 

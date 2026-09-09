@@ -3,9 +3,9 @@
 // Maddison-style with quartile zones, configurable indicator + scope
 // ============================================================================
 
-import State from '../state.js?v=20260908c';
-import DataLoader from '../data-loader.js?v=20260908c';
-import Tooltip from '../components/tooltip.js?v=20260908c';
+import State from '../state.js?v=20260909a';
+import DataLoader from '../data-loader.js?v=20260909a';
+import Tooltip from '../components/tooltip.js?v=20260909a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -13,7 +13,7 @@ import {
     inkFor,
     formatValue,
     formatRank,
-    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260908c';
+    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260909a';
 
 let currentContainer = null;
 
