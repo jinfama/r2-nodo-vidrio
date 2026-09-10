@@ -5,230 +5,213 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <meta name="color-scheme" content="dark">
-<title>Growth's Wake · Global Change &amp; Human Development Explorer</title>
+<title>Growth &amp; Earth · global development and environmental change since 1750</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&family=Crimson+Pro:ital,wght@0,400..600;1,400..600&display=swap">
 <style>
-/* Portada V7 (2026-09-08). Same tokens as V5/V6 (wakes in the sea); the explorer
-   re-seats them on paper: see explorer.html :root. If you change one, change the other. */
+/* Growth & Earth · portada V8 (2026-09-10). Identity after Eric Gill: Gill Sans
+   for everything (Cabin is the free stand-in; no Gill Sans files ship here,
+   Monotype licence), Perpetua (Crimson Pro) as the hand of the chart; one
+   accent, Emiliano's vermilion, on his cream; hairline rules; spaced
+   capitals. The scene is the V7b nautical chart, now full-bleed; the
+   editorial column became a floating plate top-left and a quiet band below.
+   The explorer re-seats the same tokens on paper: see explorer.html :root.
+   If you change a token here, change it there. */
 :root{
-  --sea:#0E2C48; --sea2:#0A2136; --line:#1E4463; --line2:#2F5C7E;
-  --cream:#EFE4CC; --cream2:#C6CFD6; --muted:#8AA3B7; --foam:#EDF4F7; --verm:#C4502F; --ice:#7FA6C2;
-  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
-  --sans:Geist,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --display:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;
-  --chart:"Cormorant Garamond","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sea:#0E2C48; --sea2:#0A2136; --line:#1E4463; --line2:#2F5C7E; --ice:#7FA6C2;
+  --cream:#F1E6C8; --cream2:#D9CCAB; --muted:#A89B86; --foam:#F7F0DE;
+  --verm:#D84A34;       /* Emiliano's vermilion: large capitals, rules, marks (3.4:1 on cream: display only) */
+  --verm-deep:#B13522;  /* the same red at the lightness that carries small cream type (5.0:1) */
+  --ink:#2B2521; --ink2:#4D443C; --ink3:#665A4E; --rule:#CDBF9E;
+  /* "Gill Sans MT" must come BEFORE "Gill Sans": on Windows with Office the Ultra Bold face registers its family as "Gill Sans" and would answer first */
+  --sans:"Gill Sans MT","Gill Sans Nova","Gill Sans",Cabin,"Alegreya Sans",sans-serif;
+  --serif:Perpetua,"Crimson Pro","EB Garamond",Georgia,serif;
+  --band:48px;
 }
 *{box-sizing:border-box;border-radius:0}
 html,body{height:100%}
 body{margin:0;background:var(--sea);color:var(--cream);font-family:var(--sans);font-size:15px;line-height:1.45;
-  -webkit-font-smoothing:antialiased;overflow:hidden}
+  -webkit-font-smoothing:antialiased;overflow:hidden;font-variant-numeric:tabular-nums lining-nums}
 a{color:inherit}
 button{font:inherit;color:inherit}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.page{position:relative;height:100vh;height:100dvh;overflow:hidden}
 
-.page{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);height:100vh;height:100dvh;overflow:hidden}
-
-/* ---------- text column ---------- */
-.col{display:flex;flex-direction:column;gap:clamp(10px,1.6vh,18px);min-height:0;overflow:hidden;
-  padding:clamp(22px,3vh,34px) clamp(18px,2vw,30px) clamp(16px,2.2vh,24px) clamp(20px,2.6vw,40px);
-  background:linear-gradient(90deg,var(--sea2) 0%,rgba(10,33,54,.92) 100%);border-right:1px solid var(--line)}
-.eyebrow{margin:0;display:flex;align-items:center;justify-content:space-between;gap:10px;
-  font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.eyebrow .what{line-height:1.35}
-.lang{display:flex;flex:0 0 auto}
-.lang button{background:transparent;border:1px solid var(--line2);border-left-width:0;min-width:44px;min-height:44px;
-  padding:0 8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--muted);cursor:pointer}
-.lang button:first-child{border-left-width:1px}
-.lang button.on{background:var(--cream);color:var(--sea);border-color:var(--cream)}
-.lang button:focus-visible{outline:2px solid var(--verm);outline-offset:2px}
-h1{font-family:var(--display);font-weight:620;font-variation-settings:"opsz" 96,"wdth" 88;
-  font-size:clamp(50px,5vw,86px);line-height:.88;letter-spacing:-.04em;margin:0;color:var(--cream);text-wrap:balance}
-html[lang="es"] h1{font-size:clamp(40px,3.7vw,64px);line-height:.92}
-.sub{margin:0;font-size:clamp(14px,1.05vw,17px);font-weight:500;letter-spacing:-.01em;color:var(--cream)}
-.lede{margin:0;color:var(--cream2);font-size:clamp(13px,.98vw,15px);max-width:44ch;text-wrap:pretty}
-
-.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;text-decoration:none;
-  background:var(--cream);color:var(--sea);min-height:60px;padding:0 20px;
-  font-family:var(--display);font-weight:640;font-variation-settings:"opsz" 32,"wdth" 92;font-size:20px;letter-spacing:-.015em;
-  border:2px solid var(--cream);transition:background .15s,color .15s}
-.cta svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
-.cta:hover,.cta:focus-visible{background:var(--verm);border-color:var(--verm);color:var(--foam);outline:none}
-
-.index{display:flex;flex-direction:column;border-top:1px solid var(--line2)}
-.index a{display:flex;align-items:center;gap:10px;min-height:44px;padding:2px 0;color:var(--cream2);text-decoration:none;
-  font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
-.index a span.n{font-family:var(--mono);font-size:12px;color:var(--muted);width:24px;flex:0 0 auto}
-.index a span.h{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
-.index a:hover,.index a:focus-visible{color:var(--cream);outline:none}
-.index a:hover span.h,.index a:focus-visible span.h{color:var(--verm)}
-
-.poem{margin:auto 0 0;padding:0 0 0 14px;border-left:2px solid var(--verm);max-width:40ch}
-.poem p{margin:0;font-family:var(--chart);font-weight:500;font-style:italic;
-  font-size:clamp(17px,1.4vw,21px);line-height:1.2;color:var(--cream);letter-spacing:0}
-.poem .src{display:block;margin-top:.45em;font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.poem .gloss{display:block;margin-top:.25em;font-family:var(--sans);font-style:normal;font-size:12.5px;color:var(--muted)}
-
-/* ---------- stage ---------- */
-.stage{display:flex;flex-direction:column;min-width:0;min-height:0}
-.cap{display:flex;align-items:center;gap:14px;padding:11px clamp(14px,1.6vw,24px) 7px;min-height:38px;
-  font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--cream)}
-.cap .what{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.cap b{font-weight:600;color:var(--cream)}
-.cap .pin{color:var(--verm);font-weight:600;white-space:nowrap}
-.cap .pin:empty{display:none}
-.cap .hint{margin-left:auto;color:var(--muted);text-transform:none;letter-spacing:0;font-family:var(--sans);font-size:12.5px;white-space:nowrap}
-.cap.has-pin .hint{display:none}
-#scene{position:relative;flex:1 1 auto;min-height:0;overflow:hidden;touch-action:pan-y}
+/* ---------- the scene, full-bleed ---------- */
+#scene{position:absolute;left:0;right:0;top:0;bottom:var(--band);overflow:hidden;touch-action:pan-y}
 #chart{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
 #chart.grab{cursor:ew-resize}
 
-/* map inset: a small cartouche in the open water of the early centuries */
-#mapbox{position:absolute;left:0;top:0;width:180px;padding:5px;pointer-events:auto;
-  background:rgba(10,33,54,.55);border:1px solid rgba(239,228,204,.42);outline:1px solid rgba(239,228,204,.16);outline-offset:2px}
-#mapcap{font-family:var(--chart);font-style:italic;font-weight:600;font-size:12px;letter-spacing:.04em;color:var(--cream);line-height:1.2;
-  text-align:center;margin-bottom:3px;opacity:.85}
+/* the map cartouche: paper on the water, under the plate, in water no wake reaches */
+#mapbox{position:absolute;left:0;top:0;width:200px;padding:6px 6px 5px;pointer-events:auto;z-index:2;
+  background:rgba(10,33,54,.55);border:1px solid rgba(241,230,200,.45);outline:1px solid rgba(241,230,200,.16);outline-offset:3px}
+#mapcap{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);line-height:1.3;text-align:center;margin:1px 0 5px;opacity:.9}
 #map{display:block;width:100%;height:auto}
 #map .c{stroke:rgba(10,33,54,.9);stroke-width:.45px;vector-effect:non-scaling-stroke}
 #map g.r{cursor:pointer}
 #map g.r.dim{opacity:.32}
 #map g.r.lit .c{stroke:var(--foam);stroke-width:1.1px}
-#map .none{fill:rgba(198,207,214,.10);stroke:rgba(198,207,214,.35);stroke-width:.4px;vector-effect:non-scaling-stroke;pointer-events:none}
-#map .frame{fill:none;stroke:rgba(239,228,204,.45);stroke-width:.8px;vector-effect:non-scaling-stroke}
+#map .none{fill:rgba(217,204,171,.10);stroke:rgba(217,204,171,.35);stroke-width:.4px;vector-effect:non-scaling-stroke;pointer-events:none}
+#map .frame{fill:none;stroke:rgba(241,230,200,.45);stroke-width:.8px;vector-effect:non-scaling-stroke}
+
+/* the stamp: the year, what the scene is, the hint — top right, in the open water */
+.stamp{position:absolute;right:26px;top:16px;z-index:4;text-align:right;pointer-events:none;max-width:min(360px,40vw)}
+#year{display:block;font-family:var(--serif);font-weight:400;font-size:clamp(34px,3vw,44px);line-height:1;color:var(--cream);letter-spacing:.02em}
+.stamp .what{display:block;margin-top:8px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream2);line-height:1.55}
+.stamp .what b{font-weight:600;color:var(--cream)}
+.stamp .pin{display:block;margin-top:4px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream)}
+.stamp .pin .star{color:var(--verm)}
+.stamp .pin:empty{display:none}
+.stamp .hint{display:block;margin-top:5px;font-family:var(--serif);font-style:italic;font-size:14.5px;color:var(--muted)}
+.stamp.has-pin .hint{display:none}
+
+/* the time line: a hairline laid on the year axis itself; drag it, or drag the water */
+#slider{position:absolute;z-index:3;left:0;top:0;width:100px;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:ew-resize}
+#slider::-webkit-slider-runnable-track{height:1px;background:rgba(241,230,200,.22)}
+#slider::-moz-range-track{height:1px;background:rgba(241,230,200,.22)}
+#slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:10px;height:10px;margin-top:-4.5px;background:var(--cream);border:1px solid var(--sea);transform:rotate(45deg)}
+#slider::-moz-range-thumb{width:10px;height:10px;background:var(--cream);border:1px solid var(--sea);border-radius:0;transform:rotate(45deg)}
+#slider:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
 
 /* tooltip (HTML, over the canvas) */
-.tip{position:fixed;z-index:5;pointer-events:none;background:rgba(8,22,37,.95);border:1px solid var(--cream);color:var(--cream);
+.tip{position:fixed;z-index:8;pointer-events:none;background:rgba(8,22,37,.95);border:1px solid var(--cream);color:var(--cream);
   padding:8px 11px;font-size:12.5px;line-height:1.45;max-width:260px;display:none}
 .tip.show{display:block}
-.tip b{display:block;font-family:var(--chart);font-style:italic;font-weight:600;font-size:15px;letter-spacing:.03em;margin-bottom:1px}
-.tip .yr{color:var(--muted);font-family:var(--mono);font-size:12px;margin-left:6px}
+.tip b{display:block;font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:2px}
+.tip .yr{color:var(--muted);font-family:var(--serif);font-size:13px;letter-spacing:.02em;margin-left:6px;text-transform:none}
 .tip .v2{color:var(--verm)}
-.tip .pinned{display:block;margin-top:3px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em}
+.tip .pinned{display:block;margin-top:3px;font-size:10.5px;color:var(--muted);letter-spacing:.06em}
 
-/* time bar: one button, one thin line, the year */
-.timebar{display:flex;align-items:center;gap:14px;padding:8px clamp(14px,1.6vw,24px) 12px;border-top:1px solid var(--line)}
-#play{width:44px;height:44px;flex:0 0 auto;background:transparent;color:var(--cream);border:1px solid var(--cream2);cursor:pointer;
-  display:flex;align-items:center;justify-content:center}
-#play svg{width:18px;height:18px;fill:currentColor}
-#play:hover,#play:focus-visible{background:var(--cream);border-color:var(--cream);color:var(--sea);outline:none}
-#play .ic-pause{display:none}
-#play.playing .ic-play{display:none}
-#play.playing .ic-pause{display:block}
-#slider{flex:1 1 auto;min-width:0;height:44px;margin:0;background:transparent;-webkit-appearance:none;appearance:none;cursor:pointer}
-#slider::-webkit-slider-runnable-track{height:1px;background:var(--line2)}
-#slider::-moz-range-track{height:1px;background:var(--line2)}
-#slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-6.5px;background:var(--cream);border:1px solid var(--sea);transform:rotate(45deg)}
-#slider::-moz-range-thumb{width:14px;height:14px;background:var(--cream);border:1px solid var(--sea);border-radius:0}
-#slider:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
-.yr-wrap{display:flex;align-items:baseline;gap:8px;flex:0 0 auto;min-width:5ch;justify-content:flex-end}
-#year{font-family:var(--chart);font-weight:600;font-size:clamp(30px,2.6vw,38px);line-height:1;letter-spacing:.01em;color:var(--cream);font-variant-numeric:tabular-nums lining-nums}
-.yr-wrap small{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+/* ---------- the plate: the editorial column, floating top-left ---------- */
+.plate{position:absolute;z-index:6;left:32px;top:32px;width:min(472px,calc(100vw - 64px));
+  background:var(--cream);color:var(--ink);padding:22px 28px 26px;
+  border:1px solid var(--ink);outline:1px solid rgba(241,230,200,.4);outline-offset:3px;
+  box-shadow:0 24px 60px rgba(3,12,22,.5)}
+.plate-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 12px}
+.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.eyebrow{margin:0;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);line-height:1.5;padding-top:7px}
+.lang{display:flex;flex:0 0 auto;margin:-2px -8px 0 0}
+.lang button{background:transparent;border:0;min-width:40px;min-height:40px;padding:0 6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);cursor:pointer}
+.lang button.on{color:var(--verm-deep);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
+.lang button:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
+.mark{display:block;flex:0 0 auto;width:50px;height:50px;color:var(--verm);margin:6px 2px 0 0}
+h1{margin:0;font-family:var(--sans);font-weight:400;font-size:clamp(36px,3.1vw,44px);line-height:1.06;letter-spacing:.18em;text-transform:uppercase;color:var(--verm)}
+h1 .amp{font-weight:300}
+.sub{margin:8px 0 0;font-size:16.5px;line-height:1.35;color:var(--ink2);letter-spacing:.01em;text-wrap:pretty}
+.rule{width:44px;height:1px;background:var(--verm);border:0;margin:14px 0 12px}
+.lede{margin:0;font-size:14px;line-height:1.45;color:var(--ink);text-wrap:pretty}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:12px;text-decoration:none;margin-top:18px;
+  background:var(--verm-deep);color:var(--cream);min-height:52px;padding:0 18px 0 20px;
+  font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;border:1px solid var(--verm-deep);transition:background .15s,color .15s}
+.cta svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.cta:hover,.cta:focus-visible{background:var(--cream);color:var(--verm-deep);outline:none}
+
+/* ---------- the band: the index and the verse, quiet, below the water ---------- */
+.band{position:absolute;left:0;right:0;bottom:0;height:var(--band);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:0 26px 0 22px;background:var(--sea2);border-top:1px solid rgba(241,230,200,.22)}
+.index{display:flex;align-items:center;gap:0;margin:0}
+.index a{display:flex;align-items:center;gap:9px;min-height:44px;padding:0 11px;color:var(--cream2);text-decoration:none;font-size:11px;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.index a .n{color:var(--muted);letter-spacing:.06em}
+.index a:hover,.index a:focus-visible{color:var(--foam);outline:none}
+.index a:hover .n,.index a:focus-visible .n{color:var(--verm)}
+.poem{margin:0;min-width:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.poem p{margin:0;font-family:var(--serif);font-style:italic;font-size:16px;line-height:1.2;color:var(--cream)}
+.poem .src{font-family:var(--sans);font-style:normal;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-left:12px}
 .mob-only{display:none}
 
-/* ---------- portrait / phone ---------- */
+@media (max-height:760px) and (min-width:900px){
+  .plate{padding:16px 24px 20px}
+  .plate-top{margin-bottom:8px}
+  .mark{width:40px;height:40px}
+  h1{font-size:clamp(30px,2.8vw,36px)}
+  .sub{font-size:15px}
+  .rule{margin:10px 0 8px}
+  .lede{font-size:13px}
+  .cta{margin-top:12px;min-height:46px}
+}
+@media (max-width:1180px) and (min-width:900px){ .poem{display:none} }
+
+/* ---------- portrait / phone: plate, then the scene at 58 vh, then the band; CTA fixed ---------- */
 @media (max-width:899px){
   body{overflow:auto}
-  .page{display:block;height:auto;overflow:visible}
-  .col{border-right:0;padding:16px 16px 6px;gap:8px;overflow:visible;background:none}
-  .col .cta,.col .index,.col .poem{display:none}
-  h1{font-size:clamp(48px,13vw,66px)}
-  html[lang="es"] h1{font-size:clamp(38px,10vw,52px)}
-  .lede{font-size:13.5px;max-width:none}
-  .stage{display:block}
-  .cap{padding:8px 14px 6px;font-size:12px;min-height:0;flex-wrap:wrap;gap:2px 14px}
-  .cap .what{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
-  .cap .hint{display:none}
-  #scene{height:55vh;height:55dvh;min-height:380px}
-  #mapbox{padding:3px}
+  .page{display:flex;flex-direction:column;height:auto;overflow:visible}
+  .plate{position:static;order:0;width:auto;margin:0;padding:12px 18px 16px;border:0;outline:0;box-shadow:none}
+  .plate-top{margin-bottom:10px}
+  .eyebrow{padding-top:8px;font-size:10px;letter-spacing:.12em;white-space:nowrap}
+  .mark{width:40px;height:40px;margin:4px 0 0}
+  h1{font-size:clamp(30px,8.6vw,38px)}
+  .sub{font-size:14.5px;margin-top:6px}
+  .rule{margin:12px 0 10px}
+  .lede{font-size:13.5px;line-height:1.42;max-width:none}
+  .plate .cta{display:none}
+  #scene{position:relative;order:1;inset:auto;height:55vh;height:55dvh;min-height:400px;border-top:1px solid rgba(43,37,33,.35)}
+  #mapbox{padding:4px}
   #mapcap{display:none}
-  .timebar{padding:8px 14px 12px}
-  #year{font-size:32px}
-  .mob-only{display:flex}
+  .stamp{right:12px;top:10px;max-width:44vw}
+  #year{font-size:30px}
+  .stamp .what,.stamp .hint{display:none}   /* the plate above already says what the scene is */
+  .band{position:static;order:2;height:auto;flex-direction:column;align-items:stretch;gap:8px;padding:10px 18px 118px}
+  .index{flex-direction:column;align-items:stretch}
+  .index a{padding:0;min-height:46px;border-bottom:1px solid rgba(241,230,200,.14);justify-content:flex-start}
+  .poem{text-align:left;white-space:normal;margin-top:8px}
+  .poem .src{display:block;margin:6px 0 0}
+  .mob-only{display:block}
   .mob-cta{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:8px 14px calc(8px + env(safe-area-inset-bottom));
-    background:linear-gradient(180deg,rgba(14,44,72,0) 0%,rgba(14,44,72,.96) 30%)}
-  .mob-cta .cta{width:100%;min-height:56px;font-size:19px}
-  .mob-index{flex-direction:column;padding:8px 16px 110px;gap:14px}
-  .mob-index .index{width:100%}
-  .mob-index .poem{margin:6px 0 0}
+    background:linear-gradient(180deg,rgba(10,33,54,0) 0%,rgba(10,33,54,.96) 30%)}
+  .mob-cta .cta{margin:0;min-height:54px}
 }
-@media (prefers-reduced-motion:reduce){ .cta,#play{transition:none} }
+@media (prefers-reduced-motion:reduce){ .cta{transition:none} }
 </style>
 </head>
 <body>
 <main class="page">
-  <header class="col">
-    <p class="eyebrow">
-      <span class="what" data-es="Cambio global y desarrollo humano · 1750–2024">Global change &amp; human development · 1750–2024</span>
+  <section id="scene" aria-label="Scene">
+    <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024, then open water"></canvas>
+    <div id="mapbox">
+      <div id="mapcap" data-es="GEI por persona">GHG per person</div>
+      <svg id="map" viewBox="0 0 200 100" aria-label="World map by region"></svg>
+    </div>
+    <div class="stamp" id="cap">
+      <output id="year" for="slider">1750</output>
+      <span class="what"><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="ocho regiones del mundo">eight world regions</span> · <span data-es="tinta y mapa: GEI por persona">ink and map: GHG per person</span></span>
+      <span class="pin" id="pinlbl"></span>
+      <span class="hint" id="hint" data-es="Señala una estela; arrastra por los años">Point at a wake; drag along the years</span>
+    </div>
+    <input id="slider" type="range" min="1750" max="2024" step="1" value="1750" aria-label="Year">
+    <button id="play" type="button" class="playing sr-only" aria-label="Pause">
+      <span class="ic-play" data-es="Reproducir">Play</span><span class="ic-pause" data-es="Pausa">Pause</span>
+    </button>
+    <div class="tip" id="tip" role="status" aria-live="polite"></div>
+  </section>
+
+  <header class="plate">
+    <div class="plate-top">
+      <p class="eyebrow" data-es="Estelas del crecimiento · 1750–2024">199 countries · 1750–2024</p>
       <span class="lang" role="group" aria-label="Language">
         <button type="button" data-lang="en" class="on" aria-label="English">EN</button>
         <button type="button" data-lang="es" aria-label="Español">ES</button>
       </span>
-    </p>
-    <h1><span data-es="Estelas del crecimiento">Growth's Wake</span></h1>
-    <p class="sub" data-es="Explorador de cambio global y desarrollo humano">Global Change &amp; Human Development Explorer</p>
-    <p class="lede" data-es="Series históricas de 199 países y ocho regiones del mundo desde 1750: renta, población, desarrollo humano, emisiones de gases de efecto invernadero, tierra cultivada y uso de materiales. Las ocho regiones zarpan de la misma agua en 1750, durante siglo y medio sus estelas se trenzan en un solo rumbo y después se separan. Más allá del último dato la carta queda en blanco: mar abierta, nada trazado.">Historical series for 199 countries and eight world regions since 1750: income, population, human development, greenhouse gas emissions, cropland and material use. The eight regions leave the same water in 1750, braid into one course for a century and a half, and then part. Past the last reading the chart goes blank: open water, nothing charted.</p>
-
-    <a class="cta" id="cta" href="explorer.html#globe">
-      <span data-es="Entrar al visor">Enter the explorer</span>
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-    </a>
-
-    <nav class="index" aria-label="Sections of the explorer">
-      <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span><span class="h">#globe</span></a>
-      <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar: mapas, rankings y series">Explore: maps, rankings and series</span><span class="h">#explore</span></a>
-      <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis: desacoplamiento y descomposición">Analysis: decoupling and decomposition</span><span class="h">#analysis</span></a>
-      <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span><span class="h">#about</span></a>
-    </nav>
-
-    <blockquote class="poem">
-      <p>Caminante, no hay camino,<br>sino estelas en la mar.
-        <span class="src">Antonio Machado · Proverbios y cantares XXIX · 1912</span>
-        <span class="gloss" data-es="Antonio Machado, Campos de Castilla.">Wanderer, there is no road — only wakes in the sea.</span>
-      </p>
-    </blockquote>
+    </div>
+    <div class="title-row"><h1>Growth<br><span class="amp">&amp;</span> Earth</h1><svg class="mark" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21.5" stroke-width="1.8"/><path d="M7 29.5h34" stroke-width="1.2"/><path d="M15.5 29.5a8.5 8.5 0 0 1 17 0" stroke-width="1.8"/><path d="M24 14.5v-4.5M35 18.5l3.5-3.5M13 18.5l-3.5-3.5M34.2 25.3l3.2-1.3M13.8 25.3l-3.2-1.3" stroke-width="1.4"/><path d="M10 35.5c4.7-2.6 9.3-2.6 14 0s9.3 2.6 14 0M14 40c3.3-1.8 6.7-1.8 10 0s6.7 1.8 10 0" stroke-width="1.2"/></svg></div>
+    <p class="sub" data-es="desarrollo global y cambio ambiental desde 1750">global development and environmental change since 1750</p>
+    <hr class="rule">
+    <p class="lede" data-es="Desde la revolución industrial, el crecimiento económico moderno ha sostenido poblaciones cada vez más numerosas y progresos extraordinarios en educación y salud, al tiempo que transformaba el planeta mediante las emisiones de gases de efecto invernadero, la expansión de los cultivos y la extracción de materias primas. Growth &amp; Earth es un lugar para explorar esta historia desigual del desarrollo global y del cambio ambiental.">Since the industrial revolution, modern economic growth has sustained ever larger populations and extraordinary progress in education and health, while also transforming the planet through greenhouse gas emissions, cropland expansion, and raw material extraction. Growth &amp; Earth is a place to explore this uneven history of global development and environmental change.</p>
+    <a class="cta" id="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </header>
 
-  <section class="stage" aria-label="Scene">
-    <div class="cap" id="cap">
-      <span class="what"><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="ocho regiones del mundo">eight world regions</span> · 1750–2024 · <span data-es="tinta y mapa: GEI por persona">ink and map: greenhouse gas per person</span></span>
-      <span class="pin" id="pinlbl"></span>
-      <span class="hint" id="hint" data-es="Señala una estela; arrastra para recorrer los años">Point at a wake; drag to move through the years</span>
-    </div>
-    <div id="scene">
-      <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024, then open water"></canvas>
-      <div id="mapbox">
-        <div id="mapcap" data-es="GEI por persona">GHG per person</div>
-        <svg id="map" viewBox="0 0 200 100" aria-label="World map by region"></svg>
-      </div>
-      <div class="tip" id="tip" role="status" aria-live="polite"></div>
-    </div>
-    <div class="timebar">
-      <button id="play" type="button" class="playing" aria-label="Pause">
-        <svg class="ic-play" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l12 7-12 7z"/></svg>
-        <svg class="ic-pause" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 3h4v14H4zM12 3h4v14h-4z"/></svg>
-      </button>
-      <input id="slider" type="range" min="1750" max="2024" step="1" value="1750" aria-label="Year">
-      <div class="yr-wrap"><output id="year" for="slider">1750</output><small data-es="año">year</small></div>
-    </div>
-    <div class="mob-only mob-cta">
-      <a class="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-    </div>
-    <div class="mob-only mob-index">
-      <nav class="index" aria-label="Sections of the explorer">
-        <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span><span class="h">#globe</span></a>
-        <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar: mapas, rankings y series">Explore: maps, rankings and series</span><span class="h">#explore</span></a>
-        <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis: desacoplamiento y descomposición">Analysis: decoupling and decomposition</span><span class="h">#analysis</span></a>
-        <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span><span class="h">#about</span></a>
-      </nav>
-      <blockquote class="poem">
-        <p>Caminante, no hay camino,<br>sino estelas en la mar.
-          <span class="src">Antonio Machado · Proverbios y cantares XXIX · 1912</span>
-          <span class="gloss" data-es="Antonio Machado, Campos de Castilla.">Wanderer, there is no road — only wakes in the sea.</span>
-        </p>
-      </blockquote>
-    </div>
-  </section>
+  <footer class="band">
+    <nav class="index" aria-label="Sections of the explorer">
+      <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span></a>
+      <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar">Explore</span></a>
+      <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis">Analysis</span></a>
+      <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span></a>
+    </nav>
+    <blockquote class="poem"><p>Caminante, no hay camino, sino estelas en la mar.<span class="src">Antonio Machado · 1912</span></p></blockquote>
+  </footer>
+  <div class="mob-only mob-cta">
+    <a class="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -240,7 +223,7 @@ html[lang="es"] h1{font-size:clamp(40px,3.7vw,64px);line-height:.92}
 (function(){
 'use strict';
 /* ------------------------------------------------------------------
-   Growth's Wake · portada V7. A nautical chart. Eight world regions
+   Growth & Earth · portada V8 (2026-09-10; scene of V7b). A nautical chart. Eight world regions
    leave the same shore in 1750; the height of each wake is that
    region's GDP per capita, the colour of its ink the greenhouse gas
    its people release. The chart is drawn up to the last reading
@@ -250,19 +233,25 @@ html[lang="es"] h1{font-size:clamp(40px,3.7vw,64px);line-height:.92}
    further out they go (V7b, 2026-09-09: fewer and subtler than V7, and
    the rich regions keep a course that goes on climbing). Nothing out
    there is measured, labelled or bounded; it is a figure of speech,
-   not a projection.
+   not a projection. V8: the scene is full-bleed; the editorial plate floats
+   top-left and the engine keeps out of it (PL); the cartouche sits under the
+   plate at ~1.8x; the time line is a hairline on the year axis; the fonts
+   are read from the CSS tokens (--sans Gill Sans/Cabin, --serif Perpetua).
    ------------------------------------------------------------------ */
 var D=window.CASCORRO, TOPO=window.WORLD110, RG=window.CASCORRO_REGIONS;
 var canvas=document.getElementById('chart'), scene=document.getElementById('scene');
 var mapbox=document.getElementById('mapbox'), mapSvg=document.getElementById('map');
 var tip=document.getElementById('tip'), playBtn=document.getElementById('play'), slider=document.getElementById('slider');
 var yearOut=document.getElementById('year'), pinLbl=document.getElementById('pinlbl');
+var plate=document.querySelector('.plate'), stamp=document.getElementById('cap');
 var RM=!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 var COARSE=!!(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);
 window.__fps=0;window.__state=null;
 if(!D||!D.regions||!canvas.getContext||typeof d3==='undefined'||typeof topojson==='undefined')return;
 var ctx=canvas.getContext('2d');
 var HAS_LS=('letterSpacing' in ctx);
+var CSSV=getComputedStyle(document.documentElement);
+var SANS=(CSSV.getPropertyValue('--sans')||'sans-serif').trim(), SERIF=(CSSV.getPropertyValue('--serif')||'serif').trim();
 
 /* ---------- language ---------- */
 var LANG_KEY='growthWake.language';           /* the explorer's own key (js/app.js) */
@@ -271,12 +260,12 @@ try{if(localStorage.getItem(LANG_KEY)==='es')LANG='es';}catch(e){}
 var T={
   en:{perPerson:'per person',gdp:'GDP per capita',ghg:'t CO₂e per person',pinned:'pinned · click again to release',pinnedTap:'pinned · tap again to release',
       part:'the wakes part',partShort:'they part',partSub:function(g,g0){return 'richest region earns '+g+'× the poorest ('+g0+'× in 1750)';},
-      open:'open water — nothing charted',openShort:'open water · nothing charted',last:'last reading',play:'Play',pause:'Pause',
-      title:"Growth's Wake · Global Change & Human Development Explorer"},
+      open:'open water — nothing charted',openShort:'open water · nothing charted',openTiny:'open water',last:'last reading',play:'Play',pause:'Pause',
+      title:'Growth & Earth · global development and environmental change since 1750'},
   es:{perPerson:'por persona',gdp:'PIB per cápita',ghg:'t CO₂e por persona',pinned:'fijada · clic de nuevo para soltar',pinnedTap:'fijada · toca de nuevo para soltar',
       part:'las estelas se separan',partShort:'se separan',partSub:function(g,g0){return 'la región más rica gana '+g+'× la más pobre ('+g0+'× en 1750)';},
-      open:'mar abierta — nada trazado',openShort:'mar abierta · nada trazado',last:'último dato',play:'Reproducir',pause:'Pausa',
-      title:'Estelas del crecimiento · Explorador de cambio global y desarrollo humano'}
+      open:'mar abierta — nada trazado',openShort:'mar abierta · nada trazado',openTiny:'mar abierta',last:'último dato',play:'Reproducir',pause:'Pausa',
+      title:'Growth & Earth · desarrollo global y cambio ambiental desde 1750'}
 };
 var NAMES={
   en:{'East Asia & Pacific':'East Asia & Pacific','Europe & Central Asia':'Europe & Central Asia','Latin America & Caribbean':'Latin America & Caribbean',
@@ -317,8 +306,8 @@ function setLang(l,save){
 document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.lang,true);});});
 
 /* ---------- colour helpers ---------- */
-var SEA='#0E2C48',SEA2='#0A2136',LINE2='#2F5C7E',CREAM='#EFE4CC',FOAM='#EDF4F7',VERM='#C4502F';
-var RGB={FOAM:[237,244,247],VERM:[196,80,47],ICE:[127,166,194],CREAM:[239,228,204],MUTED:[138,163,183]};
+var SEA='#0E2C48',SEA2='#0A2136',LINE2='#2F5C7E',CREAM='#F1E6C8',FOAM='#F7F0DE',VERM='#D84A34';   /* --cream/--foam/--verm of :root */
+var RGB={FOAM:[247,240,222],VERM:[216,74,52],ICE:[127,166,194],CREAM:[241,230,200],MUTED:[168,155,134]};
 function lerp3(a,b,t){t=t<0?0:t>1?1:t;return [a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t];}
 function rgbaArr(c,al){return 'rgba('+Math.round(c[0])+','+Math.round(c[1])+','+Math.round(c[2])+','+al+')';}
 function rgba(c,a){var p=parseInt(c.slice(1),16);return 'rgba('+((p>>16)&255)+','+((p>>8)&255)+','+(p&255)+','+a+')';}
@@ -328,8 +317,9 @@ function noise(x,sd){var i0=Math.floor(x),f=x-i0,a=hash(i0+sd*131.7),b=hash(i0+1
 function fbm(x,sd){return noise(x,sd)*0.62+noise(x*2.31,sd+7)*0.26+noise(x*4.7,sd+19)*0.12;}
 function clamp(x){return x<0?0:x>1?1:x;}
 function fmtMoney(v){return '$'+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,LANG==='es'?'.':',');}
-function chartFont(px,italic,weight){return (italic?'italic ':'')+(weight||600)+' '+px+'px "Cormorant Garamond", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif';}
-function monoFont(px,weight){return (weight||500)+' '+px+'px "Geist Mono", ui-monospace, Menlo, Consolas, monospace';}
+/* the hand of the chart is Perpetua (Crimson Pro); the plates and the rose are Gill Sans capitals */
+function chartFont(px,italic,weight){return (italic?'italic ':'')+(weight||500)+' '+px+'px '+SERIF;}
+function sansFont(px,weight){return (weight||500)+' '+px+'px '+SANS;}
 function spaced(g,em){if(HAS_LS)g.letterSpacing=em;}
 
 /* ---------- the eight courses ---------- */
@@ -366,7 +356,7 @@ var RATE=(N-1)/5800;                       /* years per ms: the whole run in 5.8
 var endedAt=null;                          /* when the clock last reached 2024, for the open-water fade */
 
 /* ---------- layout ---------- */
-var W,H,dpr,mobile,xL,xData,xFut,yB,yT,chartLayer=null,roseX,roseY,roseR,MB,WAVES=[],SOUND=[];
+var W,H,dpr,mobile,xL,xData,xFut,yB,yT,chartLayer=null,roseX,roseY,roseR,MB,PL=null,WAVES=[],SOUND=[];
 function xs(y){return xL+(y-Y0)/(Y1-Y0)*(xData-xL);}
 function ys(v){return yB-(v/vMax)*(yB-yT);}
 function pt(jj,k){return [xs(YRS[k]),ys(ships[jj].v[k])+fbm(k*0.07+jj*9,jj)*(mobile?0.9:1.4)];}
@@ -381,13 +371,21 @@ function layout(){
   xL=mobile?16:30;xFut=W-(mobile?10:26);
   xData=Math.round(xL+(xFut-xL)*0.60);          /* the charted world ends at 60 %; the rest is open water */
   yT=mobile?26:34;yB=H-(mobile?30:40);
-  /* the map cartouche: small, top-left, in water no wake ever reaches */
-  var mw=Math.round(W*(mobile?0.30:0.175));mw=Math.max(mobile?104:150,Math.min(mw,mobile?124:200));
-  MB={x:xL+10,y:yT+6,w:mw};
+  /* the plate's keep-out (desktop only: on a phone the plate sits above the scene, not on it) */
+  PL=null;
+  if(!mobile&&plate){var pr=plate.getBoundingClientRect(),sr=scene.getBoundingClientRect();PL={x:pr.left-sr.left,y:pr.top-sr.top,w:pr.width,h:pr.height};}
+  /* the map cartouche: under the plate on desktop (about 1.8x the V7b size), top-left on a phone; always in water no wake reaches */
+  var mw,my,capH=mobile?0:22;
+  if(PL){my=Math.round(PL.y+PL.h+22);mw=Math.round(W*0.26);mw=Math.max(240,Math.min(mw,380));
+    var avail=(yB-60)-my-capH-12;if(avail<mw*0.5)mw=Math.max(200,Math.floor(avail*2));}
+  else{my=yT+6;mw=Math.round(W*(mobile?0.42:0.26));mw=Math.max(mobile?150:240,Math.min(mw,mobile?190:380));}
+  MB={x:PL?Math.round(PL.x):xL+10,y:my,w:mw,h:mw*0.5+capH+12};   /* flush with the plate's left edge */
   mapbox.style.left=MB.x+'px';mapbox.style.top=MB.y+'px';mapbox.style.width=MB.w+'px';
+  /* the time line: a hairline laid on the year axis itself (44 px tall to take a finger) */
+  slider.style.left=xL+'px';slider.style.width=(xData-xL)+'px';slider.style.top=(yB-22)+'px';
   /* the rose lives in the open water */
   roseR=Math.min(mobile?30:60,(yB-yT)*0.13);
-  roseX=Math.round(xData+(xFut-xData)*0.56);roseY=Math.round(yT+(yB-yT)*0.30);
+  roseX=Math.round(xData+(xFut-xData)*0.56);roseY=Math.round(yT+(yB-yT)*(mobile?0.30:0.34));
   TICKS=(xData-xL)<520?TICKS_TIGHT:TICKS_WIDE;
   buildWaves();buildChart();buildFuture();gradCache={};needDraw=true;
 }
@@ -428,8 +426,9 @@ function buildChart(){
   g.beginPath();g.moveTo(sxs[0][0],sxs[0][1]);for(k=1;k<sxs.length;k++)g.lineTo(sxs[k][0],sxs[k][1]);g.stroke();
   g.strokeStyle=rgba(CREAM,0.22);g.lineWidth=0.8;
   g.beginPath();g.moveTo(sxs[0][0]-4,sxs[0][1]);for(k=1;k<sxs.length;k++)g.lineTo(sxs[k][0]-4+fbm(k*0.6,33)*1.5,sxs[k][1]);g.stroke();
-  /* year scale, in the hand of a chart, stopping at the last reading */
-  g.font=chartFont(mobile?13:14,false,600);g.textAlign='center';g.textBaseline='top';spaced(g,'0.04em');
+  /* the year axis: a hairline (the slider lies on it), then the scale in the hand of a chart, stopping at the last reading */
+  g.strokeStyle=rgba(CREAM,0.30);g.lineWidth=1;g.beginPath();g.moveTo(xL,yB+0.5);g.lineTo(xData,yB+0.5);g.stroke();
+  g.font=chartFont(mobile?13:14.5,false,500);g.textAlign='center';g.textBaseline='top';spaced(g,'0.04em');
   for(k=0;k<TICKS.length;k++){var tx2=xs(TICKS[k]);
     g.strokeStyle=rgba(CREAM,k===0?0:0.35);g.lineWidth=0.8;g.beginPath();g.moveTo(tx2,yB);g.lineTo(tx2,yB+5);g.stroke();
     g.fillStyle=rgba(CREAM,0.82);g.fillText(String(TICKS[k]),Math.min(xData-8,Math.max(xL+14,tx2)),yB+8);}
@@ -437,9 +436,9 @@ function buildChart(){
   /* the edge of the charted world */
   g.setLineDash([2,4]);g.strokeStyle=rgba(CREAM,0.30);g.lineWidth=1;g.beginPath();g.moveTo(xData,yT-12);g.lineTo(xData,yB+6);g.stroke();g.setLineDash([]);
   /* the quiet word in the open water */
-  g.font=chartFont(mobile?12:14,true,600);g.textAlign='right';g.textBaseline='bottom';spaced(g,'0.06em');
+  g.font=chartFont(mobile?12.5:15,true,500);g.textAlign='right';g.textBaseline='bottom';spaced(g,'0.06em');
   g.strokeStyle=rgba(SEA2,0.9);g.lineWidth=3;g.lineJoin='round';
-  var ow=mobile?tr('openShort'):tr('open');
+  var ow=mobile?tr('openTiny'):tr('open');   /* on a phone the short word, so it never touches the 2024 tick */
   g.strokeText(ow,xFut-6,yB+(mobile?22:24));g.fillStyle=rgba(CREAM,0.66);g.fillText(ow,xFut-6,yB+(mobile?22:24));
   spaced(g,'0px');
   /* neatline with the alternating border bands of a chart */
@@ -467,7 +466,7 @@ function rose(g,cx,cy,R,alpha){
   /* the fleur at north, in vermilion */
   g.fillStyle=VERM;g.beginPath();g.moveTo(cx,cy-R*0.86);g.lineTo(cx+R*0.06,cy-R*0.62);g.lineTo(cx-R*0.06,cy-R*0.62);g.closePath();g.fill();
   g.beginPath();g.arc(cx,cy,R*0.055,0,6.2832);g.fill();
-  g.font=chartFont(Math.max(12,Math.round(R*0.26)),false,600);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.7);
+  g.font=sansFont(Math.max(11,Math.round(R*0.24)),500);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.7);
   g.fillText('N',cx,cy-R*1.12);g.fillText('S',cx,cy+R*1.12);g.fillText('E',cx+R*1.12,cy);g.fillText('W',cx-R*1.12,cy);
   g.restore();
 }
@@ -476,13 +475,14 @@ function soundings(g){
   var top=yT+12,bot=yB-16;
   while(SOUND.length<n&&tries<600){tries++;
     var x=xL+30+hash(tries*3.1+5)*(xData-xL-60),y=top+hash(tries*7.7+2)*(bot-top),ok=true;
-    if(x>MB.x-14&&x<MB.x+MB.w+14&&y<MB.y+MB.w*0.55+30)ok=false;                   /* under the map */
-    if(Math.abs(x-xs(partYear))<40&&y<yT+50)ok=false;                              /* the parting label */
+    if(x>MB.x-14&&x<MB.x+MB.w+14&&y>MB.y-14&&y<MB.y+MB.h+14)ok=false;              /* under the map */
+    if(PL&&x<PL.x+PL.w+16&&y<PL.y+PL.h+16)ok=false;                                /* under the plate */
+    if(x>xs(partYear)-40&&x<xs(partYear)+320&&Math.abs(y-partLabelY())<40)ok=false; /* the parting label */
     if(ok){var kk=xToIdx(x);for(jj=0;jj<NS&&ok;jj++){var yy=ys(ships[jj].v[kk]);if(y>yy-26)ok=false;}}
     if(ok){for(k=0;k<SOUND.length;k++)if(Math.abs(SOUND[k][0]-x)<34&&Math.abs(SOUND[k][1]-y)<18){ok=false;break;}}
     if(ok)SOUND.push([x,y,Math.round(3+hash(tries*1.9)*46)]);
   }
-  g.font=chartFont(12,true,500);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.34);
+  g.font=chartFont(12.5,true,400);g.textAlign='center';g.textBaseline='middle';g.fillStyle=rgba(CREAM,0.34);
   for(k=0;k<SOUND.length;k++)g.fillText(String(SOUND[k][2]),SOUND[k][0],SOUND[k][1]);
 }
 
@@ -555,31 +555,33 @@ function partRule(alpha){
   if(mobile){
     /* on a phone the cartouche owns the top-left, so the label runs up the rule itself */
     ctx.save();ctx.translate(x-4,yB-42);ctx.rotate(-Math.PI/2);ctx.textAlign='left';ctx.textBaseline='bottom';
-    ctx.font=chartFont(13,true,600);spaced(ctx,'0.05em');var l1=partYear+' · '+tr('partShort');
+    ctx.font=chartFont(13.5,true,500);spaced(ctx,'0.05em');var l1=partYear+' · '+tr('partShort');
     ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,0,0);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,0,0);
     spaced(ctx,'0px');ctx.restore();ctx.globalAlpha=1;return;}
-  var tx=x+7,ly=yT+4;
-  ctx.font=chartFont(15,true,600);ctx.textAlign='left';ctx.textBaseline='top';spaced(ctx,'0.05em');
+  var tx=x+7,ly=partLabelY();
+  ctx.font=chartFont(16,true,500);ctx.textAlign='left';ctx.textBaseline='top';spaced(ctx,'0.05em');
   var l1b='✦ '+partYear+' · '+tr('part'),l2=tr('partSub')(GAP,gap0);
   ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1b,tx,ly);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1b,tx,ly);
-  ctx.font=chartFont(13,true,500);spaced(ctx,'0.02em');ctx.strokeText(l2,tx,ly+19);ctx.fillStyle=rgba(CREAM,0.68);ctx.fillText(l2,tx,ly+19);
+  ctx.font=chartFont(14,true,400);spaced(ctx,'0.02em');ctx.strokeText(l2,tx,ly+20);ctx.fillStyle=rgba(CREAM,0.68);ctx.fillText(l2,tx,ly+20);
   spaced(ctx,'0px');ctx.textAlign='left';ctx.globalAlpha=1;
 }
-/* name plates just past each head, in the italic hand of a chart */
+/* where the parting label goes: at the top, unless the plate owns that corner, then just under it */
+function partLabelY(){var x=xs(partYear)+7;return (PL&&x<PL.x+PL.w+12&&yT+4<PL.y+PL.h+12)?PL.y+PL.h+24:yT+4;}
+/* name plates just past each head, in spaced Gill capitals */
 function headLabels(heads,alpha,lit){
   if(alpha<=0)return;
   var gap=mobile?16:19,ord=heads.map(function(h,k){return {k:k,y:h[1],x:h[0]};}).sort(function(a,b){return a.y-b.y;});
   var top=yT+2,bot=yB-2,k,prev=-1e9;
   for(k=0;k<ord.length;k++){ord[k].ly=Math.max(ord[k].y,prev+gap,top);prev=ord[k].ly;}
   prev=1e9;for(k=ord.length-1;k>=0;k--){ord[k].ly=Math.min(ord[k].ly,prev-gap,bot);prev=ord[k].ly;}
-  ctx.textBaseline='middle';ctx.textAlign='left';var fs=mobile?13:14;
-  ctx.font=chartFont(fs,true,600);spaced(ctx,'0.06em');ctx.lineJoin='round';
+  ctx.textBaseline='middle';ctx.textAlign='left';var fs=mobile?10.5:11.5;
+  ctx.font=sansFont(fs,500);spaced(ctx,'0.14em');ctx.lineJoin='round';
   for(k=0;k<ord.length;k++){var o=ord[k],lx=o.x+(mobile?10:14),nm=((mobile?TINY:SHORT)[LANG][ships[o.k].name]||ships[o.k].name).toUpperCase();
     var a=alpha*(lit<0||lit===o.k?1:0.42);ctx.globalAlpha=a;
     var tw=ctx.measureText(nm).width;
     if(lx+tw+4>W-4){lx=o.x-tw-(mobile?9:12);}
     if(Math.abs(o.ly-o.y)>2.5){ctx.strokeStyle=rgba(CREAM,0.32);ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(o.x+3,o.y);ctx.lineTo(lx-2,o.ly);ctx.stroke();}
-    ctx.fillStyle=rgba(SEA2,0.7);ctx.fillRect(lx-3,o.ly-fs*0.62,tw+6,fs*1.25);
+    ctx.fillStyle=rgba(SEA2,0.7);ctx.fillRect(lx-4,o.ly-fs*0.7,tw+8,fs*1.4);
     ctx.strokeStyle=rgba(SEA2,0.88);ctx.lineWidth=3;ctx.strokeText(nm,lx,o.ly);
     ctx.fillStyle=lit===o.k?FOAM:CREAM;ctx.fillText(nm,lx,o.ly);}
   spaced(ctx,'0px');ctx.globalAlpha=1;
@@ -702,7 +704,7 @@ function render(now){
     if(!wk){heads[j]=[xL,yB];continue;}heads[j]=wk.head;
     shipGlyph(wk.head[0],wk.head[1],wk.ang,(mobile?4.2:5.4)*(boost?1.2:1),lit>=0&&!boost?0.35:1,inkCol(j,idx,1));}
   /* value marks, tucked just inside the last reading, skipped where a head sits */
-  ctx.font=chartFont(12,true,600);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=rgba(CREAM,0.5);
+  ctx.font=chartFont(12.5,true,400);ctx.textAlign='right';ctx.textBaseline='bottom';ctx.fillStyle=rgba(CREAM,0.5);
   for(var vv=20000;vv<vMax;vv+=20000){var vy=ys(vv),free=true;for(j=0;j<NS;j++)if(Math.abs(heads[j][1]-vy)<11&&heads[j][0]>xData-40){free=false;break;}
     if(free)ctx.fillText('$'+(vv/1000)+'k',xData-6,vy-1);}
   /* the clock: a vertical cursor at the year on the slider */
@@ -765,7 +767,7 @@ function togglePin(jj,k,src,cxp,cyp){
   else{pinned=jj;hover=jj;hoverIdx=k;hoverSrc=src;tipX=cxp;tipY=cyp;showTip(jj,k,cxp,cyp,true);}
   updatePinLabel();syncState();redraw();
 }
-function updatePinLabel(){pinLbl.textContent=pinned>=0?('✦ '+NAMES[LANG][ships[pinned].name]):'';document.getElementById('cap').classList.toggle('has-pin',pinned>=0);}
+function updatePinLabel(){pinLbl.innerHTML=pinned>=0?('<span class="star">✦</span> '+NAMES[LANG][ships[pinned].name]):'';stamp.classList.toggle('has-pin',pinned>=0);}
 var tipX=0,tipY=0;
 function showTip(jj,k,cxp,cyp,isPinned){
   var s=ships[jj];tipX=cxp;tipY=cyp;
@@ -841,7 +843,10 @@ document.addEventListener('keydown',function(e){
 });
 document.addEventListener('visibilitychange',function(){if(document.hidden)last=null;else{last=null;loop();}});
 var rt=null;
-window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){layout();mapIdx=-1;redraw();},80);});
+function relayout(){clearTimeout(rt);rt=setTimeout(function(){if(!chartLayer)return;layout();mapIdx=-1;redraw();},80);}
+window.addEventListener('resize',relayout);
+if(window.ResizeObserver&&plate){var plateH=0;new ResizeObserver(function(){var h=plate.offsetHeight;if(h!==plateH){plateH=h;relayout();}}).observe(plate);}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(relayout,function(){});
 
 /* ---------- boot ---------- */
 function start(){
@@ -852,8 +857,8 @@ function start(){
 }
 (function boot(){var done=false;function go(){if(done)return;done=true;start();}
   if(document.fonts&&document.fonts.load){
-    Promise.all([document.fonts.load('italic 600 14px "Cormorant Garamond"'),document.fonts.load('600 14px "Cormorant Garamond"'),document.fonts.load('500 12px "Geist Mono"')]).then(go,go);
-    setTimeout(go,1200);}
+    Promise.all([document.fonts.load('italic 500 14px '+SERIF),document.fonts.load('500 14px '+SERIF),document.fonts.load('400 14px '+SANS),document.fonts.load('600 14px '+SANS)]).then(go,go);
+    setTimeout(go,1500);}
   else go();})();
 })();
 </script>

@@ -2,12 +2,12 @@
 // CORRELATIONS - Gapminder-style bubble scatter plot
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS, COMPARISON_PALETTE, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260909a';
+    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260910a';
 
 const MARGIN = { top: 24, right: 118, bottom: 52, left: 72 };
 
@@ -467,7 +467,7 @@ function renderBubbles(bubbles) {
         d,
         x: Math.max(30, Math.min(chartW - 30, xScale(d.x))),
         y: Math.max(14, yScale(d.y) - sizeScale(d.size) - 4),
-        w: textWidthPx(d.name, '600 10px Geist, system-ui, sans-serif') + 6
+        w: textWidthPx(d.name, `500 10px ${UI_FONT}`) + 6
     })).sort((a, b) => a.y - b.y);
     for (let pass = 0; pass < 3; pass++) {
         for (let i = 0; i < placed.length; i++) {

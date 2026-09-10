@@ -8,7 +8,7 @@ export function captureScreenshot() {
         html2canvas(app, { backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false })
             .then(canvas => {
                 const link = document.createElement('a');
-                link.download = `cascorro_export_${Date.now()}.png`;
+                link.download = `growth-earth_export_${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             }).catch(err => console.error('Screenshot failed:', err));
@@ -31,7 +31,7 @@ export function exportCSV(data, filename) {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = filename || `cascorro_data_${Date.now()}.csv`;
+    link.download = filename || `growth-earth_data_${Date.now()}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
 }

@@ -4,12 +4,12 @@
 // View 2: Decomposition — Kaya identity (Pop × Income × Intensity)
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS, getColorForIndex, formatEmissions, shortName
-} from '../utils.js?v=20260909a';
+} from '../utils.js?v=20260910a';
 
 const GREEN_COLOR = '#2a9d8f';     // green growth (decoupling)
 const RECESS_COLOR = '#495057';    // recessive (dark gray)
@@ -281,7 +281,7 @@ function renderFacetedReductions(container, dataSets) {
     const legendDiv = document.createElement('div');
     legendDiv.style.cssText = 'display:flex;gap:20px;padding:8px 12px;justify-content:center;flex-shrink:0';
     [{ label: 'Green growth', color: GREEN_COLOR }, { label: 'Recessive', color: RECESS_COLOR }].forEach(item => {
-        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.3px">
+        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
             <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
             ${item.label}</span>`;
     });
@@ -610,7 +610,7 @@ function renderFacetedDecomposition(container, dataSets) {
         { label: 'Income', color: INC_COLOR },
         { label: 'Intensity', color: INT_COLOR }
     ].forEach(item => {
-        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.3px">
+        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
             <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
             ${item.label}</span>`;
     });
@@ -907,7 +907,7 @@ function renderReductionsLegend(svg, margin, w) {
         row.append('rect').attr('width', 10).attr('height', 10).attr('y', -8)
             .attr('fill', item.color).attr('opacity', 0.85);
         row.append('text').attr('x', 14).attr('y', 0).attr('font-size', 10).attr('fill', COLORS.gray)
-            .style('text-transform', 'uppercase').style('letter-spacing', '0.3px').text(item.label);
+            .style('text-transform', 'uppercase').style('letter-spacing', '0.12em').text(item.label);
         xOff += item.label.length * 6.5 + 28;
     });
 }
@@ -925,7 +925,7 @@ function renderKayaLegend(svg, margin, w) {
         row.append('rect').attr('width', 10).attr('height', 10).attr('y', -8)
             .attr('fill', item.color).attr('opacity', 0.85);
         row.append('text').attr('x', 14).attr('y', 0).attr('font-size', 10).attr('fill', COLORS.gray)
-            .style('text-transform', 'uppercase').style('letter-spacing', '0.3px').text(item.label);
+            .style('text-transform', 'uppercase').style('letter-spacing', '0.12em').text(item.label);
         xOff += item.label.length * 6.5 + 28;
     });
 }

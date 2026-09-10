@@ -3,9 +3,9 @@
 // Maddison-style with quartile zones, configurable indicator + scope
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -13,7 +13,7 @@ import {
     inkFor,
     formatValue,
     formatRank,
-    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260909a';
+    resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260910a';
 
 let currentContainer = null;
 
@@ -132,7 +132,7 @@ function renderBumpChart() {
     // The right margin holds the end labels: measure the longest selected name
     // so a phone does not clip "United Kingdom"; the ticks thin out with the width.
     const selNames = selectedCountries.map(iso => (DataLoader.getMetadata(iso) || {}).name || iso);
-    const longest = selNames.reduce((m, n) => Math.max(m, textWidthPx(n, '700 10px Geist, system-ui, sans-serif')), 0);
+    const longest = selNames.reduce((m, n) => Math.max(m, textWidthPx(n, `700 10px ${UI_FONT}`)), 0);
     const margin = { top: 30, right: Math.min(Math.max(60, Math.ceil(longest) + 14), Math.floor(width * 0.42)), bottom: 35, left: 50 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;

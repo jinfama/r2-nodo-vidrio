@@ -2,9 +2,9 @@
 // TABLE VIEW - Sortable data table for selected countries/indicator/year
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import { exportCSV } from '../components/export.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import { exportCSV } from '../components/export.js?v=20260910a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -16,7 +16,7 @@ import {
     formatRank,
     getColorForIndex,
     resolveIndicatorValue
-} from '../utils.js?v=20260909a';
+} from '../utils.js?v=20260910a';
 
 let currentContainer = null;
 let sortColumn = 'rank';
@@ -233,7 +233,7 @@ function renderTable() {
                 });
                 return obj;
             });
-            exportCSV(csvData, `cascorro_${indicator}_${year}.csv`);
+            exportCSV(csvData, `growth-earth_${indicator}_${year}.csv`);
         });
     }
 }

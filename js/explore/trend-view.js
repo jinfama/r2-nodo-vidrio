@@ -3,9 +3,9 @@
 // Supports absolute values, % of world total, and GHG stacked area decomposition
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -19,7 +19,7 @@ import {
     getColorForIndex,
     inkFor,
     formatValue,
-    resolveIndicatorValue, textWidthPx } from '../utils.js?v=20260909a';
+    resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260910a';
 
 let currentContainer = null;
 let drawMode = 'line';       // 'line' | 'stacked'
@@ -334,7 +334,7 @@ export function destroyTrendView() {
 // Right margin that fits the longest end label, within reason: at least the
 // old 60 px, at most 42 % of the width (a phone with six long names).
 function endLabelMargin(labels, width) {
-    const longest = labels.reduce((m, l) => Math.max(m, textWidthPx(l, '600 10px Geist, system-ui, sans-serif')), 0);
+    const longest = labels.reduce((m, l) => Math.max(m, textWidthPx(l, `500 10px ${UI_FONT}`)), 0);
     return Math.min(Math.max(60, Math.ceil(longest) + 12), Math.floor(width * 0.42));
 }
 

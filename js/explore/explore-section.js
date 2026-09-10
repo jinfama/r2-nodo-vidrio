@@ -3,18 +3,18 @@
 // (Map, Trend, Ranking, Table, Composition)
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import { initChoropleth, updateChoropleth, highlightCountries, setDualMap, setYearFrom, isDual } from './choropleth.js?v=20260909a';
-import { initTrendView, updateTrendView, updateTrendYearMarker, destroyTrendView } from './trend-view.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import { initChoropleth, updateChoropleth, highlightCountries, setDualMap, setYearFrom, isDual } from './choropleth.js?v=20260910a';
+import { initTrendView, updateTrendView, updateTrendYearMarker, destroyTrendView } from './trend-view.js?v=20260910a';
 
-import { initRankingView, updateRankingView, destroyRankingView } from './ranking-view.js?v=20260909a';
-import { initTableView, updateTableView } from './table-view.js?v=20260909a';
-import { initCompositionView, updateCompositionView } from './composition-view.js?v=20260909a';
-import Timeline from '../components/timeline.js?v=20260909a';
+import { initRankingView, updateRankingView, destroyRankingView } from './ranking-view.js?v=20260910a';
+import { initTableView, updateTableView } from './table-view.js?v=20260910a';
+import { initCompositionView, updateCompositionView } from './composition-view.js?v=20260910a';
+import Timeline from '../components/timeline.js?v=20260910a';
 import { getColorForIndex, getEffectiveIndicator, INDICATOR_LABELS,
          MFA_FLOW_LABELS, MFA_MATERIAL_KEYS, MFA_MATERIAL_LABELS, MFA_MATERIAL_COLORS,
-         CROPS_COMPONENT_KEYS, CROPS_COMPONENT_LABELS, CROPS_COMPONENT_COLORS } from '../utils.js?v=20260909a';
+         CROPS_COMPONENT_KEYS, CROPS_COMPONENT_LABELS, CROPS_COMPONENT_COLORS } from '../utils.js?v=20260910a';
 
 let timeline = null;
 let initialized = false;

@@ -1,201 +1,279 @@
-# web_cascorro — Global Change & Human Development Explorer
+# web_cascorro — Growth & Earth: global development and environmental change since 1750
 
 > Protocolo comun de agentes: ver `../../AGENTS.md`. Plan de URLs beta: `../../docs/BETA_VISORS.md`.
 
 ## Descripción
-Explorador global de indicadores de cambio ambiental y desarrollo humano.
-Incluye globo 3D, mapas coropléticos, análisis de tendencias, descomposición y correlaciones.
+**Growth & Earth** (desde el 10 de septiembre de 2026; antes «Growth's Wake / Estelas del
+crecimiento»; nombre de trabajo original «Cascorro», que sigue en el nombre de la carpeta, en
+`data/`, en `portada/cascorro.js` y en la foto de la Plaza de Cascorro de About). Explorador
+global de indicadores de cambio ambiental y desarrollo humano: 199 países y ocho regiones,
+1750–2024; globo 3D con perfil de país, mapas coropléticos, tendencias, ranking, tabla,
+composición y cinco análisis (intensidades, drivers, correlaciones, recesiones, Tapio).
 Destino: organización GitHub pendiente de definir.
+
+**Título oficial** (la marca no se traduce): «Growth & Earth: global development and
+environmental change since 1750». Emiliano Travieso: «al revés [Earth & Growth] suena peor».
+Nombre español secundario, solo en el eyebrow del toggle ES de la portada y en el texto de
+orígenes de About: «Estelas del crecimiento». **Texto de entrada** de Emiliano (EN) en la placa
+de la portada, en `aboutLead` del explorador (EN/ES/中文) y traducido al español en el `data-es`
+de `.lede`: «Since the industrial revolution, modern economic growth has sustained ever larger
+populations and extraordinary progress in education and health, while also transforming the
+planet through greenhouse gas emissions, cropland expansion, and raw material extraction.
+Growth & Earth is a place to explore this uneven history of global development and
+environmental change.»
 
 ## Estructura
 ```
-cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido)
-index.html              ← Portada V7 (2026-09-08; futuros V7b 2026-09-09): carta náutica de las ocho estelas + mar abierta; CTA → explorer.html
-explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08 (sin iframe ni audio); cromo claro V7b (2026-09-09); caché `?v=20260909a`
-portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py)
-js/                     ← Módulos ES6 (23 archivos, 380K)
-├── app.js              ← Controlador principal, routing por hash
+cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido) — DESFASADO, ver Pendiente
+index.html              ← Portada V8 «Growth & Earth» (2026-09-10): escena V7b a sangre + placa Gill arriba a la izquierda; CTA → explorer.html
+explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08; identidad Gill desde 2026-09-10; caché `?v=20260910a`
+portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py); no se toca
+js/                     ← Módulos ES6 (23 archivos)
+├── app.js              ← Controlador principal, routing por hash, diccionarios i18n (EN/ES/中文), exportación PNG
 ├── state.js            ← Gestión de estado
 ├── data-loader.js      ← Carga de datos
-├── utils.js            ← Utilidades
+├── utils.js            ← Utilidades, COLORS, rampas de mapa, COMPARISON_INK, UI_FONT
 ├── components/         ← country-picker, timeline, tooltip, export
 ├── globe/              ← globe-section, globe-renderer, country-profile
 ├── explore/            ← explore-section, trend, composition, choropleth,
-│                         ranking, tapio, table (201K — sección más grande)
+│                         ranking, tapio, table
 └── analysis/           ← analysis-section, recessions, drivers,
                           correlations, intensities
-data/                   ← JSONs (27.3 MB)
+data/                   ← JSONs (27.3 MB) — no se tocan
 ├── cascorro_countries.json    ← 24 MB — dataset principal
 ├── cascorro_regions.json      ← 2.4 MB — agregaciones regionales
 ├── cascorro_reductions.json   ← 693K — descomposiciones
 ├── cascorro_metadata.json     ← Definiciones de variables
 └── countries-110m.json        ← Topología del mapa
-img/                    ← Logos y fotos del equipo (1.2 MB)
+img/                    ← Fotos del equipo y logos institucionales; `cascorro.jpg` (el azulejo, marca antigua) se conserva y solo lo usa la historia de About
 build/build.ps1         ← NO DESPLEGAR. Script PowerShell que genera cascorro_explorer.html
 {}                      ← Archivo vacío, se puede borrar
 ```
 
+**No hay `css/` propio.** El cromo vive en línea: `index.html` (`:root` + `<style>` de la
+portada), `explorer.html` (`:root` + bloque `<style>` de ~640 líneas), `js/app.js` (cabecera
+del PNG exportado, que lee `--bg/--cd/--cl/--cb` y la familia `UI_FONT` de `utils.js`) y las
+cadenas `style=`/`cssText` de `js/explore/composition-view.js`, `js/explore/table-view.js`,
+`js/explore/tapio-view.js` y `js/components/country-picker.js` (todas con `var(--...)`).
+
 ## Stack
 - HTML/CSS/JS vanilla (módulos ES6)
 - D3.js v7 + TopoJSON + Globe.gl (CDN)
-- Fuentes: Bricolage Grotesque + Geist + Geist Mono (una sola hoja de Google Fonts); la portada añade a esa misma hoja Cormorant Garamond (la «mano de carta» del lienzo: nombres de región, años, sondas, Machado). El explorador no la usa.
+- Fuentes: **Gill Sans** del sistema, con **Cabin** (Google Fonts) como sustituto libre;
+  **Perpetua** del sistema, con **Crimson Pro** (Google Fonts) como sustituto. Una sola hoja
+  de Google Fonts (`Cabin` + `Crimson Pro`) en portada y explorador; **no añadas otra**.
+  **No se incluyen ficheros de Gill Sans ni Perpetua en el repo** (licencia Monotype).
 - Build: PowerShell script que empaqueta todo en un HTML autocontenido
 
-## Paleta y tipografía del cromo (2026-09-06; cromo claro de nuevo desde la V7b, 2026-09-09)
+## Identidad Gill (2026-09-10)
 
-> **Regla V7b (2026-09-09): el interior toma acentos y tipografía de la portada, pero el
-> chrome es claro por decisión de Juan del 9 de septiembre** («el color oscuro en Growth's
-> Wake no me gustaba»; el azulejo de la Plaza de Cascorro no se veía sobre el mar). Cabecera,
-> pestañas, barras de tiempo, pie, pantalla de carga y barra inferior del móvil van en papel
-> (`--bg` de fondo, `--cb` de filete, tipo `--cd` 12,2:1 y `--cl` 5,2:1 medidos en vivo sobre
-> el fondo plano); las marcas activas (subrayado de pestañas y sub-pestañas, filete del
-> indicador activo del perfil, borde superior de la barra móvil) son `--verm`; los botones
-> primarios (`.tl-play`, `.ctrl-btn.active`, `.map-compare-btn`, `.method-indicator-btn.active`,
-> `.lang-btn.active`) son mar sobre crema (11,3:1); `.tl-speed` es un botón perfilado (`--cb`,
-> tinta `--cg`, 6,9:1). **Selector de idioma:** tres botones sueltos (EN · ES · 中文) sin
-> recuadro exterior; el activo es una pastilla de mar con aire interior (26 px de alto, 9 px
-> de lado; 6 px en móvil), nunca una caja alrededor a la que la pastilla toque el borde. En
-> móvil el título del logo cede con elipsis (`.app-logo>div`) para que los tres botones y los
-> dos iconos quepan en ES. El mar oscuro solo sobrevive en el raíl de Explore
-> (`.explore-sidebar`, desde 2026-09-06) y en el tooltip. La V7 oscura del 8 de septiembre
-> queda en `..._backup/explorer.html.20260909-v7b.bak` y `..._backup/js.20260909-v7b/`.
+Encargo de Juan y de Emiliano: tomar la estética de Eric Gill («un genio del diseño de
+principios de siglo»): referencia de Emiliano, fondo bermellón (≈ `#d84a34`) y texto crema
+(≈ `#f1e6c8`) en Gill Sans, «GROWTH & EARTH» en versales ligeras y espaciadas, subtítulo en
+caja baja. Reglas de la casa, portada y explorador:
 
-**Portada V7 (`index.html`, 2026-09-08; futuros V7b, 2026-09-09).** Carta náutica: la escena
-ocupa toda la columna derecha; el mundo trazado (1750–2024) termina al 60 % del ancho y el
-40 % restante es «mar abierta — nada trazado», donde cada región se abre en **dos o tres**
-estelas fantasma (tres en escritorio, dos en móvil), finas y tenues: una sube, una baja, una
-oscila. En las regiones ricas (`RICH` = Norteamérica y Europa Occidental) la que sube
-**continúa el crecimiento** (66–80 % del aire hasta el borde; `vMax` lleva un 20 % de aire
-para que la estela más alta tenga agua encima); las tres más pobres abren más hacia arriba
-(despegue tardío, `pw` 1,5–2) y su «baja» se lee como quedarse. Abanicos estrechos (11 px),
-un hilo central al 62 % y otro lateral al 28 %, deshilachado hacia el horizonte: figura
-retórica, no proyección; sin cifras ni eje. Juan pidió el 9 de septiembre «más sutiles, dos o
-tres por región, con patrones distintos, y que a Norteamérica no se le quite la opción de
-seguir creciendo»; la V7 (cuatro o cinco por región, `NB=5/NF=4`) está en
-`..._backup/index.html.20260909-v7b.bak`. Mapa en
-cartucho pequeño arriba a la izquierda (GEI por persona en el año). Retícula, rumbos desde la
-rosa, sondas, orla con bandas, oleaje vivo (~30 fps en reposo). Título «Growth's Wake» /
-«Estelas del crecimiento» (toggle ES, clave `growthWake.language`).
+- **Un solo color de acento, el bermellón**, sobre crema; tinta gris-negra cálida para el
+  texto; filetes de 1 px; versales espaciadas (`.14–.2em`) en pestañas, rótulos y títulos de
+  sección; caja baja para subtítulos; Perpetua (itálica) para prosa editorial, subtítulos de
+  gráfica y los numerales grandes del año; **cifras tabulares** (`font-variant-numeric:
+  tabular-nums lining-nums` en `body`); `border-radius:0` (excepciones vivas al pie del
+  `<style>`: retratos, puntos de dato, asa del timeline); composición asimétrica.
+- **El bermellón de Emiliano `#d84a34` da 3,4:1 sobre la crema**: sirve para filetes,
+  subrayados, marcas, la marca de sol y versales grandes (≥ 24 px, o ≥ 19 px en negrita), y
+  **nunca para texto pequeño**. Para eso existe `#b13522`: el mismo tono y saturación (HLS) a
+  la luminosidad que pasa AA — crema sobre él 5,0:1; él sobre `--bg` 5,0:1 y sobre `--bgl`
+  4,5:1. Los botones primarios y las pastillas activas son `#b13522` con tipo crema; el
+  bermellón claro solo va en superficies sin texto pequeño.
+- **La marca**: un grabado de línea, sol saliendo sobre el agua dentro de un anillo (SVG en
+  línea, `class="mark"`, trazos 1,2–1,8 en un `viewBox 0 0 48 48`, `currentColor`), repetido
+  en la placa de la portada, la cabecera del explorador, la pantalla de carga y la intro. No
+  hay fichero de imagen: si cambias el dibujo, cámbialo en los cuatro sitios (`MARK` en los
+  scripts de parche de `C:/Work/scratch/ephemeral/visores_2026-09/growth_earth/`).
+- **Pila tipográfica** (idéntica en los dos ficheros):
+  `--ff`/`--sans`: `"Gill Sans MT","Gill Sans Nova","Gill Sans",Cabin,"Alegreya Sans",sans-serif`;
+  `--ff-serif`/`--serif`: `Perpetua,"Crimson Pro","EB Garamond",Georgia,serif`.
+  **`"Gill Sans MT"` va ANTES de `"Gill Sans"` a propósito**: en Windows con Office el fichero
+  `GILSANUB.TTF` (Gill Sans Ultra Bold) registra su familia interna como «Gill Sans» y
+  responde el primero; con el orden del encargo (`"Gill Sans"` primero) toda la portada salía
+  en Ultra Bold (medido el 10-IX en esta máquina, que tiene Gill Sans MT regular/bold/italic
+  y Perpetua regular/italic/bold). En Mac/iOS «Gill Sans» es la familia real y cae ahí; sin
+  ninguna Gill, Cabin. Windows no trae Gill Sans MT Light: el «ligero» de las versales es el
+  regular 400 espaciado; por eso en el explorador **`font-weight:600` se bajó a 500** en todo
+  el `<style>` (Gill Sans MT solo tiene 400 y 700, y 600 caía en negrita). `--ff-caps` (las
+  versales espaciadas, antes `--ff-mono` Geist Mono) apunta a la misma pila; **`--ff-mono` es
+  un mono del sistema y solo lo usa `.method-formula`**. `utils.js` exporta `UI_FONT` (lee
+  `--ff` del `:root`) para el texto en canvas: cabecera del PNG y `textWidthPx()`.
+- **Lo que no cambió**: el motor de estelas de la portada (V7b, 9-IX); las rampas de datos de
+  los mapas (`MAP_RAMPS`, `ember` con su ancla `#c64d38` incluida: es dato, no acento);
+  `COMPARISON_PALETTE`; las baldosas de composition; los patrones de tapio. Solo se retocó lo
+  que es cromo: `COLORS.uiText` `#2a5474` → `#4d443c` (= `--cg`, 7,7:1), la tinta de
+  `labelInkOn()` `#0a2136` → `#1f1b18` (más oscura: todo lo que pasaba AA sigue pasando;
+  constante 0,0615), `MAP_PAPER` y el fondo del globo → `#f1e6c8`, atmósfera del globo
+  `#7fa6c2` → `#d9ccab`, y **cuatro entradas de `COMPARISON_INK`** que sobre la crema nueva
+  quedaban en 4,3–4,4:1 se bajaron en HLS (tono y saturación intactos): `#007065`→`#006e63`,
+  `#486875`→`#466672`, `#965212`→`#925012`, `#0068a1`→`#00659d`, `#c31932`→`#bf1931`; las
+  diez pasan de 4,5:1 sobre los dos papeles.
 
-**Portada que sigue el visor:**
-`07_temp/portadas_visores_2026-09/estelas/V5_wakes-in-the-sea.html`
-(sustituye a V3, que era la referencia anterior; misma paleta, más el token `--ice`).
+**Tokens del explorador (`explorer.html :root`), medidos sobre los dos papeles:**
 
-**No hay `css/` propio.** El cromo vive en línea en cuatro sitios y hay que tocarlos juntos:
-`index.html` (`:root` de la portada del visor), `explorer.html` (`:root` del explorador,
-bloque `<style>` de ~530 líneas), `js/app.js` (cabecera del PNG exportado: lee `--bg/--cd/--cl/--cb`
-del CSS, pero las familias tipográficas van escritas a mano) y las cadenas `style=`/`cssText`
-de `js/explore/composition-view.js`, `js/explore/table-view.js`, `js/explore/tapio-view.js`
-y `js/components/country-picker.js` (todas usan ya `var(--...)`).
-
-**Tokens de la portada, literales:**
-`--sea #0E2C48` `--sea2 #0A2136` `--line #1E4463` `--line2 #2F5C7E`
-`--cream #EFE4CC` `--cream2 #C6CFD6` `--muted #8AA3B7` `--foam #EDF4F7`
-`--verm #C4502F` `--ice #7FA6C2`
-
-**Cómo se reasientan sobre papel** (la portada pinta crema sobre mar oscuro; el explorador
-es el fondo contrario, papel de carta náutica).
-
-**Cómo se miden los ratios (2026-09-06).** No con `getComputedStyle().color`: el texto SVG
-se pinta con `fill`, y leer `color` sobre un `<text>` devuelve el valor heredado, no el que
-se ve — de ahí que un barrido anterior declarara «0 por debajo de AA» y fuera falso. El
-barrido bueno toma el color de `fill` en SVG y de `color` en HTML, y el fondo lo FOTOGRAFÍA:
-esconde todo el texto de la página con una regla global (`color/fill:transparent`), hace una
-captura, y cada rótulo muestrea los píxeles reales de su propia caja. Es la única forma
-correcta cuando el fondo es un lienzo, una imagen o un degradado. La herramienta está en
-`C:/Work/scratch/ephemeral/visores_2026-09/estelas2/barrido.py`.
-
-Ratios de la tabla, medidos sobre píxeles:
-
-**Hay DOS papeles, no uno**: `--bg` `#f2ede0` y `--bgl` `#e7dfcc`. El segundo es más
-oscuro y bajo él un token pierde ~0.6 puntos de ratio, así que la columna que manda
-para cualquier texto sobre `--bgl` (chips, etiquetas del selector, hovers de botón)
-es la tercera.
-
-| token | valor | sobre `--bg` | sobre `--bgl` | de dónde sale |
+| token | valor | sobre `--bg` | sobre `--bgl` | uso |
 |---|---|---|---|---|
-| `--bg` | `#f2ede0` | — | — | `--cream` levantado hacia `--foam` |
-| `--bgl` | `#e7dfcc` | — | — | un paso de vuelta hacia `--cream` |
-| `--cb` | `#c6cfd6` | 1.4:1 (filete) | 1.2:1 (filete) | `--cream2` |
-| `--cd` | `#0e2c48` | **12.2:1** | **10.8:1** | `--sea` como tinta |
-| `--cg` | `#2a5474` | **6.9:1** | **6.0:1** | `--sea`↔`--line2` |
-| `--cl` | `#456580` | **5.2:1** | **4.6:1** | `--muted` bajado hasta pasar AA en LOS DOS papeles (`#8aa3b7` daba 2.5:1; `#4a6d85`, 4.7:1 y 4.2:1) |
-| `--verm` | `#c4502f` | 4.0:1 | 3.5:1 | sólo filetes, subrayados y marcas |
-| `--verm-ink` | `#9f4126` | **5.5:1** | **4.9:1** | `--verm` a L 38.6% (mismo tono 13.3°, misma saturación) |
+| `--bg` | `#f1e6c8` | — | — | la crema de Emiliano, fondo de todo el cromo, del globo y de los mapas |
+| `--bgl` | `#e8dcbd` | — | — | un paso más oscuro: filas teñidas, chips, hovers |
+| `--foam` | `#f7f0de` | — | — | un realce sobre la crema |
+| `--cd` | `#2b2521` | **12,2:1** | **11,1:1** | tinta |
+| `--cg` | `#4d443c` | **7,7:1** | **7,0:1** | tinta secundaria; = `COLORS.uiText` |
+| `--cl` | `#665a4e` | **5,4:1** | **4,9:1** | tinta terciaria, pestañas inactivas, placeholders |
+| `--cb` | `#cdbf9e` | 1,5:1 (filete) | 1,4:1 | filete |
+| `--verm` | `#d84a34` | 3,4:1 | 3,1:1 | filete de pestaña activa, subrayados, marcas, marca, progreso del timeline, versales grandes |
+| `--verm-deep` | `#b13522` | crema sobre él **5,0:1** | | botones primarios: `.tl-play`, `.ctrl-btn.active`, `.lang-btn.active`, `.map-compare-btn`, `.method-indicator-btn.active`, `.gas-preset.active` |
+| `--verm-ink` | `#b13522` | **5,0:1** | **4,5:1** | bermellón como texto: logo de la cabecera, `h2.about-h2`, hovers |
+| `--c1` | `#b13522` | | | acento de interfaz (checkboxes, enlaces, barras de la tabla) |
+| `--sea` / `--sea2` | `#2b2521` / `#1f1b18` | | | nombres heredados de la carta náutica: ahora tinta (raíl de Explore, tooltip) |
+| `--cream` / `--cream2` / `--muted` | `#f1e6c8` / `#d9ccab` / `#a89b86` | | | heredados; `--muted` sobre `--sea2` 6,0:1 (raíl inactivo) |
 
-`--cl` pasó de `#4a6d85` a `#456580` (2026-09-06) porque en su sitio real —filas teñidas
-de la tabla, lista de países, barra inferior del móvil— medía 4.2–4.4:1, no los 4.7:1 que
-da sobre papel limpio. Ahora pasa sobre los dos papeles. El aspa del chip (`.chip-remove`)
-y la etiqueta de recuento del selector (`.cpicker-item-tag`) siguen pintadas en `--cg`. `--verm-ink` bajó
-de `#b04728` (4.19:1 sobre `--bgl`, fallaba en `.chip-remove:hover` y `.header-btn:hover`)
-a `#9f4126`, que pasa sobre los dos papeles.
+**Tokens de la portada (`index.html :root`):** escena sin cambios (`--sea #0E2C48 --sea2
+#0A2136 --line #1E4463 --line2 #2F5C7E --ice #7FA6C2`); `--cream #F1E6C8 --cream2 #D9CCAB
+--muted #A89B86 --foam #F7F0DE`; `--verm #D84A34 --verm-deep #B13522`; tinta de la placa
+`--ink #2B2521 --ink2 #4D443C --ink3 #665A4E`, filete `--rule #CDBF9E`. Medidos en vivo
+(Playwright, `getComputedStyle` sobre fondo plano): eyebrow 5,4:1, EN/ES 5,0:1, `h1` 3,4:1 a
+44 px (texto grande), subtítulo 7,7:1, párrafo 12,2:1, CTA (crema sobre `--verm-deep`)
+5,0:1, banda: `--cream2` sobre `--sea2` 8,8:1 y `--muted` 6,0:1. En el JS de la escena,
+`CREAM`/`FOAM`/`VERM` y `RGB.*` repiten estos valores: la tinta de las estelas va de espuma a
+bermellón según los GEI por persona, así que el cambio de `--verm` se ve en las estelas y en
+el mapa (permitido: es el tono de acento). **Si cambias un token aquí, cambia el otro.**
 
-Los `::placeholder` de los tres buscadores van a `--cl` con `opacity:1`
-(`.ctrl-input`, `.cpicker-search input`, `#globe-search-input`): sin regla propia
-heredaban el gris del navegador, `#757575`, 3.9:1.
+**Cómo se miden los ratios (2026-09-06).** No con `getComputedStyle().color` sobre un SVG:
+el texto SVG se pinta con `fill`, y leer `color` sobre un `<text>` devuelve el valor
+heredado. El barrido bueno toma el color de `fill` en SVG y de `color` en HTML, y el fondo lo
+FOTOGRAFÍA (esconde el texto con `color/fill:transparent`, captura, y muestrea los píxeles
+reales de cada caja). Herramienta: `C:/Work/scratch/ephemeral/visores_2026-09/estelas2/barrido.py`.
+Las cifras de la tabla de arriba son sobre fondo plano (el cromo); el barrido sobre píxeles
+de los rótulos dentro de los lienzos no se repitió el 10-IX y sigue pendiente (ver «Pendiente
+conocido»). Los `::placeholder` de los tres buscadores van a `--cl` con `opacity:1`.
 
-`index.html` (portada V6, 2026-09-08) pinta crema sobre mar con los tokens literales de la portada
-(`--sea/--sea2/--line/--line2/--cream/--cream2/--muted/--foam/--verm/--ice`). **Si cambias uno, cambia el otro.**
+**Marcas de agua del año — decorativas, declaradas.** `#globe-year-display`,
+`#explore-year-display` y `-2` y la `text.year-watermark` de `correlations.js` llevan
+`aria-hidden="true"`; desde el 10-IX van en Perpetua (`--ff-serif`, 34/56 px) y tinta cálida
+al 11–13 %. Son decoración porque el mismo año se imprime a 12,2:1 en la barra de tiempo de
+esa vista. Si alguna vista dejara de mostrar su barra, la marca pasaría a ser la única forma
+de saber el año y habría que subirla a 3:1.
 
-El mar oscuro sobrevive en un sitio: el raíl de Explore (`.explore-sidebar`), pintado en
-`--sea2` con marcador activo en `--verm` (6.2:1 inactivo, 9.5:1 activo).
+**Pendiente conocido** — lo medido por debajo de AA el 6-IX sobre los papeles V7b
+(`#f2ede0`/`#e7dfcc`) y NO tocado porque es codificación de dato; con la crema nueva
+(L 0,79 frente a 0,84) los ratios bajan ~5 %, así que estas cifras son orientativas:
 
-**Tipografía:** `--ff-display` Bricolage Grotesque (logo, títulos de gráfico, nombre de país,
-h1 del intro), `--ff` Geist (interfaz), `--ff-mono` Geist Mono (todas las microetiquetas
-en versalitas con interletraje, los años y la cabecera del PNG). Una sola petición a
-Google Fonts; **no añadas otra**: mete la familia en la hoja que ya existe.
+| dónde | medido | qué es |
+|---|---|---|
+| `.profile-rank-badge` y las cifras del perfil | 1.3–3.6:1 | el número en el color de su serie |
+| rótulos de cuadrante de `tapio-view.js` | 1.7–1.9:1 | `PATTERN_META[].color` al 60%: el color nombra el patrón de desacople |
+| año del punto actual en `tapio-view.js` | 1.5:1 | pintado con el color del patrón; el año está a 12.2:1 en la barra de tiempo |
+| etiquetas de baldosa de `composition-view.js` | 4.17–9.8:1 | `labelInkOn()`; 6 de 18 entre 4.17 y 4.5 en baldosas de luminancia media |
+| `end-label` / `bubble-label` / etiquetas de ranking | ≥ 4.5:1 | `COMPARISON_INK` + `inkFor()`, remedidas y ajustadas el 10-IX sobre la crema nueva |
 
-**Esquinas:** `border-radius:0` en toda la interfaz. Excepciones vivas, declaradas al pie
-del `<style>` de `explorer.html`: retratos circulares del equipo (`.about-avatar`), puntos
-de datos al 50% (`.chip-color/.chip-dot` y los que imprimen los js), y el asa del timeline
-(`.tl-handle`). Nada más; nada de píldoras de 999px.
-
-**Tinta de cromo dentro de `js/`:** `utils.js` `COLORS.uiText` = `#2a5474` (el mismo valor
-que `--cg`). Es la tinta de los rótulos de eje, los pies de gráfico, los mensajes de estado
-vacío y la celda de rango de la tabla — texto de interfaz dibujado dentro de un SVG, donde
-no llegan las variables CSS. `COLORS.lightGray` `#adb5bd` **sigue donde es dato**: la serie
-de referencia World (trend), la línea del año actual y las trayectorias no seleccionadas
-(ranking), y las retículas y líneas de referencia (drivers, tapio, country-profile).
-`utils.js labelInkOn()` elige tinta mar o papel para el rótulo que va ENCIMA de un color de
-dato (baldosas de composition); el color de la baldosa no se toca, sólo lo que se escribe
-sobre él.
-
-**Lo que NO es cromo:** las escalas de color de datos viven en `js/`
-(`utils.js` `COLORS`/`COMPARISON_PALETTE`, trend, composition, tapio, choropleth,
+**Lo que NO es cromo:** las escalas de color de datos viven en `js/` (`utils.js`
+`COLORS`/`COMPARISON_PALETTE`/`MAP_RAMPS`, trend, composition, tapio, choropleth,
 correlations, drivers). `--c1/--c2/--c3` de `explorer.html` son la excepción de nombre:
-`--c1` es acento de interfaz, pero `--c2`/`--c3` marcan las fichas de método con el color
-de su serie, así que cuentan como dato.
+`--c1` es acento de interfaz (ahora bermellón), pero `--c2`/`--c3` marcan las fichas de
+método con el color de su serie, así que cuentan como dato.
 
 > **La regla «no se tocan las escalas de datos» ya no cubre los mapas.** El 6 de septiembre
 > de 2026 el autor la levantó explícitamente para las escalas de mapa y pidió ajustarlas a
 > la portada y hacerlas más agradables. Se rehicieron; la sección siguiente dice con qué
 > criterio y con qué medida. Para todo lo demás —series de gráfico, baldosas de
-> composition, colores de patrón de tapio— **la regla sigue en pie**.
+> composition, colores de patrón de tapio— **la regla sigue en pie**. El 10-IX no se tocó
+> ninguna rampa: solo el tono de acento.
 
-**Marcas de agua del año — decorativas, declaradas (2026-09-06).** `#globe-year-display`
-(1.28:1), `#explore-year-display` y `-2` (1.23:1) y la `text.year-watermark` de
-`correlations.js` (1.05:1) llevan `aria-hidden="true"` y conservan su tono. El criterio no
-es el tamaño sino la evidencia: en las tres vistas el mismo año se imprime a 12.2:1 en la
-barra de tiempo de esa misma vista (`#globe-timeline-year`, `#explore-timeline-year`,
-`#analysis-timeline-year`), así que la marca repite un dato disponible y es decoración.
-Si alguna vista dejara de mostrar su barra de tiempo, la marca pasaría a ser la única
-forma de saber el año y habría que subirla a 3:1. Igual el separador `·` de la portada
-(`.switcher .sep`, 1.97:1): divide botones, no lleva información, `aria-hidden`.
+## Portada V8 «Growth & Earth» (`index.html`, 2026-09-10)
 
-**Pendiente conocido** — lo que este pase midió por debajo de AA y NO tocó, porque es
-codificación de dato. La decisión es del autor:
+Juan: «me gusta [la carta náutica], quiero que el mapa salga un poco más grande», y otra
+estructura que no sea texto a la izquierda y escena a la derecha: «que la figura y el mapa lo
+ocupen todo y solo arriba a la izquierda aparezca el título, la descripción y el botón».
 
-| dónde | medido | qué es |
-|---|---|---|
-| `.profile-rank-badge` y las cifras del perfil | 1.3–3.6:1 | el número en el color de su serie |
-| `end-label` / `bubble-label` / etiquetas de ranking | 1.4–3.6:1 → **4.84–11.24:1** | corregido 2026-09-06: `COMPARISON_INK` + `inkFor()`, mismo tono, tinta para texto |
-| rótulos de cuadrante de `tapio-view.js` | 1.7–1.9:1 | `PATTERN_META[].color` al 60%: el color nombra el patrón de desacople |
-| año del punto actual en `tapio-view.js` | 1.5:1 | pintado con el color del patrón; el año está a 12.2:1 en la barra de tiempo |
-| `span.wake` de la portada | 2.1–2.2:1 → **3.3–3.4:1** | corregido: token propio `--warm-hero` `#96381f` |
-| etiquetas de baldosa de `composition-view.js` | 1.44–5.5:1 → **4.17–9.8:1** | corregido con `labelInkOn()` (tinta por baldosa) y quitando el atenuado de opacidad; quedan 6 de 18 entre 4.17 y 4.5 en las baldosas de luminancia media, donde ni papel ni `--sea2` llegan a 4.5:1: cerrarlo del todo pide un velo bajo el rótulo y eso es decisión de diseño |
-| celda «—» de `table-view.js` | 1.58:1 → **6.1:1** | corregido: `COLORS.uiText` |
-| rótulo de eje de trend y pie de ranking | 1.78:1 → **6.9:1** | corregido: `COLORS.uiText` |
-| `--cl` en su sitio real (`.bn-label`, `.rp-country-iso`, `.profile-unit`) | 4.2–4.4:1 → **4.7–5.2:1** | corregido: `#4a6d85` → `#456580` |
+- **Escena a sangre** (`#scene`, absoluta, `bottom: var(--band)` = 48 px): el motor de la
+  carta náutica V7b sin cambios de semántica (ocho estelas, GEI como tinta, mar abierta con
+  dos o tres estelas fantasma por región, rosa, sondas, orla). Cambian la mano tipográfica
+  (Perpetua para años, sondas, «the wakes part» y «open water»; Gill Sans en versales
+  espaciadas `.14em` para las placas de nombre de las cabezas y las letras de la rosa; las
+  fuentes se leen de `--sans`/`--serif` del `:root` al arrancar, `SANS`/`SERIF`) y los
+  colores `CREAM`/`FOAM`/`VERM`.
+- **La placa** (`header.plate`, absoluta en 32/32, 472 px de ancho, crema, borde de tinta de
+  1 px + `outline` crema a 3 px, sombra): fila superior con eyebrow (`199 countries ·
+  1750–2024` / ES `Estelas del crecimiento · 1750–2024`) y el toggle EN/ES (botones de
+  40 px, el activo en `--verm-deep` subrayado); `.title-row` con el `h1` «GROWTH / & EARTH»
+  (dos líneas, `clamp(36px,3.1vw,44px)`, peso 400, `.18em`, bermellón) y la marca a su
+  derecha (50 px); subtítulo en caja baja 16,5 px; filete bermellón de 44 px; el párrafo de
+  Emiliano a 14 px; CTA «Enter the explorer» (`--verm-deep`, crema, versales `.18em`, 52 px,
+  hover invertido). En `max-height:760px` la placa se compacta.
+- **El motor respeta la placa**: `layout()` lee su rect (`PL`) y (a) coloca el **cartucho
+  del mapa** debajo, alineado con su borde izquierdo, a `W*0.26` acotado en 240–380 px
+  (374 px a 1440×900: 1,87× los 200 px de la V7b) y lo reduce solo si no cabe sobre las
+  estelas de 1750–1900 (`avail`; mínimo 200), (b) baja el rótulo «✦ 1885 · the wakes part»
+  bajo la placa (`partLabelY()`) y (c) mantiene las sondas fuera de placa, cartucho y
+  rótulo. Un `ResizeObserver` sobre la placa relanza `layout()` cuando cambia de alto (ES es
+  más largo; fuentes tardías), igual que `document.fonts.ready`.
+- **El sello** (`.stamp`, arriba a la derecha, en la mar abierta): el año en Perpetua
+  (`#year`, 34–44 px), el rótulo de una línea de qué es la escena (versales `.16em`), la
+  región fijada (`#pinlbl`, estrella bermellón) y la pista en itálica. En móvil solo el año.
+- **Sin barra de tiempo**: el `input[type=range]` es una **línea fina tendida sobre el eje
+  de años** (`layout()` lo coloca en `xL..xData`, 44 px de alto para el dedo, pista
+  transparente sobre el eje dibujado, asa de 10 px en rombo crema). Arrastrar el agua sigue
+  recorriendo los años. El botón reproducir/pausa existe pero es `sr-only` (teclado: espacio,
+  flechas, Inicio/Fin, Escape suelta la región fijada).
+- **La banda** (`footer.band`, 48 px, `--sea2`, filete crema al 22 %): índice de las cuatro
+  secciones en versales espaciadas (numerales en `--muted`, hover en bermellón) y el verso de
+  Machado en Perpetua itálica con «ANTONIO MACHADO · 1912» (se oculta por debajo de 1180 px).
+- **Móvil (≤ 899 px)**: la página fluye (`flex-direction:column`): placa (sin CTA), escena a
+  `55vh` (mín. 400 px, cartucho arriba a la izquierda a `W*0.42`, 150–190 px), banda con el
+  índice en columna y el verso; CTA fijo abajo con degradado. El eyebrow va en una línea
+  (`nowrap`, 10 px).
+- **Contrato V7** comprobado el 10-IX: sin fetch, `index.html` 60 KB + kit 180 KB en total,
+  `noindex`, `prefers-reduced-motion` (estado final estático), 0 errores, sin
+  desbordamiento, ~30 fps en reposo (el bucle vivo se limita a 32 ms) en escritorio y móvil,
+  título «Growth & Earth · global development and environmental change since 1750» (ES:
+  «… · desarrollo global y cambio ambiental desde 1750»). Clave de idioma compartida con el
+  explorador: `growthWake.language` (no se renombró para no perder la preferencia guardada).
+- La V7b anterior está en `C:/Work/scratch/checkpoint/visores_2026-09/web_cascorro_backup/index.html.20260910-ge.bak`
+  (y `explorer.html.20260910-ge.bak`, `js.20260910-ge/`, `CLAUDE.md.20260910-ge.bak`).
+  Scripts de parche reproducibles (`patch_portada.py`, `patch_explorer.py`) y QA (`qa_ge.py`)
+  en `C:/Work/scratch/ephemeral/visores_2026-09/growth_earth/`; capturas en `identidad/`.
+
+## Sistema de pestañas del explorador (documentado para añadir una sección, p. ej. «What if»)
+
+Comprobado en `js/app.js` (líneas 15–90) y `explorer.html`. Una sección nueva necesita, en
+este orden:
+
+1. **El panel**: `<div class="section" id="section-<id>">…</div>` dentro de
+   `.section-container` (junto a `#section-globe`, `#section-explore`, `#section-analysis`,
+   `#section-about`). `.section` es absoluta y `display:none`; `.section.active` es `flex`
+   en columna. Las barras superiores de una sección se ordenan con `order:-3/-2/-1`.
+2. **El registro**: añadir la clave al objeto `sections` de `app.js`
+   (`sections = { globe, explore, analysis, about }` → `document.getElementById`). Sin esa
+   entrada `switchSection()` ignora el id y `handleHash()` no enruta.
+3. **Los botones**: un `<button class="tab-btn" data-section="<id>" data-i18n="nav<Id>">` en
+   `nav.tab-nav` de la cabecera **y otro** en `nav.mobile-bottom-nav` (con su `<svg>` de
+   18 px y `<span class="bn-label" data-i18n="nav<Id>">`). `app.js` los cablea todos con un
+   solo `querySelectorAll('.tab-btn')`: clic → `switchSection(id)` + `location.hash = '#id'`;
+   la clase `active` se sincroniza en los dos juegos. El estilo ya está hecho (versales Gill
+   espaciadas, filete bermellón inferior en escritorio y superior en el móvil): no hace
+   falta CSS nuevo para la pestaña.
+4. **Los textos**: claves `nav<Id>` en los tres diccionarios de `LANGUAGES` (`en`, `es`,
+   `zh`) de `app.js`; `applyLanguage()` rellena `[data-i18n]`, `[data-i18n-html]` y
+   `[data-i18n-title]`.
+5. **El enrutado**: `#<id>` abre la sección (`handleHash`, también en `hashchange`);
+   `#<id>?clave=valor` pasa por `applyStateFromParams()` (hoy `c`, `ind`, `view`, `an`,
+   `range`, `from`, `year`); `buildStateHash()` escribe el permalink desde `State`
+   (`activeSection`, `selectedCountries`, `currentYear`, `yearRange`, `yearFrom`,
+   `indicator`…). `State.subscribe('activeSection')` llama a `switchSection`, y `switchSection`
+   para la reproducción (`isPlaying=false`).
+6. **Exportación**: `visibleFigure()` toma el `svg`/`canvas` más grande de `.section.active`
+   para el PNG; `figureTitle()` distingue `globe`/`analysis`/`about` y deja el resto como
+   Explore — una sección nueva con figura propia debe añadir su rama ahí. El botón Reset del
+   pie vuelve a `globe`.
+7. **La portada**: si la sección debe aparecer en el índice de la banda, añadir un enlace
+   `explorer.html#<id>` en `nav.index` de `index.html` (con `data-es`).
+8. **Caché**: subir el sufijo `?v=` en `explorer.html` y en todos los `import` de `js/`
+   (hoy `20260910a`; un solo `sed` sobre `js/` y `explorer.html`).
 
 ## Escalas de color de los mapas (rehechas 2026-09-06; familia de la portada desde 2026-09-08; `ember` V7b 2026-09-09)
 
@@ -441,19 +519,22 @@ declarado.
   2. `index.html` + `js/` + `data/` — versión modular (para desarrollo).
 - **Para GitHub Pages**: se puede desplegar `index.html` directamente (usa módulos ES6 + CDN). El HTML autocontenido es alternativa para distribución offline.
 - **NO modificar `build/`** sin instrucción explícita
-- **Idioma**: inglés
-- **4 secciones**: globe, explore, analysis, about (routing por hash)
+- **Idioma**: inglés (interfaz EN/ES/中文; la marca «Growth & Earth» no se traduce)
+- **4 secciones**: globe, explore, analysis, about (routing por hash; ver «Sistema de pestañas» arriba antes de añadir una)
+- **Identidad Gill (2026-09-10)**: un solo acento (bermellón), crema, tinta cálida, versales espaciadas, filetes finos, Gill Sans/Cabin + Perpetua/Crimson Pro, sin ficheros de fuentes en el repo, una sola hoja de Google Fonts, `border-radius:0`. No introduzcas colores nuevos de cromo ni otra familia; `--verm` claro nunca como texto pequeño (usa `--verm-ink`/`--verm-deep`).
 
 ## Estado actual
 - [x] Globo 3D interactivo con perfil de país
 - [x] 6 vistas en Explore (trend, composition, choropleth, ranking, tapio, table)
 - [x] 4 análisis (recessions, drivers, correlations, intensities)
-- [x] Versión autocontenida generada
+- [x] Versión autocontenida generada (desfasada)
+- [x] Identidad Growth & Earth / Gill en portada y explorador (2026-09-10)
 
 ## Pendiente
 - [ ] **`cascorro_explorer.html` está desfasado** (de 2026-05-14; `explorer.html` es de
       2026-09). No lleva ni el pase móvil de septiembre, ni la paleta de la portada V5, ni el
-      cromo claro V7b, la `ember` de ocho anclas ni el globo sin textura (2026-09-09).
+      cromo claro V7b, la `ember` de ocho anclas ni el globo sin textura (2026-09-09), ni el
+      nombre e identidad Growth & Earth (2026-09-10).
       Regenerarlo con `build/build.ps1` cuando toque distribuir la versión offline.
 - [ ] Crear `.gitignore` (excluir `build/`, `cascorro_explorer.html`, `{}`)
 - [ ] Borrar archivo `{}` (vacío, sin propósito)

@@ -2,15 +2,15 @@
 // APP.JS - Application entry point, routing, initialization
 // ============================================================================
 
-import State from './state.js?v=20260909a';
-import DataLoader from './data-loader.js?v=20260909a';
-import { initGlobeSection } from './globe/globe-section.js?v=20260909a';
-import { initExploreSection } from './explore/explore-section.js?v=20260909a';
-import { initAnalysisSection } from './analysis/analysis-section.js?v=20260909a';
-import { toggleFullscreen, exportCSV } from './components/export.js?v=20260909a';
-import CountryPicker from './components/country-picker.js?v=20260909a';
-import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260909a';
-import { INDICATOR_LABELS, INDICATOR_UNITS } from './utils.js?v=20260909a';
+import State from './state.js?v=20260910a';
+import DataLoader from './data-loader.js?v=20260910a';
+import { initGlobeSection } from './globe/globe-section.js?v=20260910a';
+import { initExploreSection } from './explore/explore-section.js?v=20260910a';
+import { initAnalysisSection } from './analysis/analysis-section.js?v=20260910a';
+import { toggleFullscreen, exportCSV } from './components/export.js?v=20260910a';
+import CountryPicker from './components/country-picker.js?v=20260910a';
+import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260910a';
+import { INDICATOR_LABELS, INDICATOR_UNITS, UI_FONT } from './utils.js?v=20260910a';
 
 // ---- TAB NAVIGATION ---- //
 const sections = {
@@ -97,120 +97,120 @@ const LANGUAGE_STORAGE_KEY = 'growthWake.language';
 const LANGUAGES = {
     en: {
         htmlLang: 'en',
-        pageTitle: "Growth's Wake: Historical Trajectories of Development and Environment",
-        introTitle: "Growth's Wake",
-        introKicker: 'Historical trajectories of development and environment',
+        pageTitle: 'Growth & Earth · global development and environmental change since 1750',
+        introTitle: 'Growth & Earth',
+        introKicker: 'global development and environmental change since 1750',
         poemLabel: 'Antonio Machado, Proverbios y cantares, XXIX',
         poemQuote: '“Caminante, son tus huellas<br>el camino, y nada más;<br>caminante, no hay camino:<br>se hace camino al andar.<br>Al andar se hace camino,<br>y al volver la vista atrás<br>se ve la senda que nunca<br>se ha de volver a pisar.<br>Caminante, no hay camino,<br>sino estelas en la mar.”',
         poemCredit: 'Antonio Machado, Campos de Castilla (1912)',
         dataLabel: 'Explore the data',
         siteDescription: 'A website offering a compilation of historical series on economic development, resource use, and environmental impacts across countries.',
         introButton: 'Explore trajectories',
-        loadingSubtitle: 'Preparing historical trajectories of development and environment...',
+        loadingSubtitle: 'Loading two and a half centuries of development and environmental change…',
         fallbackIntro: 'A comparative compilation of historical series on <strong>economic development</strong>, <strong>resource use</strong>, and <strong>environmental impacts</strong> across countries and world regions.',
-        logoHtml: "Growth's Wake <span>Development &amp; Environment</span>",
+        logoHtml: 'Growth &amp; Earth <span>development &amp; environment since 1750</span>',
         navProfile: 'Country Profile',
         navExplore: 'Explore',
         navAnalysis: 'Analysis',
         navAbout: 'About',
         homeTitle: 'Back to cover',
-        footerBrand: "Growth's Wake · Infante-Amate, Aguilera & Travieso ·",
+        footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: 'About & sources',
         aboutTabAbout: 'About',
         aboutTabMethodology: 'Methodology',
         aboutTabPublications: 'Publications',
-        aboutTitle: "About Growth's Wake",
-        aboutLead: "Growth's Wake is a data website for historical comparison. It compiles country series on economic development, resource use, greenhouse gas emissions, material flows, land use, biodiversity, and other environmental impacts from the eighteenth century to the present.",
+        aboutTitle: 'About Growth & Earth',
+        aboutLead: "Since the industrial revolution, modern economic growth has sustained ever larger populations and extraordinary progress in education and health, while also transforming the planet through greenhouse gas emissions, cropland expansion, and raw material extraction. Growth & Earth is a place to explore this uneven history of global development and environmental change. It compiles country series on economic development, resource use, greenhouse gas emissions, material flows, land use, biodiversity, and other environmental impacts from the eighteenth century to the present.",
         conceptHeading: 'Conceptual frame',
-        conceptOne: 'The site begins with Machado because the metaphor is methodological as much as poetic. Development does not follow a single predefined road. Countries leave traces that branch, rise, fall, and sometimes contradict one another.',
+        conceptOne: 'The cover carries a line of Machado because the metaphor is methodological as much as poetic. Development does not follow a single predefined road. Countries leave traces that branch, rise, fall, and sometimes contradict one another.',
         conceptTwo: 'The historical record lets us see those wakes retrospectively: where income rose, where human development improved, where resource use intensified, where emissions accumulated, and where environmental impacts became visible. Some older estimates are uncertain, but the direction of travel is clearer behind us than ahead.',
         viewerHeading: 'What the viewer shows',
         viewerText: 'The viewer links country profiles, maps, rankings, time-series comparisons, decoupling patterns, and decomposition tools. Together they allow readers to follow how GDP, HDI, population, emissions, material flows, land use, and biodiversity indicators moved together or apart across two centuries of global change.',
         teamHeading: 'Team',
         originsHeading: 'Origins and future directions',
         originsOne: 'The project began under the working name <strong>Cascorro</strong>, after the <em>Plaza de Cascorro</em>, a lively square in the historic centre of Madrid. Over the course of several research meetings held in Madrid, the three members of the team ended up &mdash;more often than not&mdash; wrapping up the day with a beer and conversation in this square. What began as an informal meeting point became the place where the project was conceived and gradually took shape.',
-        originsTwo: 'The current title, <strong>Growth&rsquo;s Wake</strong>, draws on the image of a wake on the sea: development has no single predefined road, but a plurality of paths that can be reconstructed historically. Looking back, those wakes reveal gains in human development as well as greenhouse gas emissions, material pressures, land-use change, and biodiversity losses.',
-        originsThree: 'Growth&rsquo;s Wake is an ongoing research initiative. Future work will expand the platform with <strong>new indicators</strong>, updated datasets, and papers that analyze the interplay between environmental pressures and socioeconomic development in historical perspective, deepening our understanding of long-term decoupling patterns, regional trajectories, and the environmental costs of growth.',
+        originsTwo: 'The title, <strong>Growth &amp; Earth</strong>, names the two sides of the story: modern economic growth, and the planet that has sustained it and been transformed by it. The image of a wake on the sea, from Machado&rsquo;s verse, stays with the project as its Spanish subtitle, <em>Estelas del crecimiento</em>: development has no single predefined road, but a plurality of paths that can be reconstructed historically. Looking back, those wakes reveal gains in human development as well as greenhouse gas emissions, material pressures, land-use change, and biodiversity losses.',
+        originsThree: 'Growth &amp; Earth is an ongoing research initiative. Future work will expand the platform with <strong>new indicators</strong>, updated datasets, and papers that analyze the interplay between environmental pressures and socioeconomic development in historical perspective, deepening our understanding of long-term decoupling patterns, regional trajectories, and the environmental costs of growth.',
         dataSourcesHeading: 'Data sources',
-        dataSourcesText: 'All data displayed on this platform is derived from publicly available datasets. Each indicator page in the <strong>Methodology</strong> tab documents the original source, coverage, and required citation. If you use data or visualizations from Growth&rsquo;s Wake in your work, please cite both the original data providers and the relevant publications by Infante-Amate, Travieso &amp; Aguilera listed in the Methodology section.'
+        dataSourcesText: 'All data displayed on this platform is derived from publicly available datasets. Each indicator page in the <strong>Methodology</strong> tab documents the original source, coverage, and required citation. If you use data or visualizations from Growth &amp; Earth in your work, please cite both the original data providers and the relevant publications by Infante-Amate, Travieso &amp; Aguilera listed in the Methodology section.'
     },
     es: {
         htmlLang: 'es',
-        pageTitle: 'Estelas del crecimiento: trayectorias históricas de desarrollo y ambiente',
-        introTitle: 'Estelas del crecimiento',
-        introKicker: 'Trayectorias históricas de desarrollo y ambiente',
+        pageTitle: 'Growth & Earth · desarrollo global y cambio ambiental desde 1750',
+        introTitle: 'Growth & Earth',
+        introKicker: 'desarrollo global y cambio ambiental desde 1750',
         poemLabel: 'Antonio Machado, Proverbios y cantares, XXIX',
         poemQuote: '“Caminante, son tus huellas<br>el camino, y nada más;<br>caminante, no hay camino:<br>se hace camino al andar.<br>Al andar se hace camino,<br>y al volver la vista atrás<br>se ve la senda que nunca<br>se ha de volver a pisar.<br>Caminante, no hay camino,<br>sino estelas en la mar.”',
         poemCredit: 'Antonio Machado, Campos de Castilla (1912)',
         dataLabel: 'Explorar los datos',
         siteDescription: 'Sitio web que ofrece una compilación de series históricas sobre desarrollo económico, uso de recursos e impactos ambientales de los países.',
         introButton: 'Explorar trayectorias',
-        loadingSubtitle: 'Preparando trayectorias históricas de desarrollo y ambiente...',
+        loadingSubtitle: 'Cargando dos siglos y medio de desarrollo y cambio ambiental…',
         fallbackIntro: 'Una compilación comparada de series históricas sobre <strong>desarrollo económico</strong>, <strong>uso de recursos</strong> e <strong>impactos ambientales</strong> para países y regiones del mundo.',
-        logoHtml: 'Estelas del crecimiento <span>Desarrollo y ambiente</span>',
+        logoHtml: 'Growth &amp; Earth <span>desarrollo y ambiente desde 1750</span>',
         navProfile: 'Perfil',
         navExplore: 'Explorar',
         navAnalysis: 'Análisis',
         navAbout: 'Acerca de',
         homeTitle: 'Volver a la portada',
-        footerBrand: 'Estelas del crecimiento · Infante-Amate, Aguilera & Travieso ·',
+        footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: 'Acerca de y fuentes',
         aboutTabAbout: 'Acerca de',
         aboutTabMethodology: 'Metodología',
         aboutTabPublications: 'Publicaciones',
-        aboutTitle: 'Acerca de Estelas del crecimiento',
-        aboutLead: 'Estelas del crecimiento es un sitio web de comparación histórica. Compila series nacionales sobre desarrollo económico, uso de recursos, emisiones de gases de efecto invernadero, flujos materiales, uso del suelo, biodiversidad y otros impactos ambientales desde el siglo XVIII hasta el presente.',
+        aboutTitle: 'Acerca de Growth & Earth',
+        aboutLead: 'Desde la revolución industrial, el crecimiento económico moderno ha sostenido poblaciones cada vez más numerosas y progresos extraordinarios en educación y salud, al tiempo que transformaba el planeta mediante las emisiones de gases de efecto invernadero, la expansión de los cultivos y la extracción de materias primas. Growth & Earth es un lugar para explorar esta historia desigual del desarrollo global y del cambio ambiental. Compila series nacionales sobre desarrollo económico, uso de recursos, emisiones de gases de efecto invernadero, flujos materiales, uso del suelo, biodiversidad y otros impactos ambientales desde el siglo XVIII hasta el presente.',
         conceptHeading: 'Marco conceptual',
-        conceptOne: 'El sitio empieza con Machado porque la metáfora es metodológica además de poética. El desarrollo no sigue un camino único y predefinido. Los países dejan trazas que se bifurcan, suben, caen y a veces se contradicen.',
+        conceptOne: 'La portada lleva un verso de Machado porque la metáfora es metodológica además de poética. El desarrollo no sigue un camino único y predefinido. Los países dejan trazas que se bifurcan, suben, caen y a veces se contradicen.',
         conceptTwo: 'El registro histórico permite ver esas estelas retrospectivamente: dónde creció el ingreso, dónde mejoró el desarrollo humano, dónde se intensificó el uso de recursos, dónde se acumularon emisiones y dónde se hicieron visibles los impactos ambientales. Algunas estimaciones antiguas son inciertas, pero la dirección del viaje se ve mejor hacia atrás que hacia adelante.',
         viewerHeading: 'Qué muestra el visor',
         viewerText: 'El visor conecta perfiles de país, mapas, rankings, comparaciones temporales, patrones de desacoplamiento y herramientas de descomposición. En conjunto permite seguir cómo PIB, IDH, población, emisiones, flujos materiales, usos del suelo e indicadores de biodiversidad se movieron juntos o se separaron a lo largo de dos siglos de cambio global.',
         teamHeading: 'Equipo',
         originsHeading: 'Orígenes y próximos pasos',
         originsOne: 'El proyecto comenzó con el nombre de trabajo <strong>Cascorro</strong>, por la <em>Plaza de Cascorro</em>, una plaza viva del centro histórico de Madrid. Durante varias reuniones de investigación en Madrid, los tres miembros del equipo terminaban a menudo el día con una cerveza y conversación en esa plaza. Lo que empezó como punto informal de encuentro acabó siendo el lugar donde el proyecto fue concebido y tomó forma.',
-        originsTwo: 'El título actual, <strong>Estelas del crecimiento</strong>, se apoya en la imagen de una estela en el mar: el desarrollo no tiene un camino predefinido, sino una pluralidad de trayectorias que pueden reconstruirse históricamente. Al mirar hacia atrás, esas estelas revelan ganancias en desarrollo humano junto a emisiones de gases de efecto invernadero, presiones materiales, cambios de uso del suelo y pérdidas de biodiversidad.',
-        originsThree: 'Estelas del crecimiento es una iniciativa de investigación en marcha. El trabajo futuro ampliará la plataforma con <strong>nuevos indicadores</strong>, datos actualizados y artículos que analicen la relación entre presiones ambientales y desarrollo socioeconómico en perspectiva histórica.',
+        originsTwo: 'El título, <strong>Growth &amp; Earth</strong>, nombra las dos caras de la historia: el crecimiento económico moderno y el planeta que lo ha sostenido y que él ha transformado. La imagen de la estela en el mar, tomada del verso de Machado, sigue acompañando al proyecto como subtítulo en español, <em>Estelas del crecimiento</em>: el desarrollo no tiene un camino predefinido, sino una pluralidad de trayectorias que pueden reconstruirse históricamente. Al mirar hacia atrás, esas estelas revelan ganancias en desarrollo humano junto a emisiones de gases de efecto invernadero, presiones materiales, cambios de uso del suelo y pérdidas de biodiversidad.',
+        originsThree: 'Growth &amp; Earth es una iniciativa de investigación en marcha. El trabajo futuro ampliará la plataforma con <strong>nuevos indicadores</strong>, datos actualizados y artículos que analicen la relación entre presiones ambientales y desarrollo socioeconómico en perspectiva histórica.',
         dataSourcesHeading: 'Fuentes de datos',
-        dataSourcesText: 'Todos los datos mostrados en esta plataforma proceden de fuentes públicas. Cada indicador de la pestaña <strong>Metodología</strong> documenta la fuente original, la cobertura y la cita requerida. Si usas datos o visualizaciones de Estelas del crecimiento, cita tanto a los proveedores originales como las publicaciones relevantes de Infante-Amate, Travieso &amp; Aguilera incluidas en la sección metodológica.'
+        dataSourcesText: 'Todos los datos mostrados en esta plataforma proceden de fuentes públicas. Cada indicador de la pestaña <strong>Metodología</strong> documenta la fuente original, la cobertura y la cita requerida. Si usas datos o visualizaciones de Growth &amp; Earth, cita tanto a los proveedores originales como las publicaciones relevantes de Infante-Amate, Travieso &amp; Aguilera incluidas en la sección metodológica.'
     },
     zh: {
         htmlLang: 'zh',
-        pageTitle: '增长的航迹：发展与环境的历史轨迹',
-        introTitle: '增长的航迹',
-        introKicker: '发展与环境的历史轨迹',
+        pageTitle: 'Growth & Earth：1750年以来的全球发展与环境变化',
+        introTitle: 'Growth & Earth',
+        introKicker: '1750年以来的全球发展与环境变化',
         poemLabel: 'Antonio Machado, Proverbios y cantares, XXIX',
         poemQuote: '“Caminante, son tus huellas<br>el camino, y nada más;<br>caminante, no hay camino:<br>se hace camino al andar.<br>Al andar se hace camino,<br>y al volver la vista atrás<br>se ve la senda que nunca<br>se ha de volver a pisar.<br>Caminante, no hay camino,<br>sino estelas en la mar.”',
         poemCredit: 'Antonio Machado, Campos de Castilla (1912)',
         dataLabel: '探索数据',
         siteDescription: '本网站汇编各国关于经济发展、资源使用与环境影响的历史序列。',
         introButton: '探索轨迹',
-        loadingSubtitle: '正在准备发展与环境的历史轨迹...',
+        loadingSubtitle: '正在加载两个半世纪的发展与环境变化…',
         fallbackIntro: '一套关于<strong>经济发展</strong>、<strong>资源使用</strong>与<strong>环境影响</strong>的可比较历史序列汇编，覆盖各国与世界区域。',
-        logoHtml: '增长的航迹 <span>发展与环境</span>',
+        logoHtml: 'Growth &amp; Earth <span>增长与地球 · 1750年以来</span>',
         navProfile: '国家概况',
         navExplore: '探索',
         navAnalysis: '分析',
         navAbout: '关于',
         homeTitle: '返回介绍',
-        footerBrand: '增长的航迹 · Infante-Amate, Aguilera & Travieso ·',
+        footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: '关于与数据来源',
         aboutTabAbout: '关于',
         aboutTabMethodology: '方法',
         aboutTabPublications: '出版物',
-        aboutTitle: '关于增长的航迹',
-        aboutLead: '增长的航迹是一个用于历史比较的数据网站。它汇编各国关于经济发展、资源使用、温室气体排放、物质流、土地利用、生物多样性以及其他环境影响的历史序列，时间跨度从十八世纪延伸至今。',
+        aboutTitle: '关于 Growth & Earth',
+        aboutLead: '自工业革命以来，现代经济增长支撑了不断扩大的人口，并带来了教育与健康的非凡进步，同时也通过温室气体排放、耕地扩张和原材料开采改变了地球。Growth & Earth 是一个探索这段不均衡的全球发展与环境变化历史的地方。它汇编各国关于经济发展、资源使用、温室气体排放、物质流、土地利用、生物多样性以及其他环境影响的历史序列，时间跨度从十八世纪延伸至今。',
         conceptHeading: '概念框架',
-        conceptOne: '网站以 Machado 开篇，因为这个隐喻既是诗意的，也是方法论的。发展并不沿着一条预设道路前进。不同国家留下的痕迹会分叉、上升、下落，有时还彼此矛盾。',
+        conceptOne: '封面保留了 Machado 的诗句，因为这个隐喻既是诗意的，也是方法论的。发展并不沿着一条预设道路前进。不同国家留下的痕迹会分叉、上升、下落，有时还彼此矛盾。',
         conceptTwo: '历史记录让我们能够回望这些航迹：哪里收入增长，哪里人类发展改善，哪里资源使用加剧，哪里排放累积，哪里环境影响变得可见。一些早期估计存在不确定性，但旅行的方向在身后比在前方更清楚。',
         viewerHeading: '这个视图展示什么',
         viewerText: '本平台连接国家概况、地图、排名、时间序列比较、脱钩模式和分解工具。读者可以追踪两个世纪全球变化中，GDP、HDI、人口、排放、物质流、土地利用和生物多样性指标如何共同变化或彼此分离。',
         teamHeading: '团队',
         originsHeading: '起源与未来方向',
         originsOne: '这个项目最初的工作名是 <strong>Cascorro</strong>，来自马德里历史中心充满活力的 <em>Plaza de Cascorro</em>。在马德里的多次研究会议中，团队三位成员常常在这座广场以啤酒和谈话结束一天。一个非正式的会面地点，逐渐成为项目构思和成形的地方。',
-        originsTwo: '现在的标题 <strong>增长的航迹</strong> 借用了海上航迹的图像：发展没有预设道路，而是由多条可以从历史中重建的路径组成。回望这些航迹，可以同时看到人类发展的进步，以及温室气体排放、物质压力、土地利用变化和生物多样性损失。',
-        originsThree: '增长的航迹是一项持续推进的研究计划。未来工作将加入<strong>新指标</strong>、更新数据，并发表更多从历史视角分析环境压力与社会经济发展关系的研究。',
+        originsTwo: '标题 <strong>Growth &amp; Earth</strong>（增长与地球）指向这个故事的两面：现代经济增长，以及支撑了这一增长并被其改变的地球。取自 Machado 诗句的海上航迹意象，仍以西班牙语副标题 <em>Estelas del crecimiento</em> 的形式留在项目中：发展没有预设道路，而是由多条可以从历史中重建的路径组成。回望这些航迹，可以同时看到人类发展的进步，以及温室气体排放、物质压力、土地利用变化和生物多样性损失。',
+        originsThree: 'Growth &amp; Earth 是一项持续推进的研究计划。未来工作将加入<strong>新指标</strong>、更新数据，并发表更多从历史视角分析环境压力与社会经济发展关系的研究。',
         dataSourcesHeading: '数据来源',
-        dataSourcesText: '平台中的所有数据都来自公开数据集。<strong>方法</strong>标签中的每个指标都记录了原始来源、覆盖范围和引用要求。如果你在研究中使用增长的航迹中的数据或可视化，请同时引用原始数据提供者，以及方法部分列出的 Infante-Amate、Travieso &amp; Aguilera 相关出版物。'
+        dataSourcesText: '平台中的所有数据都来自公开数据集。<strong>方法</strong>标签中的每个指标都记录了原始来源、覆盖范围和引用要求。如果你在研究中使用 Growth &amp; Earth 中的数据或可视化，请同时引用原始数据提供者，以及方法部分列出的 Infante-Amate、Travieso &amp; Aguilera 相关出版物。'
     }
 };
 
@@ -276,7 +276,7 @@ const WAKE_HTML = `
   <div class="intro-wake-copy">
     <div class="intro-wake-header">
       <div class="intro-wake-kicker" id="intro-kicker" data-i18n="introKicker">Historical trajectories of development and environment</div>
-      <h1 id="intro-title" data-i18n="introTitle">Growth's Wake</h1>
+      <h1 id="intro-title" data-i18n="introTitle">Growth &amp; Earth</h1>
     </div>
     <div class="intro-wake-grid">
       <div class="intro-poem" id="intro-poem">
@@ -419,7 +419,7 @@ function wireIntroEnter(overlayEl) {
         appEl.style.display = 'flex';
         // Retry globe init now that app is visible
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260909a').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260910a').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => overlayEl.remove(), 600);
     });
@@ -696,7 +696,7 @@ document.getElementById('footer-csv').addEventListener('click', () => {
             });
         });
     });
-    exportCSV(rows, `cascorro_data_${countries.join('_')}.csv`);
+    exportCSV(rows, `growth-earth_data_${countries.join('_')}.csv`);
 });
 
 // ---- MOBILE SHELL (sprint visores 2026-09) ---- //
@@ -778,11 +778,11 @@ async function init() {
         if (introOverlay) introOverlay.classList.add('hidden');
         appEl.style.display = 'flex';
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260909a').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260910a').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => introOverlay && introOverlay.remove(), 600);
 
-        console.log("Growth's Wake initialized successfully");
+        console.log('Growth & Earth initialized successfully');
 
     } catch (err) {
         console.error('Initialization failed:', err);
@@ -892,7 +892,7 @@ async function copyPermalink(btn) {
 function exportSlug(text) {
     return String(text || '')
         .normalize('NFD').replace(/[̀-ͯ]/g, '')
-        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'growths-wake';
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'growth-earth';
 }
 
 function pageStyleSheetText() {
@@ -976,10 +976,10 @@ async function exportVisiblePNG(btn) {
     ctx.scale(scale, scale);
 
     const css = getComputedStyle(document.documentElement);
-    const paper = css.getPropertyValue('--bg').trim() || '#f2ede0';
-    const ink = css.getPropertyValue('--cd').trim() || '#0e2c48';
+    const paper = css.getPropertyValue('--bg').trim() || '#f1e6c8';
+    const ink = css.getPropertyValue('--cd').trim() || '#2b2521';
     const mute = css.getPropertyValue('--cl').trim() || '#4a6d85';
-    const rule = css.getPropertyValue('--cb').trim() || '#c6cfd6';
+    const rule = css.getPropertyValue('--cb').trim() || '#cdbf9e';
 
     ctx.fillStyle = paper;
     ctx.fillRect(0, 0, w + padSide * 2, h + padTop + padBottom);
@@ -993,14 +993,16 @@ async function exportVisiblePNG(btn) {
 
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = mute;
-    ctx.font = "600 9.5px 'Geist Mono', ui-monospace, Menlo, Consolas, monospace";
-    ctx.fillText("GROWTH'S WAKE · GLOBAL CHANGE & HUMAN DEVELOPMENT", padSide, 24);
+    ctx.font = `500 10px ${UI_FONT}`;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0.16em';
+    ctx.fillText('GROWTH & EARTH · GLOBAL DEVELOPMENT AND ENVIRONMENTAL CHANGE SINCE 1750', padSide, 24);
+    if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     ctx.fillStyle = ink;
-    ctx.font = "600 20px 'Bricolage Grotesque', Geist, system-ui, sans-serif";
+    ctx.font = `500 20px ${UI_FONT}`;
     ctx.fillText(`${t.main}${t.unit ? ` (${t.unit})` : ''} · ${when}`, padSide, 51);
     const sel = State.get('selectedCountries') || [];
     ctx.fillStyle = mute;
-    ctx.font = "400 10.5px Geist, system-ui, sans-serif";
+    ctx.font = `400 10.5px ${UI_FONT}`;
     if (sel.length) ctx.fillText(sel.join(', ').slice(0, 140), padSide, 66);
 
     ctx.strokeStyle = rule;
@@ -1010,15 +1012,15 @@ async function exportVisiblePNG(btn) {
     ctx.lineTo(w + padSide, h + padTop + 16);
     ctx.stroke();
     ctx.fillStyle = mute;
-    ctx.font = "400 10px Geist, system-ui, sans-serif";
-    ctx.fillText("Source: Growth's Wake — Infante-Amate, Aguilera & Travieso. See About & sources for the full reference list.", padSide, h + padTop + 33);
+    ctx.font = `400 10px ${UI_FONT}`;
+    ctx.fillText('Source: Growth & Earth — Infante-Amate, Aguilera & Travieso. See About & sources for the full reference list.', padSide, h + padTop + 33);
     ctx.fillText(permalinkURL().slice(0, 160), padSide, h + padTop + 47);
 
     canvas.toBlob(blob => {
         if (!blob) { flashAction(btn, 'Error'); return; }
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `growths-wake_${exportSlug(t.main)}_${when.replace('–', '-')}.png`;
+        a.download = `growth-earth_${exportSlug(t.main)}_${when.replace('–', '-')}.png`;
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(a.href), 2000);
         flashAction(btn, 'PNG ✓');

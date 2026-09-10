@@ -2,6 +2,10 @@
 // UTILITIES - Formatters, color scales, calculations, constants
 // ============================================================================
 
+// The interface face, read once from the chrome token so canvas text (PNG
+// export, label measuring) matches the CSS: Gill Sans, or Cabin in its place.
+export const UI_FONT = (typeof getComputedStyle === 'function' && (getComputedStyle(document.documentElement).getPropertyValue('--ff') || '').trim()) || 'Cabin, sans-serif';
+
 export const COLORS = {
     primary: '#1e6091',
     accent: '#e63946',
@@ -10,11 +14,10 @@ export const COLORS = {
     // #adb5bd stays: it is a DATA colour (the World reference series, the
     // current-year rule, the unselected trajectories, the gridlines).
     lightGray: '#adb5bd',
-    // Chrome text — axis titles, chart footers, empty-state messages. Same hue
-    // family as the approved cover (07_temp/portadas_visores_2026-09/estelas/
-    // V5_wakes-in-the-sea.html: sea #0E2C48 -> line2 #2F5C7E) and identical to
-    // the explorer's own --cg secondary-ink token. 6.9:1 on paper.
-    uiText: '#2a5474',
+    // Chrome text — axis titles, chart footers, empty-state messages. The
+    // explorer's own --cg secondary ink (Growth & Earth, 2026-09-10: warm
+    // grey-black on Gill cream), 7.7:1 on --bg, 7.0:1 on --bgl.
+    uiText: '#4d443c',
     border: '#e0e0e0',
     bg: '#ffffff',
     bgLight: '#f8f9fa',
@@ -47,13 +50,14 @@ export function labelInkOn(bg) {
     if (!ok) return { ink: '#ffffff', shadow: '0 1px 3px rgba(0,0,0,.5)' };
     const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
     const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
-    // #0a2136 is the cover's --sea2. Measured against the pale tiles of this
-    // palette, --sea (#0e2c48) stopped at 4.29:1; sea2 clears AA on the same
-    // tiles. 0.06418 is its own relative luminance plus the 0.05 of the formula.
+    // #1f1b18 is the chrome's deep ink (--sea2 since 2026-09-10; it was the
+    // cover's sea #0a2136, 4.29:1 on the palest tiles for --sea). Its relative
+    // luminance is 0.0115, a shade darker than the sea's 0.0142, so every tile
+    // that cleared AA before still does. 0.0615 is that luminance plus 0.05.
     const onPaper = 1.05 / (L + 0.05);          // white ink over this tile
-    const onSea   = (L + 0.05) / 0.06418;       // #0a2136 ink over this tile
+    const onSea   = (L + 0.05) / 0.0615;        // #1f1b18 ink over this tile
     return onSea > onPaper
-        ? { ink: '#0a2136', shadow: '0 1px 2px rgba(255,255,255,.65)' }
+        ? { ink: '#1f1b18', shadow: '0 1px 2px rgba(255,255,255,.65)' }
         : { ink: '#ffffff', shadow: '0 1px 3px rgba(0,0,0,.5)' };
 }
 
@@ -68,15 +72,17 @@ export const COMPARISON_PALETTE = [
 // series colour in three places (trend end-labels, ranking end-labels,
 // correlation bubbles) - so those names were unreadable. Hue is kept, so a
 // label still points at its line; only lightness and chroma move, and each
-// entry clears 4.5:1 over BOTH papers (--bg #f2ede0 and --bgl #e7dfcc).
+// entry clears 4.5:1 over BOTH papers (--bg #f1e6c8 and --bgl #e8dcbd since
+// 2026-09-10; the four that fell just under on the darker cream were walked
+// down in HLS, hue and saturation kept).
 // Measured min pairwise dE76 across the ten: 7.8 normal, 6.4 deuteranopia,
 // 7.6 protanopia - against 9.5 / 1.8 / 9.4 for the line palette, i.e. the ink
 // separates a little less under normal vision and far better without green.
 // Use it ONLY for text on paper. Lines, dots, chips and tiles keep the palette,
 // and text inside the dark tooltip keeps its own colours.
 export const COMPARISON_INK = [
-    '#105989', '#a6001b', '#007065', '#5f4800', '#486875',
-    '#965212', '#3b2264', '#0068a1', '#023c00', '#c31932'
+    '#105989', '#a6001b', '#006e63', '#5f4800', '#466672',
+    '#925012', '#3b2264', '#00659d', '#023c00', '#bf1931'
 ];
 
 // Palette colour -> its ink. Anything that is not a palette colour (the grey
@@ -446,7 +452,7 @@ export function textWidthPx(text, font) {
         _measureCtx = c.getContext('2d');
     }
     if (!_measureCtx) return String(text).length * 6;
-    _measureCtx.font = font || "600 10px Geist, system-ui, sans-serif";
+    _measureCtx.font = font || `500 10px ${UI_FONT}`;
     return _measureCtx.measureText(String(text)).width;
 }
 
@@ -536,7 +542,7 @@ export const MAP_RAMP_STOPS = {
 // ramp; zero #f5f0e8 was 2.8 from the paper, i.e. invisible).
 export const MAP_NO_DATA = '#8f8a7e';   // unsurveyed; hatched as well on the SVG map
 export const MAP_ZERO    = '#c6baa2';   // a measured nothing
-export const MAP_PAPER   = '#f2ede0';   // the ground both maps are drawn on
+export const MAP_PAPER   = '#f1e6c8';   // the ground both maps are drawn on (Gill cream, 2026-09-10)
 
 const EMISSION_INDICATORS = new Set([
     'ghg', 'ghg_pc', 'co2ff', 'co2ff_pc', 'ch4', 'ch4_pc', 'n2o', 'n2o_pc',

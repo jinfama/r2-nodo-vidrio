@@ -3,13 +3,13 @@
 // Progressive reveal: lines grow as timelapse advances
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS, INDICATOR_LABELS, INDICATOR_UNITS,
     getColorForIndex, formatValue, shortName, resolveIndicatorValue
-} from '../utils.js?v=20260909a';
+} from '../utils.js?v=20260910a';
 
 const MARGIN = { top: 24, right: 120, bottom: 44, left: 64 };
 let _unsubs = [];

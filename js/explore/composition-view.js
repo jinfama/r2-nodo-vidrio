@@ -4,8 +4,8 @@
 // Supports viewing for world, single country, or sum of selected countries
 // ============================================================================
 
-import State from '../state.js?v=20260909a';
-import DataLoader from '../data-loader.js?v=20260909a';
+import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260910a';
 import {
     COLORS,
     labelInkOn,
@@ -22,7 +22,7 @@ import {
     CROPS_COMPONENT_KEYS,
     CROPS_COMPONENT_LABELS,
     CROPS_COMPONENT_COLORS
-} from '../utils.js?v=20260909a';
+} from '../utils.js?v=20260910a';
 
 let container = null;
 let resizeObserver = null;
@@ -83,7 +83,7 @@ function renderCountryValueComposition(base, year, width, height) {
     }).filter(Boolean).sort((a, b) => b.value - a.value);
 
     if (!children.length) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:13px;font-family:Inter,sans-serif">No country data for year ' + year + '</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:13px;font-family:var(--ff)">No country data for year ' + year + '</div>';
         return;
     }
 
@@ -297,7 +297,7 @@ function render() {
             panel.style.cssText = 'border:1px solid var(--cb,#e0e0e0);position:relative;min-height:200px';
 
             if (children.length === 0) {
-                panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:Inter,sans-serif">No data</div>';
+                panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">No data</div>';
                 const lbl = document.createElement('div');
                 lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
                 lbl.textContent = comp.label + ' \u2014 ' + year;
@@ -358,7 +358,7 @@ function render() {
     }).filter(d => d.value > 0);
 
     if (children.length === 0) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:13px;font-family:Inter,sans-serif">No data for year ' + year + '</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:13px;font-family:var(--ff)">No data for year ' + year + '</div>';
         return;
     }
 
@@ -459,7 +459,7 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
     }).filter(d => d.value > 0);
 
     if (children.length === 0) {
-        panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:Inter,sans-serif">No data</div>';
+        panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">No data</div>';
         // Still add the country label
         const lbl = document.createElement('div');
         lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';

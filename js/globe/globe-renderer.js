@@ -2,14 +2,14 @@
 // GLOBE RENDERER - Globe.gl wrapper for multi-indicator visualization
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260909a';
-import State from '../state.js?v=20260909a';
-import Tooltip from '../components/tooltip.js?v=20260909a';
+import DataLoader from '../data-loader.js?v=20260910a';
+import State from '../state.js?v=20260910a';
+import Tooltip from '../components/tooltip.js?v=20260910a';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatRank, formatRatio,
     getMapColor, MAP_NO_DATA, buildMapLegendHTML, resolveIndicatorValue,
     INDICATOR_LABELS, INDICATOR_UNITS
-} from '../utils.js?v=20260909a';
+} from '../utils.js?v=20260910a';
 
 let globe = null;
 let currentColorFn = null;
@@ -49,9 +49,9 @@ export function initGlobe(containerId) {
             .globeImageUrl(null)
             // the same paper the explorer is printed on (--bg), so the globe
             // is not a white hole in the middle of a cream page
-            .backgroundColor('#f2ede0')
+            .backgroundColor('#f1e6c8')
             .showAtmosphere(true)
-            .atmosphereColor('#7fa6c2')
+            .atmosphereColor('#d9ccab')
             .atmosphereAltitude(0.15)
             .width(container.clientWidth)
             .height(container.clientHeight)
