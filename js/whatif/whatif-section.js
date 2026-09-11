@@ -49,7 +49,7 @@ export const WHATIF_DEFAULTS = Object.freeze({
     whatifRegion: 'WLD',
     whatifRef: 'GBR',
     whatifFrom: 1850,
-    whatifCfMode: 'rate',
+    whatifCfMode: 'level',
     whatifIntensity: 'own'
 });
 

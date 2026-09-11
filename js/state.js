@@ -56,7 +56,7 @@ const State = (() => {
         whatifRegion: 'WLD',           // Behind: WLD CHN EAP ECA LAC MENA NAM SAS SSA WEU GBR
         whatifRef: 'GBR',              // Behind: 'GBR' | 'WLD'
         whatifFrom: 1850,              // Behind: counterfactual start year
-        whatifCfMode: 'rate',          // Behind: 'rate' | 'level'
+        whatifCfMode: 'level',         // Behind: 'rate' | 'level' ('level' pairs with the UK reference, spec 3.6)
         whatifIntensity: 'own',        // Behind: 'own' | 'ref' | 'world'
         // Chart options
         chartType: 'evolution',
