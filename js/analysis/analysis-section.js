@@ -2,15 +2,15 @@
 // ANALYSIS SECTION - Controller for Intensities, Drivers, Correlations, Recessions
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import { COMPARISON_PALETTE, getColorForIndex } from '../utils.js?v=20260911a';
-import { initIntensities, updateIntensities, destroyIntensities } from './intensities.js?v=20260911a';
-import { initDrivers, updateDrivers, destroyDrivers } from './drivers.js?v=20260911a';
-import { initCorrelations, updateCorrelations, destroyCorrelations } from './correlations.js?v=20260911a';
-import { initRecessions, updateRecessions, destroyRecessions } from './recessions.js?v=20260911a';
-import { initTapioView, updateTapioView, destroyTapioView } from '../explore/tapio-view.js?v=20260911a';
-import Timeline from '../components/timeline.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import { COMPARISON_PALETTE, getColorForIndex } from '../utils.js?v=20260911b';
+import { initIntensities, updateIntensities, destroyIntensities } from './intensities.js?v=20260911b';
+import { initDrivers, updateDrivers, destroyDrivers } from './drivers.js?v=20260911b';
+import { initCorrelations, updateCorrelations, destroyCorrelations } from './correlations.js?v=20260911b';
+import { initRecessions, updateRecessions, destroyRecessions } from './recessions.js?v=20260911b';
+import { initTapioView, updateTapioView, destroyTapioView } from '../explore/tapio-view.js?v=20260911b';
+import Timeline from '../components/timeline.js?v=20260911b';
 
 // Country groups for preset buttons
 const PRESETS = {
@@ -21,6 +21,9 @@ const PRESETS = {
 let _active = false;
 let _unsubs = [];
 let _timeline = null;
+let _chartRO = null;
+let _roSize = { w: 0, h: 0 };
+let _roTimer = null;
 
 // ---- Sub-tab navigation ----
 
@@ -177,6 +180,33 @@ function refresh() {
     }
 }
 
+// ---- Redraw when the scene changes size ----
+
+// The facet grids of Recessions and Tapio divide the height of the chart area
+// between their rows, so that height has to be re-read whenever it moves: a
+// window resize, a side panel opening or closing, the chips row wrapping onto
+// a second line when countries are added. Same pattern as the composition view
+// in Explore: observe the container, debounce, redraw.
+function observeChartArea() {
+    const wrap = document.getElementById('analysis-chart-wrapper');
+    if (!wrap || typeof ResizeObserver === 'undefined') return;
+    _roSize = { w: Math.round(wrap.clientWidth), h: Math.round(wrap.clientHeight) };
+    _chartRO = new ResizeObserver(() => {
+        const w = Math.round(wrap.clientWidth);
+        const h = Math.round(wrap.clientHeight);
+        // Redrawing does not change the wrapper (it is flex-sized and clipped),
+        // so this guard is what keeps the observer from feeding itself.
+        if (Math.abs(w - _roSize.w) < 2 && Math.abs(h - _roSize.h) < 2) return;
+        _roSize = { w, h };
+        if (!w || !h) return;                       // hidden section: nothing to draw
+        clearTimeout(_roTimer);
+        _roTimer = setTimeout(() => {
+            if (_active && State.get('activeSection') === 'analysis') refresh();
+        }, 100);
+    });
+    _chartRO.observe(wrap);
+}
+
 // ---- Lifecycle ----
 
 export function initAnalysisSection() {
@@ -188,6 +218,8 @@ export function initAnalysisSection() {
 
     // Timeline
     _timeline = new Timeline('analysis-timeline');
+
+    observeChartArea();
 
     // Subscribe to state changes
     _unsubs.push(State.subscribe('analysisMode', (mode) => switchMode(mode)));
@@ -203,6 +235,12 @@ export function initAnalysisSection() {
         }
     }));
 
+    // Language: the five analyses print their own titles and legends.
+    document.addEventListener('gw:language', () => {
+        renderChips();
+        switchMode(State.get('analysisMode'));
+    });
+
     // Initial render
     renderChips();
     switchMode(State.get('analysisMode'));
@@ -212,6 +250,8 @@ export function destroyAnalysisSection() {
     _active = false;
     _unsubs.forEach(fn => fn());
     _unsubs = [];
+    if (_chartRO) { _chartRO.disconnect(); _chartRO = null; }
+    clearTimeout(_roTimer);
     if (_timeline) { _timeline.destroy(); _timeline = null; }
     destroyIntensities();
     destroyDrivers();

@@ -3,13 +3,14 @@
 // Progressive reveal: lines grow as timelapse advances
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
     COLORS, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, formatValue, shortName, resolveIndicatorValue
-} from '../utils.js?v=20260911a';
+    getColorForIndex, formatValue, shortName, resolveIndicatorValue,
+    tLabel
+} from '../utils.js?v=20260911b';
 
 const MARGIN = { top: 24, right: 120, bottom: 44, left: 64 };
 let _unsubs = [];
@@ -179,7 +180,7 @@ export function updateIntensities() {
     const titleEl = document.getElementById('analysis-title');
     const subEl = document.getElementById('analysis-subtitle');
     if (titleEl) titleEl.textContent = buildTitle();
-    if (subEl) subEl.textContent = 'Ratio of selected indicators over time';
+    if (subEl) subEl.textContent = tLabel('Ratio of selected indicators over time', 'Razón entre los indicadores elegidos a lo largo del tiempo', '所选指标之比随时间的变化');
 
     const currentYear = State.get('currentYear');
     const series = buildSeries(currentYear);

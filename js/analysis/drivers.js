@@ -3,10 +3,10 @@
 // Waterfall chart with optional faceting by country
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
-import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
+import { COLORS, getColorForIndex, formatPercent, formatEmissions, tLabel } from '../utils.js?v=20260911b';
 
 const MARGIN = { top: 24, right: 24, bottom: 64, left: 64 };
 const FACTOR_COLORS = {
@@ -15,12 +15,22 @@ const FACTOR_COLORS = {
     techEffect: '#2a9d8f',
     total: '#e63946'
 };
+// Getters, not values: the module is evaluated once, the labels are read on
+// every draw, so they follow the language the reader chose.
 const FACTOR_LABELS = {
-    popEffect: 'Population',
-    gdpEffect: 'GDP per capita',
-    techEffect: 'Emission intensity',
-    total: 'Total GHG change'
+    get popEffect() { return tLabel('Population', 'Población', '人口'); },
+    get gdpEffect() { return tLabel('GDP per capita', 'PIB per cápita', '人均 GDP'); },
+    get techEffect() { return tLabel('Emission intensity', 'Intensidad de emisiones', '排放强度'); },
+    get total() { return tLabel('Total GHG change', 'Cambio total de GEI', '温室气体变化总量'); }
 };
+
+/** The tick under a waterfall bar. English abbreviates to three letters
+ *  ("Pop", "GDP", "Emi"); two or three ideographs are short already, so
+ *  Chinese is left whole — cutting it gave 排放强 for 排放强度. */
+function shortFactor(label) {
+    const s = String(label == null ? '' : label);
+    return /[\u4e00-\u9fff]/.test(s) ? s : s.substring(0, 3);
+}
 
 let svg, chartW, chartH;
 let _unsubs = [];
@@ -183,7 +193,7 @@ function renderSingleWaterfall(dec, group) {
     svg.select('.x-axis')
         .call(d3.axisBottom(xScale).tickFormat((d, i) => {
             const bar = barData[i];
-            return bar.isYear ? bar.label : bar.label.substring(0, 3);
+            return bar.isYear ? bar.label : shortFactor(bar.label);
         }))
         .selectAll('text')
         .style('font-weight', (d, i) => barData[i]?.isYear ? '700' : '400')
@@ -440,7 +450,7 @@ function renderFacetedWaterfall(decompositions) {
         ['popEffect', 'gdpEffect', 'techEffect'].forEach(f => {
             const val = dec[f];
             barData.push({
-                label: FACTOR_LABELS[f].substring(0, 3),
+                label: shortFactor(FACTOR_LABELS[f]),
                 factor: f,
                 start: cumulative,
                 end: cumulative + val,
@@ -546,8 +556,10 @@ export function updateDrivers() {
     const [startYear, endYear] = State.get('driversPeriod');
     const titleEl = document.getElementById('analysis-title');
     const subEl = document.getElementById('analysis-subtitle');
-    if (titleEl) titleEl.textContent = 'Kaya Decomposition';
-    if (subEl) subEl.textContent = `GHG emission drivers, ${startYear}\u2013${endYear}`;
+    if (titleEl) titleEl.textContent = tLabel('Kaya Decomposition', 'Descomposición de Kaya', 'Kaya 分解');
+    if (subEl) subEl.textContent = tLabel(`GHG emission drivers, ${startYear}\u2013${endYear}`,
+        `Factores de las emisiones de GEI, ${startYear}\u2013${endYear}`,
+        `温室气体排放的驱动因素，${startYear}\u2013${endYear}`);
 
     const countries = State.get('selectedCountries');
     const decompositions = countries.map(iso => decompose(iso)).filter(Boolean);
@@ -555,7 +567,7 @@ export function updateDrivers() {
     if (!decompositions.length) {
         const wrapper = document.getElementById('analysis-chart-wrapper');
         if (wrapper) {
-            wrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">Select countries with data for the chosen period</div>';
+            wrapper.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('Select countries with data for the chosen period', 'Elige países con datos para el periodo elegido', '请选择在所选时期内有数据的国家') + '</div>';
         }
         svg = null;
         return;

@@ -2,14 +2,15 @@
 // GLOBE RENDERER - Globe.gl wrapper for multi-indicator visualization
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260911a';
-import State from '../state.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911b';
+import State from '../state.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatRank, formatRatio,
     getMapColor, MAP_NO_DATA, buildMapLegendHTML, resolveIndicatorValue,
-    INDICATOR_LABELS, INDICATOR_UNITS
-} from '../utils.js?v=20260911a';
+    INDICATOR_LABELS, INDICATOR_UNITS,
+    tLabel
+} from '../utils.js?v=20260911b';
 
 let globe = null;
 let currentColorFn = null;
@@ -191,20 +192,20 @@ function buildTooltipHTML(name, year, indicator, iso3, val, worldVal) {
     const rows = [
         `<div class="tooltip-title"><span>${name}</span><span>${year}</span></div>`,
         `<div class="tooltip-row"><span class="tooltip-label">${primaryLabel}</span><span class="tooltip-value">${formatValue(primaryValue, indicator)}</span></div>`,
-        `<div class="tooltip-row"><span class="tooltip-label">World rank</span><span class="tooltip-value">${rank ? formatRank(rank, total) : '\u2014'}</span></div>`,
-        `<div class="tooltip-row"><span class="tooltip-label">vs World avg</span><span class="tooltip-value">${ratio != null ? formatRatio(ratio) : '\u2014'}</span></div>`
+        `<div class="tooltip-row"><span class="tooltip-label">${tLabel('World rank', 'Puesto mundial', '世界排名')}</span><span class="tooltip-value">${rank ? formatRank(rank, total) : '\u2014'}</span></div>`,
+        `<div class="tooltip-row"><span class="tooltip-label">${tLabel('vs World avg', 'frente a la media mundial', '与世界平均之比')}</span><span class="tooltip-value">${ratio != null ? formatRatio(ratio) : '\u2014'}</span></div>`
     ];
 
     // Add secondary rows for quick context
     if (indicator !== 'gdp_pc') {
-        rows.push(`<div class="tooltip-row"><span class="tooltip-label">GDP per capita</span><span class="tooltip-value">${formatGDP(val?.gdp_pc)}</span></div>`);
+        rows.push(`<div class="tooltip-row"><span class="tooltip-label">${tLabel('GDP per capita', 'PIB per cápita', '人均 GDP')}</span><span class="tooltip-value">${formatGDP(val?.gdp_pc)}</span></div>`);
     }
     if (indicator !== 'ghg' && indicator !== 'co2ff' && indicator !== 'ghg_pc') {
-        rows.push(`<div class="tooltip-row"><span class="tooltip-label">GHG total</span><span class="tooltip-value">${formatEmissions(val?.ghg)}</span></div>`);
+        rows.push(`<div class="tooltip-row"><span class="tooltip-label">${tLabel('GHG total', 'GEI total', '温室气体总量')}</span><span class="tooltip-value">${formatEmissions(val?.ghg)}</span></div>`);
     }
     if (indicator === 'ghg') {
-        rows.push(`<div class="tooltip-row"><span class="tooltip-label">CO\u2082 fossil</span><span class="tooltip-value">${formatEmissions(val?.co2ff)}</span></div>`);
-        rows.push(`<div class="tooltip-row"><span class="tooltip-label">GHG per capita</span><span class="tooltip-value">${val?.ghg_pc != null ? val.ghg_pc.toFixed(1) + ' t' : '\u2014'}</span></div>`);
+        rows.push(`<div class="tooltip-row"><span class="tooltip-label">${tLabel('CO₂ fossil', 'CO₂ fósil', '化石 CO₂')}</span><span class="tooltip-value">${formatEmissions(val?.co2ff)}</span></div>`);
+        rows.push(`<div class="tooltip-row"><span class="tooltip-label">${tLabel('GHG per capita', 'GEI per cápita', '人均温室气体')}</span><span class="tooltip-value">${val?.ghg_pc != null ? val.ghg_pc.toFixed(1) + ' t' : '\u2014'}</span></div>`);
     }
 
     return rows.join('');

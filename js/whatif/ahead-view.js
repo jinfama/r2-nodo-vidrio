@@ -71,6 +71,9 @@ function unbindAll() {
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const round4 = (v) => Math.round(v * 1e4) / 1e4;
 const isEs = () => ctx.lang() === 'es';
+const isZh = () => ctx.lang() === 'zh';
+/** One of three literals, by the language of the day (zh falls back to en). */
+const pk = (en, es, zh) => (isEs() ? es : isZh() ? (zh == null ? en : zh) : en);
 
 /** A signed integer of Gt, with the typographic minus and a leading plus. */
 function signedGt(v, d = 0) {
@@ -90,7 +93,9 @@ function rateTxt(x, d = 1) {
  *  three chips of the dial then read as three different kinds of number. */
 function popTxt(p) {
     const f = ctx.fmt;
-    return isEs() ? f.nGroup(p / 1e6, 0) + ' M' : f.n(p / 1e9, 1) + ' bn';
+    if (isEs()) return f.nGroup(p / 1e6, 0) + ' M';
+    if (isZh()) return f.n(p / 1e8, 1) + ' 亿';
+    return f.n(p / 1e9, 1) + ' bn';
 }
 
 /** Short target label for prose ('1.5 °C' / '2 °C' / '≈ 3 °C'). */
@@ -110,28 +115,28 @@ function probTxt(prob) { return String(prob).replace('%', ' %'); }
 // pushes the full label + definition + source into the tooltip.
 const SHORT = {
     growth: {
-        imf: { en: 'IMF', es: 'FMI' },
-        oecd: { en: 'OECD', es: 'OCDE' },
-        recent: { en: 'Recent', es: 'Reciente' },
-        stagnation: { en: 'Stagnation', es: 'Estancamiento' },
-        degrowth: { en: 'Degrowth', es: 'Decrecimiento' }
+        imf: { en: 'IMF', es: 'FMI', zh: 'IMF' },
+        oecd: { en: 'OECD', es: 'OCDE', zh: 'OECD' },
+        recent: { en: 'Recent', es: 'Reciente', zh: '近期' },
+        stagnation: { en: 'Stagnation', es: 'Estancamiento', zh: '停滞' },
+        degrowth: { en: 'Degrowth', es: 'Decrecimiento', zh: '去增长' }
     },
     technology: {
-        bau: { en: 'BAU', es: 'Reciente' },
-        best_global: { en: 'Best decade', es: 'Mejor década' },
-        best_regional: { en: 'Best region', es: 'Mejor región' },
-        double_best: { en: '×2 best', es: '×2 la mejor' },
-        stagnation: { en: 'No change', es: 'Sin cambio' }
+        bau: { en: 'BAU', es: 'Reciente', zh: '照常' },
+        best_global: { en: 'Best decade', es: 'Mejor década', zh: '最佳十年' },
+        best_regional: { en: 'Best region', es: 'Mejor región', zh: '最佳区域' },
+        double_best: { en: '×2 best', es: '×2 la mejor', zh: '×2 最佳' },
+        stagnation: { en: 'No change', es: 'Sin cambio', zh: '无变化' }
     }
 };
 
 /** How the growth clause of §8.2 names the technology dial. */
 const TECH_PHRASE = {
-    bau: { en: 'the recent trend in technology', es: 'la tendencia tecnológica reciente' },
-    best_global: { en: 'the best global decade of technology', es: 'la mejor década tecnológica mundial' },
-    best_regional: { en: 'the best regional decade of technology', es: 'la mejor década tecnológica regional' },
-    double_best: { en: 'twice the best global decade', es: 'el doble de la mejor década mundial' },
-    stagnation: { en: 'technology standing still', es: 'la tecnología estancada' }
+    bau: { en: 'the recent trend in technology', es: 'la tendencia tecnológica reciente', zh: '近期的技术趋势' },
+    best_global: { en: 'the best global decade of technology', es: 'la mejor década tecnológica mundial', zh: '全球最佳的技术十年' },
+    best_regional: { en: 'the best regional decade of technology', es: 'la mejor década tecnológica regional', zh: '区域最佳的技术十年' },
+    double_best: { en: 'twice the best global decade', es: 'el doble de la mejor década mundial', zh: '全球最佳十年的两倍' },
+    stagnation: { en: 'technology standing still', es: 'la tecnología estancada', zh: '技术停滞不前' }
 };
 
 // The JSON carries `definition` in Spanish only, so the English interface used
@@ -143,56 +148,112 @@ const TECH_PHRASE = {
 // decision D4). The numbers always come from the JSON — this map is prose.
 const DEFS = {
     growth: {
-        imf: { en: 'Average world GDP growth 2025–2030 from the IMF WEO of October 2025 (3.17 %/yr) minus world population growth 2024–2030 (UN WPP 2024 medium, 0.81 %/yr), extended to 2050.' },
-        oecd: { en: 'World potential GDP per capita: from 2.0 %/yr in 2025 to 1.25 %/yr in 2050 (linear); the equivalent constant rate is shown (same 2050 level).' },
-        recent: { en: 'CAGR of world GDP per capita 2010–2024 in the data of this viewer (Maddison).' },
-        stagnation: { en: 'World GDP per capita held at its 2024 level.' },
+        imf: {
+            en: 'Average world GDP growth 2025–2030 from the IMF WEO of October 2025 (3.17 %/yr) minus world population growth 2024–2030 (UN WPP 2024 medium, 0.81 %/yr), extended to 2050.',
+            zh: '国际货币基金组织 2025 年 10 月《世界经济展望》给出的 2025–2030 年世界 GDP 平均增速（3.17 %/年），减去 2024–2030 年世界人口增速（联合国《世界人口展望 2024》中方案，0.81 %/年），并延伸至 2050 年。',
+            label_zh: '预测 — IMF'
+        },
+        oecd: {
+            en: 'World potential GDP per capita: from 2.0 %/yr in 2025 to 1.25 %/yr in 2050 (linear); the equivalent constant rate is shown (same 2050 level).',
+            zh: '世界潜在人均 GDP：由 2025 年的 2.0 %/年线性降至 2050 年的 1.25 %/年；此处显示的是等效的恒定速率（2050 年水平相同）。',
+            label_zh: '预测 — OECD 长期情景'
+        },
+        recent: {
+            en: 'CAGR of world GDP per capita 2010–2024 in the data of this viewer (Maddison).',
+            zh: '本视图数据（Maddison）中 2010–2024 年世界人均 GDP 的年均复合增长率。',
+            label_zh: '近期趋势（2010–2024）'
+        },
+        stagnation: {
+            en: 'World GDP per capita held at its 2024 level.',
+            zh: '世界人均 GDP 保持在 2024 年的水平。',
+            label_zh: '停滞',
+            source_en: 'definition', source_es: 'definición', source_zh: '定义'
+        },
         degrowth: {
             en: 'World GDP per capita −1 %/yr (≈ −23 % by 2050). An illustrative value; it comes from no projection.',
             es: 'PIB per cápita mundial −1 %/año (≈ −23 % en 2050). Valor ilustrativo: no procede de ninguna proyección.',
-            source_en: 'definition', source_es: 'definición'
+            zh: '世界人均 GDP −1 %/年（到 2050 年约 −23 %）。这是示例性数值，并非来自任何预测。',
+            label_zh: '去增长',
+            source_en: 'definition', source_es: 'definición', source_zh: '定义'
         }
     },
     technology: {
-        bau: { en: 'CAGR 2010–2024 of world carbon intensity (fossil CO₂ / GDP PPP).' },
-        best_global: { en: 'Largest average annual fall of world carbon intensity over rolling ten-year windows since 1960.' },
+        bau: {
+            en: 'CAGR 2010–2024 of world carbon intensity (fossil CO₂ / GDP PPP).',
+            zh: '2010–2024 年世界碳强度（化石 CO₂ / 购买力平价 GDP）的年均复合变化率。',
+            label_zh: '照常发展（2010–2024）'
+        },
+        best_global: {
+            en: 'Largest average annual fall of world carbon intensity over rolling ten-year windows since 1960.',
+            zh: '1960 年以来，在所有滚动十年窗口中，世界碳强度年均降幅最大的一次。',
+            label_zh: '全球最佳十年（2012–2022）',
+            source_en: 'computed from data/cascorro_regions.json (world)',
+            source_es: 'cálculo sobre data/cascorro_regions.json (world)',
+            source_zh: '基于 data/cascorro_regions.json（世界）计算'
+        },
         best_regional: {
             en: 'Largest ten-year fall of carbon intensity in one of the 8 Minerva regions, among windows starting in 2010 or later, with GDP per person growing ≥ 1 %/yr and the region emitting ≥ 5 % of world fossil CO₂ at the start (a growth context, not a recession).',
             es: 'Mayor caída decenal de la intensidad en una de las 8 regiones Minerva, entre ventanas que empiezan en 2010 o después, con crecimiento del PIB pc ≥ 1 %/año y ≥ 5 % del CO₂ fósil mundial al inicio (contexto de crecimiento, no de recesión).',
+            zh: '8 个 Minerva 区域中碳强度十年降幅最大的一次，窗口起点在 2010 年或之后，且期间人均 GDP 增速 ≥ 1 %/年、该区域起点时的化石 CO₂ 占世界 ≥ 5 %（增长情境，而非衰退）。',
             label_en: 'Best regional decade (Western Europe 2012–2022)',
-            label_es: 'Mejor década regional (Europa Occidental 2012–2022)'
+            label_es: 'Mejor década regional (Europa Occidental 2012–2022)',
+            label_zh: '最佳区域十年（西欧 2012–2022）',
+            source_en: 'computed from data/cascorro_regions.json (regions)',
+            source_es: 'cálculo sobre data/cascorro_regions.json (regiones)',
+            source_zh: '基于 data/cascorro_regions.json（各区域）计算'
         },
-        double_best: { en: '2 × the best world decade. Intensity in 2050 = (1+r)^26 of the 2024 one.' },
-        stagnation: { en: 'Carbon intensity held at its 2024 level.' }
+        double_best: {
+            en: '2 × the best world decade. Intensity in 2050 = (1+r)^26 of the 2024 one.',
+            zh: '全球最佳十年的 2 倍。2050 年的强度 = 2024 年强度 ×(1+r)^26。',
+            label_zh: '全球最佳十年的两倍',
+            source_en: 'definition', source_es: 'definición', source_zh: '定义'
+        },
+        stagnation: {
+            en: 'Carbon intensity held at its 2024 level.',
+            zh: '碳强度保持在 2024 年的水平。',
+            label_zh: '技术停滞',
+            source_en: 'definition', source_es: 'definición', source_zh: '定义'
+        }
     },
-    population: {                                  // these carry only a source
-        medium: { source_en: 'UN WPP 2024, medium variant, rescaled to the 2024 base of this viewer' },
-        low: { source_en: 'UN WPP 2024, low variant' },
-        high: { source_en: 'UN WPP 2024, high variant' }
+    population: {                                  // these carry only a label and a source
+        medium: { label_zh: '联合国中方案',
+                  source_en: 'UN WPP 2024, medium variant, rescaled to the 2024 base of this viewer',
+                  source_es: 'UN WPP 2024, variante media, reescalada a la base de 2024 del visor',
+                  source_zh: '联合国《世界人口展望 2024》中方案，按本视图的 2024 年基数重新标定' },
+        low: { label_zh: '联合国低方案',
+               source_en: 'UN WPP 2024, low variant',
+               source_es: 'UN WPP 2024, variante baja',
+               source_zh: '联合国《世界人口展望 2024》低方案' },
+        high: { label_zh: '联合国高方案',
+                source_en: 'UN WPP 2024, high variant',
+                source_es: 'UN WPP 2024, variante alta',
+                source_zh: '联合国《世界人口展望 2024》高方案' }
     }
 };
 
 function defOf(group, p) {
     const o = (DEFS[group] || {})[p.id] || {};
     if (isEs()) return o.es || p.definition || '';
+    if (isZh()) return o.zh || o.en || p.definition || '';
     return o.en || p.definition || '';
 }
 
 function sourceOf(group, p) {
     const o = (DEFS[group] || {})[p.id] || {};
-    const over = isEs() ? o.source_es : o.source_en;
+    const over = isEs() ? o.source_es : isZh() ? (o.source_zh || o.source_en) : o.source_en;
     return over || p.source || '';
 }
 
 function presetFull(group, p) {
     const o = (DEFS[group] || {})[p.id] || {};
     if (isEs()) return o.label_es || p.label_es || p.label;
+    if (isZh()) return o.label_zh || o.label_en || p.label;
     return o.label_en || p.label;
 }
 
 function presetLabel(group, p) {
     const short = (SHORT[group] || {})[p.id];
-    if (short) return short[isEs() ? 'es' : 'en'];
+    if (short) return short[ctx.lang()] || short.en;
     return presetFull(group, p);
 }
 
@@ -218,16 +279,16 @@ function activePreset(group, value) {
 // ============================================================================
 
 const FRACTION_WORD = [
-    [2, { en: 'half of', es: 'la mitad del' }],
-    [3, { en: 'a third of', es: 'la tercera parte del' }],
-    [4, { en: 'a quarter of', es: 'la cuarta parte del' }],
-    [5, { en: 'a fifth of', es: 'la quinta parte del' }],
-    [10, { en: 'a tenth of', es: 'la décima parte del' }]
+    [2, { en: 'half of', es: 'la mitad del', zh: '二分之一' }],
+    [3, { en: 'a third of', es: 'la tercera parte del', zh: '三分之一' }],
+    [4, { en: 'a quarter of', es: 'la cuarta parte del', zh: '四分之一' }],
+    [5, { en: 'a fifth of', es: 'la quinta parte del', zh: '五分之一' }],
+    [10, { en: 'a tenth of', es: 'la décima parte del', zh: '十分之一' }]
 ];
 
 function fractionWord(ratio) {
     for (const [k, w] of FRACTION_WORD) {
-        if (Math.abs(ratio - 1 / k) < 0.02) return w[isEs() ? 'es' : 'en'];
+        if (Math.abs(ratio - 1 / k) < 0.02) return w[ctx.lang()] || w.en;
     }
     return null;
 }
@@ -239,18 +300,18 @@ function growthScaleNote(g) {
     const ratio = Math.pow(1 + g, YEARS);
     const head = (g >= 0 ? '+' : f.minus) + f.pct(g, g === 0 ? 0 : 1) + ' %';
     if (g === 0) {
-        return es
-            ? '0 %/año: la renta por persona de 2050 sería la misma que la de hoy.'
-            : '0 %/yr: income per person in 2050 would be the same as today.';
+        return pk('0 %/yr: income per person in 2050 would be the same as today.',
+            '0 %/año: la renta por persona de 2050 sería la misma que la de hoy.',
+            '0 %/年：2050 年的人均收入与今天相同。');
     }
     if (g > 0) {
-        return es
-            ? `${head}/año durante ${YEARS} años: la renta por persona se multiplica por ${f.ratio(ratio)} en 2050.`
-            : `${head}/yr for ${YEARS} years: income per person ×${f.ratio(ratio)} by 2050.`;
+        return pk(`${head}/yr for ${YEARS} years: income per person ×${f.ratio(ratio)} by 2050.`,
+            `${head}/año durante ${YEARS} años: la renta por persona se multiplica por ${f.ratio(ratio)} en 2050.`,
+            `${head}/年，持续 ${YEARS} 年：到 2050 年人均收入变为 ${f.ratio(ratio)} 倍。`);
     }
-    return es
-        ? `${head}/año durante ${YEARS} años: la renta por persona de 2050 sería el ${f.n(ratio * 100, 0)} % de la actual.`
-        : `${head}/yr for ${YEARS} years: income per person in 2050 would be ${f.n(ratio * 100, 0)} % of today's.`;
+    return pk(`${head}/yr for ${YEARS} years: income per person in 2050 would be ${f.n(ratio * 100, 0)} % of today's.`,
+        `${head}/año durante ${YEARS} años: la renta por persona de 2050 sería el ${f.n(ratio * 100, 0)} % de la actual.`,
+        `${head}/年，持续 ${YEARS} 年：2050 年的人均收入将是今天的 ${f.n(ratio * 100, 0)} %。`);
 }
 
 function techScaleNote(r) {
@@ -260,24 +321,24 @@ function techScaleNote(r) {
     // tablets ("BAU −2.3"): spec §8 asks for one decimal in %.
     const head = (r >= 0 ? '+' : f.minus) + f.pct(r, r === 0 ? 0 : 1) + ' %';
     if (r === 0) {
-        return es
-            ? '0 %/año: el CO₂ por dólar de 2050 sería el mismo que el de hoy.'
-            : '0 %/yr: the CO₂ per dollar of 2050 would be the same as today\'s.';
+        return pk('0 %/yr: the CO₂ per dollar of 2050 would be the same as today\'s.',
+            '0 %/año: el CO₂ por dólar de 2050 sería el mismo que el de hoy.',
+            '0 %/年：2050 年每美元的 CO₂ 与今天相同。');
     }
     if (r > 0) {
-        return es
-            ? `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería un ${f.n((ratio - 1) * 100, 0)} % mayor que el actual.`
-            : `${head}/yr for ${YEARS} years: the CO₂ per dollar of 2050 would be ${f.n((ratio - 1) * 100, 0)} % higher than today's.`;
+        return pk(`${head}/yr for ${YEARS} years: the CO₂ per dollar of 2050 would be ${f.n((ratio - 1) * 100, 0)} % higher than today's.`,
+            `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería un ${f.n((ratio - 1) * 100, 0)} % mayor que el actual.`,
+            `${head}/年，持续 ${YEARS} 年：2050 年每美元的 CO₂ 将比今天高 ${f.n((ratio - 1) * 100, 0)} %。`);
     }
     const word = fractionWord(ratio);
     if (word) {
-        return es
-            ? `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería ${word} actual.`
-            : `${head}/yr for ${YEARS} years: the CO₂ per dollar of 2050 is ${word} today's.`;
+        return pk(`${head}/yr for ${YEARS} years: the CO₂ per dollar of 2050 is ${word} today's.`,
+            `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería ${word} actual.`,
+            `${head}/年，持续 ${YEARS} 年：2050 年每美元的 CO₂ 是今天的${word}。`);
     }
-    return es
-        ? `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería un ${f.n((1 - ratio) * 100, 0)} % menor que el actual.`
-        : `${head}/yr for ${YEARS} years: CO₂ per dollar ${f.minus}${f.n((1 - ratio) * 100, 0)} % by 2050.`;
+    return pk(`${head}/yr for ${YEARS} years: CO₂ per dollar ${f.minus}${f.n((1 - ratio) * 100, 0)} % by 2050.`,
+        `${head}/año durante ${YEARS} años: el CO₂ por dólar de 2050 sería un ${f.n((1 - ratio) * 100, 0)} % menor que el actual.`,
+        `${head}/年，持续 ${YEARS} 年：到 2050 年每美元的 CO₂ 下降 ${f.n((1 - ratio) * 100, 0)} %。`);
 }
 
 function popScaleNote(variant) {
@@ -285,9 +346,9 @@ function popScaleNote(variant) {
     const p = list.find(o => o.id === variant);
     if (!p) return '';
     const name = ctx.t('whatifPop' + variant.charAt(0).toUpperCase() + variant.slice(1), variant);
-    return isEs()
-        ? `${name}: ${popTxt(p.pop_2050)} de personas en 2050 y ${popTxt(p.pop_2100)} en 2100.`
-        : `${name}: ${popTxt(p.pop_2050)} people in 2050, ${popTxt(p.pop_2100)} in 2100.`;
+    return pk(`${name}: ${popTxt(p.pop_2050)} people in 2050, ${popTxt(p.pop_2100)} in 2100.`,
+        `${name}: ${popTxt(p.pop_2050)} de personas en 2050 y ${popTxt(p.pop_2100)} en 2100.`,
+        `${name}：2050 年 ${popTxt(p.pop_2050)}人，2100 年 ${popTxt(p.pop_2100)}人。`);
 }
 
 /**
@@ -296,16 +357,22 @@ function popScaleNote(variant) {
  * 67 %" on the cards next to "…both at 50 %" in the note. It is read from
  * budgets.remaining_from_2025[target][probability] of the JSON, like the cards.
  */
+/* One paragraph, not two. The thermometer caveat of §6 and the budgets of
+   §8.4 used to be two loose grey blocks at the foot of the scene; they are one
+   small-print line in the reading column now, and both strings are still the
+   ones the dictionaries and the JSON carry. */
 function budgetNote(prob) {
     const f = ctx.fmt, es = isEs();
+    const therm = ctx.t('whatifThermNote');
     const b = (ctx.data.budgets || {}).remaining_from_2025 || {};
     const g15 = ((b['1.5C'] || {})[prob] || {}).co2ff_gt;
     const g20 = ((b['2.0C'] || {})[prob] || {}).co2ff_gt;
-    if (g15 == null || g20 == null) return ctx.t('whatifBudgetNote');
+    if (g15 == null || g20 == null) return therm + ' ' + ctx.t('whatifBudgetNote');
     const p = probTxt(prob);
-    return es
-        ? `Presupuestos desde el 1 de enero de 2025: ${f.nGroup(g15, 1)} Gt de CO₂ fósil para 1,5 °C y ${f.nGroup(g20, 1)} Gt para 2 °C, ambos al ${p}. Las estimaciones más recientes son mucho menores.`
-        : `Budgets from 1 January 2025: ${f.nGroup(g15, 1)} Gt of fossil CO₂ for 1.5 °C and ${f.nGroup(g20, 1)} Gt for 2 °C, both at ${p}. Newer estimates are much smaller.`;
+    return therm + ' ' + pk(
+        `Budgets from 1 January 2025: ${f.nGroup(g15, 1)} Gt of fossil CO₂ for 1.5 °C and ${f.nGroup(g20, 1)} Gt for 2 °C, both at ${p}. Newer estimates are much smaller.`,
+        `Presupuestos desde el 1 de enero de 2025: ${f.nGroup(g15, 1)} Gt de CO₂ fósil para 1,5 °C y ${f.nGroup(g20, 1)} Gt para 2 °C, ambos al ${p}. Las estimaciones más recientes son mucho menores.`,
+        `预算自 2025 年 1 月 1 日起算：1.5 °C 为 ${f.nGroup(g15, 1)} Gt 化石 CO₂，2 °C 为 ${f.nGroup(g20, 1)} Gt，二者均按 ${p}。更新的估计要小得多。`);
 }
 
 /** Spec §5.1: worldwide egalitarian degrowth is arithmetically stagnation. */
@@ -313,9 +380,10 @@ function egalitarianNote() {
     const f = ctx.fmt;
     const k = (ctx.data.diagnostics || {}).egalitarian_convergence_factor_2024;
     const factor = (k == null) ? '0,998' : f.n(k, 3);
-    return isEs()
-        ? `El decrecimiento igualitario mundial equivale al estancamiento: con las intensidades de 2024 la convergencia deja un factor ${factor} sobre las emisiones, así que no lleva preset aparte.`
-        : `Worldwide egalitarian degrowth is arithmetically stagnation: with 2024 intensities the convergence factor is ${factor}, so it gets no separate preset.`;
+    return pk(
+        `Worldwide egalitarian degrowth is arithmetically stagnation: with 2024 intensities the convergence factor is ${factor}, so it gets no separate preset.`,
+        `El decrecimiento igualitario mundial equivale al estancamiento: con las intensidades de 2024 la convergencia deja un factor ${factor} sobre las emisiones, así que no lleva preset aparte.`,
+        `在算术上，全球范围的平等去增长等同于停滞：以 2024 年的强度计算，收敛只带来 ${factor} 的系数，因此不单列为一个预设。`);
 }
 
 // ============================================================================
@@ -323,9 +391,8 @@ function egalitarianNote() {
 // ============================================================================
 
 function exhaustedTxt(year) {
-    const es = isEs();
-    if (year == null) return es ? 'no se agota antes de 2100' : 'not exhausted before 2100';
-    return es ? `agotado en ${year}` : `exhausted in ${year}`;
+    if (year == null) return pk('not exhausted before 2100', 'no se agota antes de 2100', '2100 年前不会耗尽');
+    return pk(`exhausted in ${year}`, `agotado en ${year}`, `${year} 年耗尽`);
 }
 
 /** Spec §8.1, the direct sentence. Returns HTML (strong = vermilion). */
@@ -333,9 +400,9 @@ function mainSentence(res) {
     const f = ctx.fmt, es = isEs();
     const g = res.inputs.g, r = res.inputs.r;
     const gTxt = (g < 0 ? f.minus : '') + f.pct(g);
-    const pop = es
-        ? ({ low: 'baja', medium: 'media', high: 'alta' })[res.inputs.population]
-        : res.inputs.population;
+    const pop = pk(res.inputs.population,
+        ({ low: 'baja', medium: 'media', high: 'alta' })[res.inputs.population],
+        ({ low: '低', medium: '中', high: '高' })[res.inputs.population]);
     const s15 = f.ratio(res.share_of_rcb_1p5);
     const s20 = f.ratio(res.share_of_rcb_2p0);
     const cum = f.gt(res.cum_2025_2050_gt);
@@ -350,6 +417,12 @@ function mainSentence(res) {
                 : 'sin cambios en el CO₂ por dólar';
         return `Con un crecimiento del ${gTxt} % anual por persona, ${rc} y la senda de población ONU ${pop}, el mundo emite <strong>${cum} Gt</strong> en 2025–2050: ${s15} veces el presupuesto de 1,5 °C (${exhaustedTxt(res.exhaustion_year_1p5)}) y ${s20} veces el de 2 °C (${exhaustedTxt(res.exhaustion_year_2p0)}). En 2050 las emisiones son ${evs} respecto a 2024 y el calentamiento llega a <strong>${T} °C</strong> (${lo}–${hi}).`;
     }
+    if (isZh()) {
+        const rc = r < 0 ? `每美元 CO₂ 每年下降 ${f.pct(r)} %`
+            : r > 0 ? `每美元 CO₂ 每年上升 ${f.pct(r)} %`
+                : '每美元 CO₂ 保持不变';
+        return `在人均收入每年增长 ${gTxt} %、${rc}、人口沿联合国${pop}方案的情形下，世界在 2025–2050 年排放 <strong>${cum} Gt</strong>：相当于 1.5 °C 预算的 ${s15} 倍（${exhaustedTxt(res.exhaustion_year_1p5)}），2 °C 预算的 ${s20} 倍（${exhaustedTxt(res.exhaustion_year_2p0)}）。到 2050 年，排放较 2024 年为 ${evs}，升温达到 <strong>${T} °C</strong>（${lo}–${hi}）。`;
+    }
     const rc = r < 0 ? `${f.pct(r)} %/yr less CO₂ per dollar`
         : r > 0 ? `${f.pct(r)} %/yr more CO₂ per dollar`
             : 'no change in CO₂ per dollar';
@@ -361,13 +434,13 @@ function tailSentence(res) {
     const f = ctx.fmt, es = isEs();
     const c100 = f.gt(res.cum_2025_2100_gt, 0);
     const t100 = f.deg(res.t_2100_c);
-    let s = es
-        ? `Si estas tasas continuaran, en 2100 se habrían emitido ${c100} Gt y el calentamiento sería de ${t100} °C.`
-        : `If these rates continued, by 2100 the world would have emitted ${c100} Gt and warming would be ${t100} °C.`;
+    let s = pk(`If these rates continued, by 2100 the world would have emitted ${c100} Gt and warming would be ${t100} °C.`,
+        `Si estas tasas continuaran, en 2100 se habrían emitido ${c100} Gt y el calentamiento sería de ${t100} °C.`,
+        `若这些速率持续下去，到 2100 年世界将累计排放 ${c100} Gt，升温将达 ${t100} °C。`);
     if (res.never_falls) {
-        s += es
-            ? ' A estas tasas las emisiones por persona no bajan nunca.'
-            : ' At these rates per-person emissions never fall.';
+        s += pk(' At these rates per-person emissions never fall.',
+            ' A estas tasas las emisiones por persona no bajan nunca.',
+            ' 按这些速率，人均排放永远不会下降。');
     }
     return s;
 }
@@ -382,9 +455,9 @@ function outOfRangeSentence(solveFor, fixed, pv, targetGt, H) {
         : ctx.model.cumulativeGt(ctx.model.forward(lo, fixed, pv, H));
     const below = atLo > targetGt;             // even the floor of the dial overshoots
     const edge = (below ? f.minus : '+') + f.pct(below ? lo : hi, 0) + ' %';
-    return es
-        ? `No se alcanza solo con esta palanca (haría falta más de un ${edge} anual).`
-        : `Not reachable with this dial alone (would need ${below ? 'less than' : 'more than'} ${edge}/yr).`;
+    return pk(`Not reachable with this dial alone (would need ${below ? 'less than' : 'more than'} ${edge}/yr).`,
+        `No se alcanza solo con esta palanca (haría falta más de un ${edge} anual).`,
+        `仅靠这个旋钮无法达到（需要每年${below ? '低于' : '高于'} ${edge}）。`);
 }
 
 /** Spec §8.2, the inverse sentence. Returns HTML. */
@@ -395,8 +468,9 @@ function solveSentence(inv, horizon) {
     const target = targetTxt(inv.target);
     const prob = probTxt(inv.probability);
     const derived = inv.target === '3.0C'
-        ? (es ? ' Es la marca del termómetro, derivada, no un presupuesto de la literatura.'
-            : ' That is the derived thermometer mark, not a budget from the literature.')
+        ? pk(' That is the derived thermometer mark, not a budget from the literature.',
+            ' Es la marca del termómetro, derivada, no un presupuesto de la literatura.',
+            ' 这是温度计上推导出的刻度，并非文献中的碳预算。')
         : '';
 
     if (!rowH || rowH.out_of_range) {
@@ -422,53 +496,62 @@ function solveSentence(inv, horizon) {
         const aside = [];
         // §8.2: for 1.5 °C the answer is a near-total cut; say so.
         if (rowH.intensity_2050_vs_2024 != null && rowH.intensity_2050_vs_2024 <= 0.10) {
-            aside.push(es
-                ? `un recorte del ${f.n((1 - rowH.intensity_2050_vs_2024) * 100, 0)} % del CO₂ por dólar en 2050`
-                : `a ${f.n((1 - rowH.intensity_2050_vs_2024) * 100, 0)} % cut in CO₂ per dollar by 2050`);
+            aside.push(pk(`a ${f.n((1 - rowH.intensity_2050_vs_2024) * 100, 0)} % cut in CO₂ per dollar by 2050`,
+                `un recorte del ${f.n((1 - rowH.intensity_2050_vs_2024) * 100, 0)} % del CO₂ por dólar en 2050`,
+                `到 2050 年每美元 CO₂ 削减 ${f.n((1 - rowH.intensity_2050_vs_2024) * 100, 0)} %`));
         }
         if (ratio) {
-            aside.push(es
-                ? `${ratio} veces la tendencia reciente (${bau} %)`
-                : `${ratio}× the recent trend (${bau} %/yr)`);
+            aside.push(pk(`${ratio}× the recent trend (${bau} %/yr)`,
+                `${ratio} veces la tendencia reciente (${bau} %)`,
+                `是近期趋势的 ${ratio} 倍（${bau} %/年）`));
         }
         // `trend` closes the clause: it ends with the comma the sentence needs.
         const trend = aside.length
-            ? (es ? ` —${aside.join(', ')}—,` : ` — ${aside.join(', ')} —`)
+            ? pk(` — ${aside.join(', ')} —`, ` —${aside.join(', ')}—,`, `（${aside.join('，')}）`)
             : ',';
         // a required rate can be positive (the 3 °C mark to 2050): say "rise", not "fall"
-        const must = (x, mag) => es
-            ? (x < 0 ? `tiene que caer un <strong>${mag} % anual</strong>` : `podría incluso subir un <strong>${mag} % anual</strong>`)
-            : (x < 0 ? `must fall <strong>${mag} %/yr</strong>` : `could even rise <strong>${mag} %/yr</strong>`);
-        const would = (x, mag) => es
-            ? (x < 0 ? `bastaría un ${mag} % anual` : `el CO₂ por dólar podría incluso subir un ${mag} % anual`)
-            : (x < 0 ? `it would take ${mag} %/yr` : `CO₂ per dollar could even rise ${mag} %/yr`);
+        const must = (x, mag) => pk(
+            x < 0 ? `must fall <strong>${mag} %/yr</strong>` : `could even rise <strong>${mag} %/yr</strong>`,
+            x < 0 ? `tiene que caer un <strong>${mag} % anual</strong>` : `podría incluso subir un <strong>${mag} % anual</strong>`,
+            x < 0 ? `必须每年下降 <strong>${mag} %</strong>` : `甚至可以每年上升 <strong>${mag} %</strong>`);
+        const would = (x, mag) => pk(
+            x < 0 ? `it would take ${mag} %/yr` : `CO₂ per dollar could even rise ${mag} %/yr`,
+            x < 0 ? `bastaría un ${mag} % anual` : `el CO₂ por dólar podría incluso subir un ${mag} % anual`,
+            x < 0 ? `每年 ${mag} % 即可` : `每美元 CO₂ 甚至可以每年上升 ${mag} %`);
 
         if (horizon === PROJ_END) {
             const other = xO == null
-                ? (es ? 'Contando solo hasta 2050 no hay solución dentro de la palanca.'
-                    : 'Counting only to 2050 there is no solution inside the dial.')
-                : (es ? `Contando solo hasta 2050 ${would(xO, magO)}, pero el presupuesto entero se habría consumido en 2050 con las emisiones todavía en ${eO} Gt/año.`
-                    : `Counting only to 2050 ${would(xO, magO)}, but the whole budget would be used up by 2050 with emissions still at ${eO} Gt/yr.`);
-            return es
-                ? `Para no salirse del presupuesto de <strong>${target}</strong> (${prob}) con un crecimiento del ${gTxt} % anual por persona, el CO₂ por dólar ${must(xH, magH)} hasta 2100${trend} dejando las emisiones de 2050 en ${eH} Gt. ${other}${derived}`
-                : `To stay within the <strong>${target}</strong> budget (${prob}) with ${gTxt} %/yr growth per person, CO₂ per dollar ${must(xH, magH)} through 2100${trend} leaving 2050 emissions at ${eH} Gt. ${other}${derived}`;
+                ? pk('Counting only to 2050 there is no solution inside the dial.',
+                    'Contando solo hasta 2050 no hay solución dentro de la palanca.',
+                    '只计到 2050 年，旋钮范围内没有解。')
+                : pk(`Counting only to 2050 ${would(xO, magO)}, but the whole budget would be used up by 2050 with emissions still at ${eO} Gt/yr.`,
+                    `Contando solo hasta 2050 ${would(xO, magO)}, pero el presupuesto entero se habría consumido en 2050 con las emisiones todavía en ${eO} Gt/año.`,
+                    `只计到 2050 年，${would(xO, magO)}，但整份预算到 2050 年就会用尽，而排放仍有 ${eO} Gt/年。`);
+            return pk(
+                `To stay within the <strong>${target}</strong> budget (${prob}) with ${gTxt} %/yr growth per person, CO₂ per dollar ${must(xH, magH)} through 2100${trend} leaving 2050 emissions at ${eH} Gt. ${other}${derived}`,
+                `Para no salirse del presupuesto de <strong>${target}</strong> (${prob}) con un crecimiento del ${gTxt} % anual por persona, el CO₂ por dólar ${must(xH, magH)} hasta 2100${trend} dejando las emisiones de 2050 en ${eH} Gt. ${other}${derived}`,
+                `要在人均收入每年增长 ${gTxt} % 的情况下不超出 <strong>${target}</strong> 预算（${prob}），每美元 CO₂ ${must(xH, magH)}，一直持续到 2100 年${trend}，使 2050 年的排放降至 ${eH} Gt。${other}${derived}`);
         }
         const other = xO == null
-            ? (es ? 'Con tasas constantes hasta 2100 no hay solución dentro de la palanca.'
-                : 'With constant rates to 2100 there is no solution inside the dial.')
-            : (es ? `Con tasas constantes hasta 2100 ${would(xO, magO)}, que deja las emisiones de 2050 en ${eO} Gt.`
-                : `With constant rates to 2100 ${would(xO, magO)}, leaving 2050 emissions at ${eO} Gt.`);
-        return es
-            ? `Contando solo hasta 2050, para quedarse dentro del presupuesto de <strong>${target}</strong> (${prob}) con un crecimiento del ${gTxt} % anual por persona el CO₂ por dólar ${must(xH, magH)}${trend} pero el presupuesto entero se habría consumido en 2050 con las emisiones todavía en ${eH} Gt/año. ${other}${derived}`
-            : `Counting only to 2050, to stay within the <strong>${target}</strong> budget (${prob}) with ${gTxt} %/yr growth per person CO₂ per dollar ${must(xH, magH)}${trend} but the whole budget would be used up by 2050 with emissions still at ${eH} Gt/yr. ${other}${derived}`;
+            ? pk('With constant rates to 2100 there is no solution inside the dial.',
+                'Con tasas constantes hasta 2100 no hay solución dentro de la palanca.',
+                '若速率恒定至 2100 年，旋钮范围内没有解。')
+            : pk(`With constant rates to 2100 ${would(xO, magO)}, leaving 2050 emissions at ${eO} Gt.`,
+                `Con tasas constantes hasta 2100 ${would(xO, magO)}, que deja las emisiones de 2050 en ${eO} Gt.`,
+                `若速率恒定至 2100 年，${would(xO, magO)}，使 2050 年的排放为 ${eO} Gt。`);
+        return pk(
+            `Counting only to 2050, to stay within the <strong>${target}</strong> budget (${prob}) with ${gTxt} %/yr growth per person CO₂ per dollar ${must(xH, magH)}${trend} but the whole budget would be used up by 2050 with emissions still at ${eH} Gt/yr. ${other}${derived}`,
+            `Contando solo hasta 2050, para quedarse dentro del presupuesto de <strong>${target}</strong> (${prob}) con un crecimiento del ${gTxt} % anual por persona el CO₂ por dólar ${must(xH, magH)}${trend} pero el presupuesto entero se habría consumido en 2050 con las emisiones todavía en ${eH} Gt/año. ${other}${derived}`,
+            `只计到 2050 年：要在人均收入每年增长 ${gTxt} % 的情况下不超出 <strong>${target}</strong> 预算（${prob}），每美元 CO₂ ${must(xH, magH)}${trend}，但整份预算到 2050 年就会用尽，而排放仍有 ${eH} Gt/年。${other}${derived}`);
     }
 
     // ---- unknown = growth ----
     const r = inv.fixed_value;
     const id = activePreset('technology', r);
-    const phrase = (TECH_PHRASE[id] || {})[isEs() ? 'es' : 'en']
-        || (es ? `un CO₂ por dólar que ${r < 0 ? 'cae' : 'sube'} un ${f.pct(r)} % anual`
-            : `CO₂ per dollar ${r < 0 ? 'falling' : 'rising'} ${f.pct(r)} %/yr`);
+    const phrase = (TECH_PHRASE[id] || {})[ctx.lang()] || (TECH_PHRASE[id] || {}).en
+        || pk(`CO₂ per dollar ${r < 0 ? 'falling' : 'rising'} ${f.pct(r)} %/yr`,
+            `un CO₂ por dólar que ${r < 0 ? 'cae' : 'sube'} un ${f.pct(r)} % anual`,
+            `每美元 CO₂ 每年${r < 0 ? '下降' : '上升'} ${f.pct(r)} %`);
     const rTxt = r === 0 ? '0' : (r < 0 ? f.minus : '+') + f.pct(r);
     const xH = rowH.g_required;
     const magH = (xH < 0 ? f.minus : '+') + f.n(Math.abs(xH) * 100, 1);
@@ -479,24 +562,28 @@ function solveSentence(inv, horizon) {
     const down = ratio == null ? '' : f.n((1 - ratio) * 100, 0);
     const up = ratio == null ? '' : f.n((ratio - 1) * 100, 0);
     const gText = ratio == null || Math.abs(ratio - 1) < 0.005
-        ? (es ? 'la misma renta por persona en 2050' : 'the same income per person in 2050')
+        ? pk('the same income per person in 2050', 'la misma renta por persona en 2050', '2050 年的人均收入与今天相同')
         : ratio < 1
-            ? (es ? `una economía por persona un ${down} % menor en 2050`
-                : `${art(down)} ${down} % smaller economy per person in 2050`)
-            : (es ? `una economía por persona un ${up} % mayor en 2050`
-                : `${art(up)} ${up} % larger economy per person in 2050`);
+            ? pk(`${art(down)} ${down} % smaller economy per person in 2050`,
+                `una economía por persona un ${down} % menor en 2050`,
+                `2050 年的人均经济规模缩小 ${down} %`)
+            : pk(`${art(up)} ${up} % larger economy per person in 2050`,
+                `una economía por persona un ${up} % mayor en 2050`,
+                `2050 年的人均经济规模扩大 ${up} %`);
     const magO = rowO && !rowO.out_of_range
         ? (rowO.g_required < 0 ? f.minus : '+') + f.n(Math.abs(rowO.g_required) * 100, 1)
         : '—';
 
     if (horizon === PROJ_END) {
-        return es
-            ? `Con ${phrase} (${rTxt} % anual), quedarse dentro de <strong>${target}</strong> (${prob}) exige que el PIB por persona varíe un <strong>${magH} % anual</strong> hasta 2100 (es decir, ${gText}). Contando solo hasta 2050 cabría un ${magO} % anual, pero el presupuesto entero se habría consumido en 2050.${derived}`
-            : `With ${phrase} (${rTxt} %/yr), staying within <strong>${target}</strong> (${prob}) requires GDP per person to change by <strong>${magH} %/yr</strong> through 2100 (that is, ${gText}). Counting only to 2050 it would allow ${magO} %/yr, but the whole budget would be used up by 2050.${derived}`;
+        return pk(
+            `With ${phrase} (${rTxt} %/yr), staying within <strong>${target}</strong> (${prob}) requires GDP per person to change by <strong>${magH} %/yr</strong> through 2100 (that is, ${gText}). Counting only to 2050 it would allow ${magO} %/yr, but the whole budget would be used up by 2050.${derived}`,
+            `Con ${phrase} (${rTxt} % anual), quedarse dentro de <strong>${target}</strong> (${prob}) exige que el PIB por persona varíe un <strong>${magH} % anual</strong> hasta 2100 (es decir, ${gText}). Contando solo hasta 2050 cabría un ${magO} % anual, pero el presupuesto entero se habría consumido en 2050.${derived}`,
+            `在${phrase}（${rTxt} %/年）的条件下，要不超出 <strong>${target}</strong>（${prob}），人均 GDP 到 2100 年须每年变动 <strong>${magH} %</strong>（也就是说，${gText}）。只计到 2050 年可以允许 ${magO} %/年，但整份预算到 2050 年就会用尽。${derived}`);
     }
-    return es
-        ? `Contando solo hasta 2050, con ${phrase} (${rTxt} % anual) cabe un crecimiento del PIB por persona del <strong>${magH} % anual</strong> (es decir, ${gText}), pero el presupuesto de ${target} (${prob}) se agotaría del todo en 2050. Con tasas constantes hasta 2100 haría falta un ${magO} % anual.${derived}`
-        : `Counting only to 2050, with ${phrase} (${rTxt} %/yr) GDP per person could still change by <strong>${magH} %/yr</strong> (that is, ${gText}), but the ${target} budget (${prob}) would be used up entirely by 2050. With constant rates to 2100 it would take ${magO} %/yr.${derived}`;
+    return pk(
+        `Counting only to 2050, with ${phrase} (${rTxt} %/yr) GDP per person could still change by <strong>${magH} %/yr</strong> (that is, ${gText}), but the ${target} budget (${prob}) would be used up entirely by 2050. With constant rates to 2100 it would take ${magO} %/yr.${derived}`,
+        `Contando solo hasta 2050, con ${phrase} (${rTxt} % anual) cabe un crecimiento del PIB por persona del <strong>${magH} % anual</strong> (es decir, ${gText}), pero el presupuesto de ${target} (${prob}) se agotaría del todo en 2050. Con tasas constantes hasta 2100 haría falta un ${magO} % anual.${derived}`,
+        `只计到 2050 年：在${phrase}（${rTxt} %/年）的条件下，人均 GDP 仍可每年变动 <strong>${magH} %</strong>（也就是说，${gText}），但 ${target} 的预算（${prob}）到 2050 年就会完全用尽。若速率恒定至 2100 年，则需要 ${magO} %/年。${derived}`);
 }
 
 // ============================================================================
@@ -506,20 +593,30 @@ function solveSentence(inv, horizon) {
 function dialHTML(key, group, nameKey, unitKey, sliders) {
     const list = ctx.model.presets(group) || [];
     const tablets = list.map(p => `<button class="wi-preset" type="button" data-wi-preset="${group}:${p.id}" aria-pressed="false" title="${esc(presetTitle(p, group))}">${esc(presetLabel(group, p))} ${esc((p.rate > 0 ? '+' : p.rate < 0 ? ctx.fmt.minus : '') + ctx.fmt.n(Math.abs(p.rate) * 100, 1))}</button>`).join('');
+    // Spec §5.1's long note about egalitarian degrowth used to sit loose under
+    // the first dial and made the column read as a page of small print; it is
+    // a fold now, inside the box it belongs to.
+    const egal = `
+    <details class="wi-aside">
+      <summary>${esc(pk('And egalitarian degrowth', 'Y el decrecimiento igualitario', '关于平等去增长'))}</summary>
+      <p data-wi-note="egal"></p>
+    </details>`;
     return `
 <div class="wi-dial" data-wi-dial="${key}">
   <div class="wi-dial-head">
     <span class="wi-dial-name" data-i18n="${nameKey}">${esc(ctx.t(nameKey))}</span>
     <span class="wi-dial-unit" data-i18n="${unitKey}">${esc(ctx.t(unitKey))}</span>
   </div>
-  <div class="wi-presets">${tablets}</div>
-  <div class="wi-slider">
-    <input type="range" data-wi-range="${key}" min="${sliders.min * 100}" max="${sliders.max * 100}" step="${sliders.step * 100}" aria-label="${esc(ctx.t(nameKey))}">
-    <input type="text" inputmode="decimal" class="wi-slider-value" data-wi-num="${key}" aria-label="${esc(ctx.t(nameKey))}">
-    <span class="wi-ahead-unit">%</span>
+  <div class="wi-dial-body">
+    <div class="wi-presets">${tablets}</div>
+    <div class="wi-slider">
+      <input type="range" data-wi-range="${key}" min="${sliders.min * 100}" max="${sliders.max * 100}" step="${sliders.step * 100}" aria-label="${esc(ctx.t(nameKey))}">
+      <input type="text" inputmode="decimal" class="wi-slider-value" data-wi-num="${key}" aria-label="${esc(ctx.t(nameKey))}">
+      <span class="wi-ahead-unit">%</span>
+    </div>
+    <p class="wi-scale-note" data-wi-note="${key}"></p>
+    ${key === 'g' ? egal : ''}
   </div>
-  <p class="wi-scale-note" data-wi-note="${key}"></p>
-  ${key === 'g' ? '<p class="wi-scale-note wi-ahead-aside" data-wi-note="egal"></p>' : ''}
 </div>`;
 }
 
@@ -535,18 +632,20 @@ function popDialHTML() {
     <span class="wi-dial-name" data-i18n="whatifDial3">${esc(ctx.t('whatifDial3'))}</span>
     <span class="wi-dial-unit" data-i18n="whatifDial3Unit">${esc(ctx.t('whatifDial3Unit'))}</span>
   </div>
-  <div class="wi-presets">${tablets}</div>
-  <p class="wi-scale-note" data-wi-note="pop"></p>
+  <div class="wi-dial-body">
+    <div class="wi-presets">${tablets}</div>
+    <p class="wi-scale-note" data-wi-note="pop"></p>
+  </div>
 </div>`;
 }
 
 /**
- * The live reading that stays with the dials. On a phone the dials fold open
- * ABOVE the scene, so moving a slider used to change nothing the reader could
- * see: the figure started 211 px below the fold and the thermometer 476 px
- * below that. This strip is sticky at the top of the panel on ≤900 px (spec §9
- * asks for a thermometer always in view) and is hidden on the desktop, where
- * the scene is beside the dials and needs no echo.
+ * The live reading. On a phone the dials now fold open BELOW the scene (the
+ * order asked for on 11-IX: explanation and buttons, live reading, scene,
+ * results, dials), so this strip is the first child of the view and sticks to
+ * the top of the scroller: whatever the thumb is doing to a slider at the foot
+ * of the page, the answer is on screen. It is hidden on the desktop, where the
+ * scene is beside the dials and needs no echo.
  */
 function liveStripHTML() {
     return `
@@ -585,7 +684,7 @@ function sourcesHTML() {
     return `
 <div class="wi-sources" data-wi-sources>
   <button class="wi-src-toggle" type="button" data-wi-src-toggle aria-expanded="false">
-    <span>${esc(es ? 'Fuentes de las palancas' : 'Sources of the dials')}</span>
+    <span>${esc(pk('Sources of the dials', 'Fuentes de las palancas', '旋钮的数据来源'))}</span>
     <span class="wi-caret" aria-hidden="true">&#9660;</span>
   </button>
   <div class="wi-src-body" data-wi-src-body hidden>${body}</div>
@@ -647,7 +746,6 @@ function solvePanelHTML() {
 function buildDials(i18n = true) {
     const sl = ctx.model.presets('sliders') || {};
     ctx.dials.innerHTML =
-        liveStripHTML() +
         dialHTML('g', 'growth', 'whatifDial1', 'whatifDial1Unit', sl.growth || { min: -0.03, max: 0.05, step: 0.001 }) +
         dialHTML('r', 'technology', 'whatifDial2', 'whatifDial2Unit', sl.technology || { min: -0.12, max: 0.02, step: 0.001 }) +
         popDialHTML() +
@@ -667,9 +765,6 @@ function buildDials(i18n = true) {
     dom.solveBody = ctx.dials.querySelector('[data-wi-solve-body]');
     dom.solveOut = ctx.dials.querySelector('[data-wi-solve-out]');
     dom.solveEcho = ctx.dials.querySelector('[data-wi-solve-echo]');
-    dom.liveRead = ctx.dials.querySelector('[data-wi-live-read]');
-    dom.liveNeedle = ctx.dials.querySelector('[data-wi-live-needle]');
-    dom.liveFoot = ctx.dials.querySelector('[data-wi-live-foot]');
     dom.srcToggle = ctx.dials.querySelector('[data-wi-src-toggle]');
     dom.srcBody = ctx.dials.querySelector('[data-wi-src-body]');
     dom.selUnknown = ctx.dials.querySelector('[data-wi-solve="unknown"]');
@@ -748,14 +843,6 @@ function wireDials() {
 // ============================================================================
 
 const CSS = `
-.wi-ahead-chart-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-family:var(--ff-caps);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl)}
-.wi-ahead-key{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.wi-ahead-key[hidden]{display:none}
-.wi-ahead-key i{display:inline-block;width:16px;height:0;border-top:2px solid var(--cd)}
-.wi-ahead-key.is-proj i{border-top-color:var(--verm-deep)}
-.wi-ahead-key.is-tail i{border-top:1px dashed var(--verm-deep)}
-.wi-ahead-tailtoggle{margin-left:auto;display:inline-flex;align-items:center;gap:7px;cursor:pointer;color:var(--cl);font-family:var(--ff-caps);letter-spacing:.14em;text-transform:uppercase;font-size:10px;min-height:26px}
-.wi-ahead-tailtoggle input{width:13px;height:13px;accent-color:var(--verm-deep);margin:0}
 .wi-ahead-tip{position:absolute;z-index:4;top:0;left:0;pointer-events:none;min-width:118px;max-width:230px;padding:7px 9px;border:1px solid var(--cb);background:var(--bg);font-size:11.5px;line-height:1.5;color:var(--cg);font-variant-numeric:tabular-nums lining-nums}
 .wi-ahead-tip b{display:block;font-family:var(--ff-caps);font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--cd);margin-bottom:3px}
 input.wi-slider-value{width:66px;flex:0 0 auto;height:26px;padding:2px 6px;border:1px solid var(--cb);border-radius:0;background:var(--bg);color:var(--cd);font-family:var(--ff);font-size:12.5px;font-weight:500;-moz-appearance:textfield}
@@ -783,96 +870,112 @@ input.wi-slider-value::-webkit-outer-spin-button,input.wi-slider-value::-webkit-
 .wi-src-list li{margin-bottom:6px}
 .wi-src-list b{font-weight:500;color:var(--cd)}
 .wi-src-list i{color:var(--cl);font-style:italic}
-.wi-ahead-therm-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.wi-ahead-therm-read{font-family:var(--ff-serif);font-size:15px;color:var(--cd);font-variant-numeric:tabular-nums lining-nums}
-.wi-ahead-tick-today{background:var(--cd)}
-.wi-ahead-tick-3{background:repeating-linear-gradient(var(--cl) 0 2px,transparent 2px 4px)}
-.wi-ahead-needle-2100{width:1px;background:var(--cl)}
-.wi-ahead-legend-line{margin-top:7px;font-size:11.5px;line-height:1.55;color:var(--cg)}
-.wi-sentence+.wi-ahead-solve-sentence{color:var(--cd);border-left:1px solid var(--verm-deep);padding-left:12px;margin-top:4px}
-.wi-ahead-solve-sentence{color:var(--cd);border-left:1px solid var(--verm-deep);padding-left:12px}
+.wi-ahead-therm-read{font-family:var(--ff-serif);font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--verm-ink);font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+/* the two-number cards ("−733.2 / +116.8") need a smaller numeral */
+.wi-card[data-wi-card="remaining"] .wi-card-value,
+.wi-card[data-wi-card="exhaustion"] .wi-card-value{font-size:20px}
+.wi-sentence+.wi-ahead-solve-sentence{color:var(--cd);border-left:1px solid var(--verm-deep);padding-left:11px;font-size:13.5px}
+.wi-ahead-solve-sentence{color:var(--cd);border-left:1px solid var(--verm-deep);padding-left:11px;font-size:13.5px}
+.wi-ahead-solve-sentence[hidden]{display:none}
+.wi-readout-note{margin:0;font-size:11px;line-height:1.45;color:var(--cl);font-variant-numeric:tabular-nums lining-nums}
+.wi-readout-note+.wi-readout-note{margin-top:-2px}
 @media (max-width:900px){
   input.wi-slider-value{height:44px;width:76px;font-size:14px}
-  .wi-ahead-tailtoggle{min-height:44px}
   .wi-ahead-tip{font-size:11px;min-width:104px}
   .wi-ahead-solve-toggle{min-height:44px}
-  /* The live reading rides with the dials: on a phone the scene is pushed
-     below the fold when the accordion opens, and this is what answers the
-     slider under the reader's thumb. */
-  .wi-live{display:block;position:sticky;top:0;z-index:5;margin:0 -16px 12px;padding:9px 16px 10px;background:var(--foam);border-bottom:1px solid var(--cb)}
+  .wi-card[data-wi-card="remaining"] .wi-card-value,
+  .wi-card[data-wi-card="exhaustion"] .wi-card-value{font-size:17px}
+  /* The live reading rides at the top of the scene: on a phone the dials are
+     at the foot of the page, and this is what answers the slider under the
+     reader's thumb. */
+  .wi-live{display:block;position:sticky;top:0;z-index:5;margin:0 -16px;padding:9px 16px 10px;background:var(--foam);border-bottom:1px solid var(--cb)}
   .wi-live-label{display:block;font-family:var(--ff-caps);font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl)}
   .wi-live-read{display:block;margin-top:2px;font-family:var(--ff-serif);font-size:19px;line-height:1.1;color:var(--cd);font-variant-numeric:tabular-nums lining-nums}
   .wi-live-rail{height:8px;margin-top:7px}
   .wi-live-foot{display:block;margin-top:5px;font-size:11.5px;color:var(--cg);font-variant-numeric:tabular-nums lining-nums}
 }
 @media (max-width:560px){
-  /* The checkbox used to wrap onto a line of its own, hard right, and the
-     chart header then ate 73 px of a 597 px fold. */
-  .wi-ahead-chart-head{gap:4px 12px}
-  .wi-ahead-tailtoggle{margin-left:0}
+  .wi-ahead-therm-read{font-size:11.5px}
 }`;
 
+/**
+ * The scene, recomposed on 11-IX after the reading:
+ *   - the live strip comes FIRST, so on a phone the answer sits at the top
+ *     of the scene and the dials fold below it;
+ *   - the stage puts the (taller) figure beside a VERTICAL thermometer;
+ *   - the four numerals sit together, with the prose to their right.
+ * The legend left the chrome and went into the drawing itself (drawNotes).
+ */
 function sceneHTML() {
     const es = isEs();
+    const cardOpen = (key, i18n) => `
+  <div class="wi-card" data-wi-card="${key}">
+    <span class="wi-card-label" data-i18n="${i18n}">${esc(ctx.t(i18n))}</span>
+    <span class="wi-card-value" data-wi-value>—</span>`;
     return `<style data-wi-ahead-css>${CSS}</style>
-<div class="wi-ahead-chart-head">
-  <span class="wi-ahead-key"><i></i>${es ? 'Histórico 1990–2024' : 'History 1990–2024'}</span>
-  <span class="wi-ahead-key is-proj"><i></i>${es ? 'Proyección 2025–2050' : 'Projection 2025–2050'}</span>
-  <span class="wi-ahead-key is-tail" data-wi-tailkey hidden><i></i>${es ? 'Cola 2051–2100' : 'Tail 2051–2100'}</span>
-  <label class="wi-ahead-tailtoggle"><input type="checkbox" data-wi-tail>${es ? 'Hasta 2100' : 'To 2100'}</label>
-</div>
-<div class="wi-chart" data-wi-chartbox>
-  <svg class="wi-chart-svg" data-wi-svg role="img" aria-label=""></svg>
-  <div class="wi-ahead-tip" data-wi-tip hidden></div>
-</div>
-<div class="wi-therm">
-  <div class="wi-ahead-therm-head">
-    <span class="wi-dial-name" data-i18n="whatifThermTitle">${esc(ctx.t('whatifThermTitle'))}</span>
-    <span class="wi-ahead-therm-read" data-wi-therm-read></span>
+${liveStripHTML()}
+<div class="wi-stage">
+  <div class="wi-stage-fig">
+    <div class="wi-fig-cap">
+      <span data-wi-figcap>${pk('World fossil CO₂ · observed and projected', 'CO₂ fósil mundial · observado y proyectado', '世界化石 CO₂ · 观测值与预测值')}</span>
+      <label class="wi-fig-tool"><input type="checkbox" data-wi-tail>${pk('To 2100', 'Hasta 2100', '延至 2100 年')}</label>
+    </div>
+    <div class="wi-chart" data-wi-chartbox>
+      <svg class="wi-chart-svg" data-wi-svg role="img" aria-label=""></svg>
+      <div class="wi-ahead-tip" data-wi-tip hidden></div>
+    </div>
   </div>
-  <div class="wi-therm-rail">
-    <span class="wi-therm-band" data-wi-band></span>
-    <span class="wi-therm-tick wi-ahead-tick-today" data-wi-tick-today></span>
-    <span class="wi-therm-tick" style="left:20%"></span>
-    <span class="wi-therm-tick" style="left:40%"></span>
-    <span class="wi-therm-tick wi-ahead-tick-3" style="left:80%"></span>
-    <span class="wi-therm-needle wi-ahead-needle-2100" data-wi-needle-2100></span>
-    <span class="wi-therm-needle" data-wi-needle></span>
+  <div class="wi-therm">
+    <div class="wi-therm-cap">
+      <span data-i18n="whatifThermTitle">${esc(ctx.t('whatifThermTitle'))}</span>
+      <b class="wi-ahead-therm-read" data-wi-therm-read></b>
+    </div>
+    <div class="wi-therm-box" data-wi-therm-box></div>
+    <p class="wi-therm-foot" data-wi-therm-foot></p>
   </div>
-  <div class="wi-therm-scale">
-    <span>${es ? '1,0' : '1.0'}</span><span>${es ? '1,5' : '1.5'}</span><span>${es ? '2,0' : '2.0'}</span>
-    <span>${es ? '2,5' : '2.5'}</span><span>${es ? '3,0' : '3.0'}</span><span>${es ? '3,5' : '3.5'}</span>
-  </div>
-  <p class="wi-ahead-legend-line" data-wi-therm-legend></p>
-  <p class="wi-therm-note" data-i18n="whatifThermNote">${esc(ctx.t('whatifThermNote'))}</p>
 </div>
-<div class="wi-cards">
-  <div class="wi-card" data-wi-card="cum">
-    <span class="wi-card-label" data-i18n="whatifCardCum">${esc(ctx.t('whatifCardCum'))}</span>
-    <span class="wi-card-value" data-wi-value>—</span>
+<div class="wi-results">
+  <div class="wi-cards">
+    ${cardOpen('cum', 'whatifCardCum')}
     <span class="wi-card-sub" data-wi-sub></span>
+    <span class="wi-fig">
+      <span class="wi-bar" data-wi-bar><span class="wi-bar-fill" data-wi-bar-fill></span><span class="wi-bar-mark" data-wi-bar-mark></span></span>
+      <span class="wi-bar-note" data-wi-bar-note></span>
+    </span>
   </div>
-  <div class="wi-card" data-wi-card="remaining">
-    <span class="wi-card-label" data-i18n="whatifCardRemaining">${esc(ctx.t('whatifCardRemaining'))}</span>
-    <span class="wi-card-value" data-wi-value>—</span>
+    ${cardOpen('remaining', 'whatifCardRemaining')}
     <span class="wi-card-sub" data-wi-sub></span>
     <span class="wi-card-sub" data-wi-sub2></span>
+    <span class="wi-fig">
+      <span class="wi-fig-track"><span class="wi-fig-zero" style="left:50%"></span><span class="wi-fig-mass" data-wi-fig="rem15"></span></span>
+      <span class="wi-fig-track"><span class="wi-fig-zero" style="left:50%"></span><span class="wi-fig-mass" data-wi-fig="rem20"></span></span>
+      <span class="wi-fig-key"><span>${pk('&larr; overshoot', '&larr; exceso', '&larr; 超支')}</span><span>${pk('left &rarr;', 'restante &rarr;', '剩余 &rarr;')}</span></span>
+    </span>
   </div>
-  <div class="wi-card" data-wi-card="exhaustion">
-    <span class="wi-card-label" data-i18n="whatifCardExhaustion">${esc(ctx.t('whatifCardExhaustion'))}</span>
-    <span class="wi-card-value" data-wi-value>—</span>
+    ${cardOpen('exhaustion', 'whatifCardExhaustion')}
     <span class="wi-card-sub" data-wi-sub></span>
+    <span class="wi-fig">
+      <span class="wi-fig-track"><span class="wi-fig-mass" data-wi-fig="exh15"></span></span>
+      <span class="wi-fig-track"><span class="wi-fig-mass" data-wi-fig="exh20"></span></span>
+      <span class="wi-fig-key"><span>2025</span><span>2100</span></span>
+    </span>
   </div>
-  <div class="wi-card" data-wi-card="e2050">
-    <span class="wi-card-label" data-i18n="whatifCard2050">${esc(ctx.t('whatifCard2050'))}</span>
-    <span class="wi-card-value" data-wi-value>—</span>
+    ${cardOpen('e2050', 'whatifCard2050')}
     <span class="wi-card-sub" data-wi-sub></span>
+    <span class="wi-fig">
+      <span class="wi-fig-track"><span class="wi-fig-zero" style="left:50%"></span><span class="wi-fig-mass" data-wi-fig="d2050"></span></span>
+      <span class="wi-fig-key"><span>&minus;100 %</span><span>+100 %</span></span>
+    </span>
   </div>
-</div>
-<p class="wi-sentence" data-wi-sentence></p>
-<p class="wi-sentence" data-wi-tailsentence></p>
-<p class="wi-sentence wi-ahead-solve-sentence" data-wi-solvesentence hidden></p>
-<p class="wi-therm-note" data-wi-budgetnote></p>`;
+  </div>
+  <div class="wi-readout">
+    <span class="wi-readout-head">${pk('What it says', 'Lo que dice', '结果怎么说')}</span>
+    <p class="wi-sentence" data-wi-sentence></p>
+    <p class="wi-sentence" data-wi-tailsentence></p>
+    <p class="wi-sentence wi-ahead-solve-sentence" data-wi-solvesentence hidden></p>
+    <p class="wi-readout-note" data-wi-budgetnote></p>
+  </div>
+</div>`;
 }
 
 function buildScene(i18n = true) {
@@ -883,13 +986,17 @@ function buildScene(i18n = true) {
     dom.chartBox = ctx.root.querySelector('[data-wi-chartbox]');
     dom.tip = ctx.root.querySelector('[data-wi-tip]');
     dom.tailBox = ctx.root.querySelector('[data-wi-tail]');
-    dom.tailKey = ctx.root.querySelector('[data-wi-tailkey]');
     dom.thermRead = ctx.root.querySelector('[data-wi-therm-read]');
-    dom.thermLegend = ctx.root.querySelector('[data-wi-therm-legend]');
-    dom.band = ctx.root.querySelector('[data-wi-band]');
-    dom.tickToday = ctx.root.querySelector('[data-wi-tick-today]');
-    dom.needle = ctx.root.querySelector('[data-wi-needle]');
-    dom.needle2100 = ctx.root.querySelector('[data-wi-needle-2100]');
+    dom.thermBox = ctx.root.querySelector('[data-wi-therm-box]');
+    dom.thermFoot = ctx.root.querySelector('[data-wi-therm-foot]');
+    dom.barFill = ctx.root.querySelector('[data-wi-bar-fill]');
+    dom.barMark = ctx.root.querySelector('[data-wi-bar-mark]');
+    dom.barNote = ctx.root.querySelector('[data-wi-bar-note]');
+    dom.fig = {};
+    ctx.root.querySelectorAll('[data-wi-fig]').forEach(n => { dom.fig[n.dataset.wiFig] = n; });
+    dom.liveRead = ctx.root.querySelector('[data-wi-live-read]');
+    dom.liveNeedle = ctx.root.querySelector('[data-wi-live-needle]');
+    dom.liveFoot = ctx.root.querySelector('[data-wi-live-foot]');
     dom.cards = {};
     ctx.root.querySelectorAll('[data-wi-card]').forEach(card => {
         dom.cards[card.dataset.wiCard] = {
@@ -908,7 +1015,7 @@ function buildScene(i18n = true) {
     // the svg skeleton: fixed groups, joined on every redraw
     if (dom.svg && window.d3) {
         const s = window.d3.select(dom.svg);
-        ['grid', 'area', 'lines', 'marks', 'axis', 'hover'].forEach(k => s.append('g').attr('class', 'wi-g-' + k));
+        ['grid', 'area', 'lines', 'marks', 'notes', 'axis', 'hover'].forEach(k => s.append('g').attr('class', 'wi-g-' + k));
     }
 
     wireScene();
@@ -1046,7 +1153,9 @@ function drawChart(res) {
 
     // budget-exhaustion marks -------------------------------------------
     const marks = [];
-    const label15 = es ? 'presupuesto de 1,5 °C agotado' : '1.5 °C budget exhausted';
+    // At 390 px the long form ran 15 px off the left edge of the plot.
+    const label15 = mobile ? pk('1.5 °C', '1,5 °C', '1.5 °C')
+        : pk('1.5 °C budget exhausted', 'presupuesto de 1,5 °C agotado', '1.5 °C 预算耗尽');
     [[res.exhaustion_year_1p5, label15], [res.exhaustion_year_2p0, '2 °C'], [res.exhaustion_year_3p0, '≈3 °C']]
         .forEach(([yr, txt], i) => {
             if (yr == null || yr < HIST_FROM || yr > xMax) return;
@@ -1061,13 +1170,89 @@ function drawChart(res) {
         .attr('y1', y(0)).attr('y2', m.t)
         .attr('stroke', 'var(--verm-ink)').attr('stroke-width', 1)
         .attr('stroke-dasharray', '3 3').attr('opacity', 0.75);
+    const mfs = mobile ? 9.5 : 10.5;
     mk.select('text')
-        .attr('x', d => (x(d.year) > W - 150 ? x(d.year) - 5 : x(d.year) + 5))
+        .attr('x', d => {
+            const wTxt = d.text.length * mfs * 0.55;
+            const flip = x(d.year) + 5 + wTxt > W - m.r;
+            return flip ? Math.max(m.l + wTxt + 2, x(d.year) - 5) : x(d.year) + 5;
+        })
         .attr('y', d => m.t + 11 + d.row * 13)
-        .attr('text-anchor', d => (x(d.year) > W - 150 ? 'end' : 'start'))
-        .attr('font-family', 'var(--ff)').attr('font-size', mobile ? 9.5 : 10.5)
+        .attr('text-anchor', d => (x(d.year) + 5 + d.text.length * mfs * 0.55 > W - m.r ? 'end' : 'start'))
+        .attr('font-family', 'var(--ff)').attr('font-size', mfs)
         .attr('fill', 'var(--verm-ink)')
         .text(d => d.text);
+
+    // in-canvas labels ---------------------------------------------------
+    // "I do not really know what the line on its own from 2024 represents."
+    // The legend used to be a row of chrome above the figure, three colour
+    // chips away from the strokes they named. It is written on the drawing
+    // now: each stretch of line carries its own name, the shaded area says
+    // what it is the sum of, and a dot marks the junction at 2024.
+    const valAt = (arr, yr) => {
+        if (!arr.length) return 0;
+        let best = arr[0];
+        for (const d of arr) if (Math.abs(d.year - yr) < Math.abs(best.year - yr)) best = d;
+        return best.gt;
+    };
+    const nfs = mobile ? 8.5 : 9.5;
+    // a label may never leave the plot: at 390 px the projection used to read
+    // "PROJECTION 2025–20" against the right edge
+    const place = (xWanted, anchor, txt) => {
+        const wTxt = txt.length * nfs * 0.63;
+        const half = anchor === 'middle' ? wTxt / 2 : 0;
+        const lo = m.l + half + 2, hi = W - m.r - (anchor === 'middle' ? half : wTxt) - 2;
+        return hi < lo ? lo : clamp(xWanted, lo, hi);
+    };
+    const notes = [];
+    const histYr = mobile ? 2002 : 2003;
+    const tHist = mobile ? pk('OBSERVED', 'OBSERVADO', '观测值')
+        : pk('OBSERVED 1990–2024', 'OBSERVADO 1990–2024', '观测值 1990–2024');
+    notes.push({
+        key: 'hist', x: place(x(histYr), 'middle', tHist), y: y(valAt(hist, histYr)) - 9,
+        anchor: 'middle', fill: 'var(--cd)', t: tHist
+    });
+    const projYr = mobile ? 2038 : 2041;
+    const tProj = mobile ? pk('PROJECTION', 'PROYECCIÓN', '预测值')
+        : pk('PROJECTION 2025–2050', 'PROYECCIÓN 2025–2050', '预测值 2025–2050');
+    notes.push({
+        key: 'proj', x: place(x(projYr), 'middle', tProj), y: y(valAt(proj, projYr)) - 9,
+        anchor: 'middle', fill: 'var(--verm-ink)', t: tProj
+    });
+    const tCum = (mobile
+        ? pk('CUMULATIVE · ', 'ACUMULADO · ', '累计 · ')
+        : pk('CUMULATIVE SINCE 2025 · ', 'ACUMULADO DESDE 2025 · ', '自 2025 年累计 · ')) + f.gt(res.cum_2025_2050_gt) + ' Gt';
+    notes.push({
+        key: 'cum', x: place(x(BASE_YEAR) + 6, 'start', tCum), y: y(0) - 8,
+        anchor: 'start', fill: 'var(--cg)', t: tCum
+    });
+    if (tail.length) {
+        const tTail = mobile ? pk('…TO 2100', '…HASTA 2100', '…延至 2100')
+            : pk('IF THE RATES HELD · 2051–2100', 'SI LAS TASAS SIGUIERAN · 2051–2100', '若速率不变 · 2051–2100');
+        notes.push({
+            key: 'tail', x: place(x(2076), 'middle', tTail), y: y(valAt(tail, 2076)) - 9,
+            anchor: 'middle', fill: 'var(--verm-ink)', op: 0.75, t: tTail
+        });
+    }
+    const gNotes = d3.select(dom.svg).select('.wi-g-notes');
+    const nj = gNotes.selectAll('text').data(notes.filter(n => n.y > m.t + 4), d => d.key).join('text');
+    nj.attr('x', d => d.x).attr('y', d => d.y)
+        .attr('text-anchor', d => d.anchor)
+        .attr('font-family', 'var(--ff)')
+        .attr('font-size', nfs)
+        .attr('letter-spacing', '.12em')
+        .attr('fill', d => d.fill)
+        .attr('opacity', d => (d.op == null ? 1 : d.op))
+        // a halo of paper, so a label never has to fight the dashed budget
+        // rules or the edge of the shaded area it sits on
+        .attr('stroke', 'var(--foam)').attr('stroke-width', 3.2)
+        .attr('stroke-linejoin', 'round').attr('paint-order', 'stroke')
+        .text(d => d.t);
+    // the junction: this is where the observed record stops and the dials start
+    let dot = gNotes.select('.wi-note-dot');
+    if (dot.empty()) dot = gNotes.append('circle').attr('class', 'wi-note-dot');
+    dot.attr('cx', x(anchor.year)).attr('cy', y(anchor.gt)).attr('r', 3)
+        .attr('fill', 'var(--cd)').attr('stroke', 'var(--foam)').attr('stroke-width', 1.5);
 
     // axes --------------------------------------------------------------
     const step = mobile ? 20 : 10;
@@ -1088,7 +1273,7 @@ function drawChart(res) {
         .attr('fill', 'var(--cl)')
         .attr('style', d => d.kind === 'y' ? 'font-variant-numeric:tabular-nums lining-nums' : null)
         .text(d => d.kind === 'unit'
-            ? (es ? 'GT CO₂/AÑO' : 'GT CO₂/YR')
+            ? pk('GT CO₂/YR', 'GT CO₂/AÑO', 'GT CO₂/年')
             : (d.kind === 'y' ? f.n(d.v, 0) : String(d.v)));
 
     // hover scaffolding --------------------------------------------------
@@ -1132,10 +1317,10 @@ function onHover(ev) {
     gHover.select('.wi-hover-dot').attr('cx', geom.x(year)).attr('cy', geom.y(d.gt));
 
     const f = ctx.fmt, es = isEs();
-    const rows = [`${es ? 'Emisiones' : 'Emissions'}: ${f.gt(d.gt)} Gt`];
+    const rows = [`${pk('Emissions', 'Emisiones', '排放')}: ${f.gt(d.gt)} Gt`];
     if (d.cum != null) {
-        rows.push(`${es ? 'Acumulado desde 2025' : 'Cumulative since 2025'}: ${f.gt(d.cum)} Gt`);
-        rows.push(`${es ? 'Restante' : 'Remaining'} (${targetTxt(lastRes.inputs.target)}): ${signedGt(d.rem, 1)} Gt`);
+        rows.push(`${pk('Cumulative since 2025', 'Acumulado desde 2025', '自 2025 年累计')}: ${f.gt(d.cum)} Gt`);
+        rows.push(`${pk('Remaining', 'Restante', '剩余')} (${targetTxt(lastRes.inputs.target)}): ${signedGt(d.rem, 1)} Gt`);
     }
     dom.tip.innerHTML = `<b>${year}</b>${rows.map(esc).join('<br>')}`;
     dom.tip.hidden = false;
@@ -1159,22 +1344,66 @@ function thermPct(c) {
     return clamp((c - THERM_LO) / (THERM_HI - THERM_LO), 0, 1) * 100;
 }
 
+/**
+ * The thermometer, vertical, with the warming ramp of the shell (ctx.thermSVG).
+ * The old flat rail was 1,100 px of empty paper with four hairlines on it; the
+ * column reads as a temperature because the colour IS the temperature, and the
+ * three needles — today, 2050, 2100 — carry their own labels.
+ */
 function drawThermometer(res) {
     const f = ctx.fmt, es = isEs();
+    const box = dom.thermBox;
+    if (!box) return;
     const t2024 = ctx.model.climate().warming_2024.human_induced;
     const lo = res.t_2050_range[0], hi = res.t_2050_range[1];
 
-    dom.tickToday.style.left = thermPct(t2024) + '%';
-    dom.band.style.left = thermPct(lo) + '%';
-    dom.band.style.width = Math.max(0.4, thermPct(hi) - thermPct(lo)) + '%';
-    dom.needle.style.left = thermPct(res.t_2050_c) + '%';
-    dom.needle2100.style.left = thermPct(res.t_2100_c) + '%';
+    dom.thermRead.textContent = `${f.deg(res.t_2050_c)} °C`;
 
-    dom.thermRead.textContent = `2050: ${f.deg(res.t_2050_c)} °C (${f.deg(lo)}–${f.deg(hi)})`;
-    const off2100 = res.t_2100_c > THERM_HI ? ' ›' : '';
-    dom.thermLegend.textContent = es
-        ? `Hoy ${f.deg(t2024)} °C · 2100 ${f.deg(res.t_2100_c)} °C${off2100} (aguja gris) · ≈3 °C: marca del termómetro, derivada.`
-        : `Today ${f.deg(t2024)} °C · 2100 ${f.deg(res.t_2100_c)} °C${off2100} (grey needle) · ≈3 °C: thermometer mark, derived.`;
+    const r = box.getBoundingClientRect();
+    const w = Math.round(r.width), h = Math.round(r.height);
+    if (w >= 40 && h >= 80) {
+        box.innerHTML = ctx.thermSVG({
+            w, h, lo: THERM_LO, hi: THERM_HI,
+            ticks: [
+                { v: 1.0, label: f.n(1.0, 1) },
+                { v: 1.5, label: f.n(1.5, 1) },
+                { v: 2.0, label: f.n(2.0, 1) },
+                { v: 2.5, label: f.n(2.5, 1) },
+                { v: 3.0, label: '≈3', dash: true },
+                { v: 3.5, label: f.n(3.5, 1) }
+            ],
+            band: [lo, hi],
+            marks: [
+                {
+                    v: t2024, kind: 'now',
+                    label: pk('today ', 'hoy ', '当前 ') + f.deg(t2024),
+                    short: pk('now ', 'hoy ', '当前 ') + f.deg(t2024)
+                },
+                {
+                    v: res.t_2050_c, kind: 'main',
+                    label: '2050 ' + f.deg(res.t_2050_c),
+                    short: '2050 ' + f.deg(res.t_2050_c)
+                },
+                {
+                    v: res.t_2100_c, kind: 'soft',
+                    label: '2100 ' + f.deg(res.t_2100_c),
+                    short: '2100 ' + f.deg(res.t_2100_c)
+                }
+            ]
+        });
+    }
+
+    // no-break spaces before the unit: a 176 px column breaks "≈3 / °C"
+    const off2100 = res.t_2100_c > THERM_HI
+        ? pk(` The 2100 needle (${f.deg(res.t_2100_c)} °C) runs off the scale.`,
+            ` La aguja de 2100 (${f.deg(res.t_2100_c)} °C) se sale de la escala.`,
+            ` 2100 年的指针（${f.deg(res.t_2100_c)} °C）已超出标度。`)
+        : '';
+    dom.thermFoot.textContent = (pk(
+        `Band: likely range in 2050 (${f.deg(lo)}–${f.deg(hi)}). ≈3 °C is a derived mark.`,
+        `Banda: rango probable en 2050 (${f.deg(lo)}–${f.deg(hi)}). ≈3 °C es una marca derivada.`,
+        `色带：2050 年的可能范围（${f.deg(lo)}–${f.deg(hi)}）。≈3 °C 为推导刻度。`) + off2100)
+        .replace(/ (°C|Gt)/g, ' $1');
 }
 
 /** The live strip that travels with the dials (phones, see liveStripHTML). */
@@ -1184,9 +1413,10 @@ function drawLive(res) {
     dom.liveRead.textContent = `${f.gt(res.cum_2025_2050_gt)} Gt · ${f.deg(res.t_2050_c)} °C`;
     if (dom.liveNeedle) dom.liveNeedle.style.left = thermPct(res.t_2050_c) + '%';
     const y15 = res.exhaustion_year_1p5, y20 = res.exhaustion_year_2p0;
-    dom.liveFoot.textContent = es
-        ? `1,5 °C ${y15 == null ? '—' : y15} · 2 °C ${y20 == null ? '—' : y20}`
-        : `1.5 °C ${y15 == null ? '—' : y15} · 2 °C ${y20 == null ? '—' : y20}`;
+    dom.liveFoot.textContent = pk(
+        `1.5 °C ${y15 == null ? '—' : y15} · 2 °C ${y20 == null ? '—' : y20}`,
+        `1,5 °C ${y15 == null ? '—' : y15} · 2 °C ${y20 == null ? '—' : y20}`,
+        `1.5 °C ${y15 == null ? '—' : y15} · 2 °C ${y20 == null ? '—' : y20}`);
 }
 
 // ---- cards -----------------------------------------------------------------
@@ -1197,32 +1427,89 @@ function drawCards(res) {
     const probTail = prob === '50%' ? '' : ` · ${probTxt(prob)}`;
 
     dom.cards.cum.value.textContent = `${f.gt(res.cum_2025_2050_gt)} Gt`;
-    dom.cards.cum.sub.textContent = es
-        ? `${f.ratio(res.share_of_rcb_1p5)}× el presupuesto de 1,5 °C · ${f.ratio(res.share_of_rcb_2p0)}× el de 2 °C${probTail}`
-        : `${f.ratio(res.share_of_rcb_1p5)}× the 1.5 °C budget · ${f.ratio(res.share_of_rcb_2p0)}× the 2 °C one${probTail}`;
+    dom.cards.cum.sub.textContent = pk(
+        `${f.ratio(res.share_of_rcb_1p5)}× the 1.5 °C budget · ${f.ratio(res.share_of_rcb_2p0)}× the 2 °C one${probTail}`,
+        `${f.ratio(res.share_of_rcb_1p5)}× el presupuesto de 1,5 °C · ${f.ratio(res.share_of_rcb_2p0)}× el de 2 °C${probTail}`,
+        `1.5 °C 预算的 ${f.ratio(res.share_of_rcb_1p5)} 倍 · 2 °C 预算的 ${f.ratio(res.share_of_rcb_2p0)} 倍${probTail}`);
+
+    // The one bar of the section: what is spent against what there is. The
+    // track is scaled to whichever is larger, so a full bar with the tick at a
+    // third of the way along says "three times over" without reading a number.
+    if (dom.barFill) {
+        const budget = res.budget_target_gt;
+        const cum = res.cum_2025_2050_gt;
+        const top = Math.max(cum, budget) * 1.02;
+        const pc = (v) => clamp((v / top) * 100, 0, 100);
+        dom.barFill.style.width = pc(cum) + '%';
+        dom.barMark.style.left = pc(budget) + '%';
+        dom.barNote.textContent = pk(
+            `the mark is the ${targetTxt(res.inputs.target)} budget (${f.nGroup(budget, 0)} Gt)`,
+            `la marca es el presupuesto de ${targetTxt(res.inputs.target)} (${f.nGroup(budget, 0)} Gt)`,
+            `刻度线是 ${targetTxt(res.inputs.target)} 的预算（${f.nGroup(budget, 0)} Gt）`);
+    }
 
     // One decimal, like every other Gt figure in the section and like the
     // tooltip of 2050 ("Remaining (2 °C): +116.8 Gt"): spec §8.
     dom.cards.remaining.value.textContent =
         `${signedGt(res.remaining_2050_1p5_gt, 1)} / ${signedGt(res.remaining_2050_2p0_gt, 1)}`;
-    dom.cards.remaining.sub.textContent = es
-        ? `Gt para 1,5 °C / 2 °C${probTail}`
-        : `Gt for 1.5 °C / 2 °C${probTail}`;
+    dom.cards.remaining.sub.textContent = pk(
+        `Gt for 1.5 °C / 2 °C${probTail}`,
+        `Gt para 1,5 °C / 2 °C${probTail}`,
+        `1.5 °C / 2 °C 的 Gt${probTail}`);
     const yrs = res.years_left_at_2050_rate_2p0;
     dom.cards.remaining.sub2.textContent = yrs == null
-        ? (es ? 'El presupuesto de 2 °C ya estaría superado.' : 'The 2 °C budget would already be overshot.')
-        : (es ? `${f.n(yrs, 1)} años al ritmo de 2050.` : `${f.n(yrs, 1)} years at the 2050 rate.`);
+        ? pk('The 2 °C budget would already be overshot.', 'El presupuesto de 2 °C ya estaría superado.', '2 °C 的预算已被突破。')
+        : pk(`${f.n(yrs, 1)} years at the 2050 rate.`, `${f.n(yrs, 1)} años al ritmo de 2050.`, `按 2050 年的速率还剩 ${f.n(yrs, 1)} 年。`);
 
     dom.cards.exhaustion.value.textContent =
         `${f.year(res.exhaustion_year_1p5)} / ${f.year(res.exhaustion_year_2p0)}`;
     const e30 = res.exhaustion_year_3p0;
-    dom.cards.exhaustion.sub.textContent = (es ? '1,5 °C / 2 °C' : '1.5 °C / 2 °C')
+    dom.cards.exhaustion.sub.textContent = pk('1.5 °C / 2 °C', '1,5 °C / 2 °C', '1.5 °C / 2 °C')
         + (e30 == null ? '' : ` · ≈3 °C: ${e30}`);
 
     dom.cards.e2050.value.textContent = f.signedChange(res.e_2050_vs_2024) + ' %';
-    dom.cards.e2050.sub.textContent = es
-        ? `${f.n(res.e_2050_mt, 0)} Mt en 2050 · ${f.n(res.base.E, 0)} Mt en 2024`
-        : `${f.n(res.e_2050_mt, 0)} Mt in 2050 · ${f.n(res.base.E, 0)} Mt in 2024`;
+    dom.cards.e2050.sub.textContent = pk(
+        `${f.n(res.e_2050_mt, 0)} Mt in 2050 · ${f.n(res.base.E, 0)} Mt in 2024`,
+        `${f.n(res.e_2050_mt, 0)} Mt en 2050 · ${f.n(res.base.E, 0)} Mt en 2024`,
+        `2050 年 ${f.n(res.e_2050_mt, 0)} Mt · 2024 年 ${f.n(res.base.E, 0)} Mt`);
+
+    drawCardFigures(res);
+}
+
+/**
+ * The micro-figures at the foot of the three cards that had none (11-IX, r2).
+ * They carry no number of their own: each is the card's own numeral drawn to
+ * scale, so the four cards can be compared at a glance instead of read one by
+ * one. Nothing here is a new measurement — every value is already on the card.
+ */
+function drawCardFigures(res) {
+    const F = dom.fig;
+    if (!F) return;
+    const set = (k, css) => { const n = F[k]; if (!n) return; Object.assign(n.style, css); };
+
+    // REMAINING: two zero-centred bars, one per budget. Left of the hairline is
+    // overshoot, right of it is what would be left.
+    const r15 = res.remaining_2050_1p5_gt, r20 = res.remaining_2050_2p0_gt;
+    const span = Math.max(Math.abs(r15), Math.abs(r20), 1) * 1.08;
+    const signed = (v) => {
+        const half = clamp((Math.abs(v) / span) * 50, 0, 50);
+        return v >= 0 ? { left: '50%', right: 'auto', width: half + '%' }
+                      : { left: (50 - half) + '%', right: 'auto', width: half + '%' };
+    };
+    set('rem15', signed(r15));
+    set('rem20', signed(r20));
+
+    // BUDGET CROSSED: how far into 2025–2100 each budget lasts. A budget that is
+    // never crossed inside the horizon leaves its rail empty.
+    const yearPc = (y) => (y == null ? 0 : clamp(((y - 2025) / 75) * 100, 0, 100));
+    set('exh15', { left: '0', width: yearPc(res.exhaustion_year_1p5) + '%' });
+    set('exh20', { left: '0', width: yearPc(res.exhaustion_year_2p0) + '%' });
+
+    // EMISSIONS 2050 VS 2024: the signed change on a ±100 % rail.
+    const d = clamp(res.e_2050_vs_2024, -100, 100);
+    const dHalf = (Math.abs(d) / 100) * 50;
+    set('d2050', d >= 0 ? { left: '50%', width: dHalf + '%' }
+                        : { left: (50 - dHalf) + '%', width: dHalf + '%' });
 }
 
 // ============================================================================
@@ -1268,11 +1555,11 @@ function drawSolve(inv) {
             ? (inv.solve_for === 'r' ? row.r_required : row.g_required)
             : null;
         const txt = v == null
-            ? (es ? 'fuera de rango' : 'out of range')
+            ? pk('out of range', 'fuera de rango', '超出范围')
             : ((v < 0 ? f.minus : '+') + f.n(Math.abs(v) * 100, 2) + ' %');
         const lead = H === PROJ_END
-            ? (es ? 'Tasas constantes hasta 2100' : 'Constant rates to 2100')
-            : (es ? 'Solo hasta 2050' : 'Only to 2050');
+            ? pk('Constant rates to 2100', 'Tasas constantes hasta 2100', '速率恒定至 2100 年')
+            : pk('Only to 2050', 'Solo hasta 2050', '只计到 2050 年');
         const strong = (H === horizon);
         return `<span data-wi-solved="${H}">${esc(lead)}: ${strong ? '<b>' : ''}${esc(txt)}${strong ? '</b>' : ''}</span>`;
     };
@@ -1352,7 +1639,6 @@ function render() {
     dom.tailSentence.textContent = tailSentence(res);
     if (dom.budgetNote) dom.budgetNote.textContent = budgetNote(res.inputs.probability);
     if (dom.svg) dom.svg.dataset.wiAria = dom.sentence.textContent;
-    if (dom.tailKey) dom.tailKey.hidden = !tailOn();
     if (dom.tailBox) dom.tailBox.checked = tailOn();
 
     drawSolve(currentInverse());
@@ -1404,7 +1690,9 @@ export function updateAheadView(info = {}) {
 
     if (reason === 'resize') {
         hideTip();
-        if (lastRes) drawChart(lastRes);
+        // Both figures measure their own box: the thermometer is an SVG now,
+        // so it has to be redrawn with the column, not stretched with it.
+        if (lastRes) { drawChart(lastRes); drawThermometer(lastRes); }
         return;
     }
 

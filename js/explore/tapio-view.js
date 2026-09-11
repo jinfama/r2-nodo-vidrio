@@ -4,21 +4,25 @@
 // Multi-country: renders one chart per country in a grid layout
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
-import { COLORS, getColorForIndex, shortName } from '../utils.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
+import { COLORS, getColorForIndex, shortName, tLabel } from '../utils.js?v=20260911b';
+import {
+    createFacetGrid, resetFacetContainer, sizeFacetGrid, appendFacetCells,
+    createFacetLegend, facetTicks, facetTitle, dropCornerTick
+} from '../analysis/facet-grid.js?v=20260911b';
 
 // Tapio pattern definitions (pre-computed in data as pat / pat_ff)
 const PATTERN_META = {
-    AD: { label: 'Absolute decoupling',   color: '#2a9d8f', desc: 'GDP grows, GHG falls' },
-    WD: { label: 'Weak decoupling',       color: '#8ecae6', desc: 'GDP grows, GHG grows slower' },
-    CG: { label: 'Coupling growth',       color: '#f4a261', desc: 'GDP and GHG grow at similar rates' },
-    DG: { label: 'Divergent growth',      color: '#e76f51', desc: 'GDP grows, GHG grows faster' },
-    RE: { label: 'Recessive',             color: '#6c757d', desc: 'GDP and GHG both decline' },
-    DR: { label: 'Decoupling recessive',  color: '#606c38', desc: 'GDP falls, GHG falls faster' },
-    LB: { label: 'Land-based',            color: '#a68a64', desc: 'Land-use change dominated' },
-    ND: { label: 'No data',               color: '#dee2e6', desc: '' }
+    AD: { get label() { return tLabel('Absolute decoupling', 'Desacoplamiento absoluto', '绝对脱钩'); }, color: '#2a9d8f', get desc() { return tLabel('GDP grows, GHG falls', 'el PIB crece y los GEI caen', 'GDP 上升，温室气体下降'); } },
+    WD: { get label() { return tLabel('Weak decoupling', 'Desacoplamiento débil', '弱脱钩'); }, color: '#8ecae6', get desc() { return tLabel('GDP grows, GHG grows slower', 'el PIB crece y los GEI crecen más despacio', 'GDP 上升，温室气体上升较慢'); } },
+    CG: { get label() { return tLabel('Coupling growth', 'Crecimiento acoplado', '耦合增长'); }, color: '#f4a261', get desc() { return tLabel('GDP and GHG grow at similar rates', 'el PIB y los GEI crecen a ritmos parecidos', 'GDP 与温室气体以相近速度上升'); } },
+    DG: { get label() { return tLabel('Divergent growth', 'Crecimiento divergente', '发散增长'); }, color: '#e76f51', get desc() { return tLabel('GDP grows, GHG grows faster', 'el PIB crece y los GEI crecen más deprisa', 'GDP 上升，温室气体上升更快'); } },
+    RE: { get label() { return tLabel('Recessive', 'Recesivo', '衰退型'); }, color: '#6c757d', get desc() { return tLabel('GDP and GHG both decline', 'el PIB y los GEI caen', 'GDP 与温室气体同时下降'); } },
+    DR: { get label() { return tLabel('Decoupling recessive', 'Recesivo con desacoplamiento', '衰退型脱钩'); }, color: '#606c38', get desc() { return tLabel('GDP falls, GHG falls faster', 'el PIB cae y los GEI caen más deprisa', 'GDP 下降，温室气体下降更快'); } },
+    LB: { get label() { return tLabel('Land-based', 'De origen agrario', '土地驱动型'); }, color: '#a68a64', get desc() { return tLabel('Land-use change dominated', 'dominado por el cambio de uso del suelo', '以土地利用变化为主'); } },
+    ND: { get label() { return tLabel('No data', 'Sin datos', '无数据'); }, color: '#dee2e6', desc: '' }
 };
 
 // Fallback classification when pre-computed pat field is missing
@@ -64,12 +68,16 @@ export function updateTapioView() {
 }
 
 export function destroyTapioView() {
-    if (currentContainer) currentContainer.innerHTML = '';
+    if (currentContainer) {
+        currentContainer.innerHTML = '';
+        resetFacetContainer(currentContainer);
+    }
 }
 
 function renderTapio() {
     const container = currentContainer;
     container.innerHTML = '';
+    resetFacetContainer(container);
 
     const countries = State.get('selectedCountries');
     const yearRange = State.get('yearRange');
@@ -80,12 +88,14 @@ function renderTapio() {
     // Update titles
     const titleEl = document.getElementById('analysis-title');
     const subtitleEl = document.getElementById('analysis-subtitle');
-    const emType = patField === 'pat_ff' ? 'CO\u2082 fossil fuel' : 'GHG';
-    if (titleEl) titleEl.textContent = `Tapio decoupling patterns \u2014 ${emType}`;
-    if (subtitleEl) subtitleEl.textContent = `${windowSize}-year growth rates \u2014 GDP per capita vs emissions`;
+    const emType = patField === 'pat_ff'
+        ? tLabel('fossil CO₂', 'CO₂ fósil', '化石 CO₂')
+        : tLabel('GHG', 'GEI', '温室气体');
+    if (titleEl) titleEl.textContent = `${tLabel('Tapio decoupling patterns', 'Patrones de desacoplamiento de Tapio', 'Tapio 脱钩模式')} \u2014 ${emType}`;
+    if (subtitleEl) subtitleEl.textContent = `${windowSize}${tLabel('-year growth rates', ' años de tasa de crecimiento', ' 年增长率')} \u2014 ${tLabel('GDP per capita vs emissions', 'PIB per cápita frente a emisiones', '人均 GDP 对比排放')}`;
 
     if (countries.length === 0) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">Select countries to view Tapio decoupling patterns</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('Select countries to view Tapio decoupling patterns', 'Elige países para ver los patrones de desacoplamiento de Tapio', '请选择国家以查看 Tapio 脱钩模式') + '</div>';
         return;
     }
 
@@ -132,49 +142,44 @@ function renderTapio() {
 
     const validDataSets = countryDataSets.filter(ds => ds.points.length > 0);
     if (validDataSets.length === 0) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">No data available for selected period</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('No data available for selected period', 'No hay datos para el periodo elegido', '所选时期暂无数据') + '</div>';
         return;
     }
 
-    // Create grid layout - one chart per country
-    const gridDiv = document.createElement('div');
-    const containerWidth = container.clientWidth || container.getBoundingClientRect().width || 1000;
-    const cols = validDataSets.length === 1 ? 1
-        : containerWidth < 900 ? 1
-        : containerWidth < 1550 ? 2
-        : Math.min(3, validDataSets.length);
-    const cellHeight = containerWidth < 900 ? 380 : 360;
-    gridDiv.style.cssText = `display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));grid-auto-rows:minmax(${cellHeight}px,auto);gap:28px 22px;width:100%;height:100%;padding:12px;overflow:auto;align-content:start`;
-    container.appendChild(gridDiv);
+    // One facet per country. The rows share the height of the scene instead of
+    // standing on a constant 360 px cell, so a single country fills the area,
+    // two take half of it each and six make a 3x2 that still fills it.
+    const grid = createFacetGrid(container);
 
-    validDataSets.forEach(ds => {
-        const cell = document.createElement('div');
-        cell.style.cssText = `position:relative;min-height:${cellHeight}px;overflow:hidden`;
-        gridDiv.appendChild(cell);
-        renderSingleTapio(cell, ds, windowSize, currentYear, emType);
-    });
-
-    // Shared legend at bottom — only show patterns present in data
-    const legendDiv = document.createElement('div');
-    legendDiv.style.cssText = 'display:flex;flex-wrap:wrap;gap:12px;padding:8px 12px;justify-content:center';
+    // The legend joins the flex column before the grid measures itself, so its
+    // strip is already discounted from the height the facets get.
+    const legendDiv = createFacetLegend();
     const usedPatterns = new Set();
     validDataSets.forEach(ds => ds.points.forEach(p => { if (p.pat !== 'ND') usedPatterns.add(p.pat); }));
     const patOrder = ['AD', 'WD', 'CG', 'DG', 'RE', 'DR', 'LB'];
     patOrder.filter(code => usedPatterns.has(code)).forEach(code => {
         const meta = PATTERN_META[code];
-        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:${COLORS.gray}">
+        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;color:${COLORS.gray}">
             <span style="width:10px;height:10px;border-radius:50%;background:${meta.color};display:inline-block"></span>
             ${meta.label}
         </span>`;
     });
     container.appendChild(legendDiv);
+
+    sizeFacetGrid(grid, validDataSets.length, { rowGap: 22, colGap: 20, minCell: 232 });
+    const cells = appendFacetCells(grid, validDataSets.length);
+
+    validDataSets.forEach((ds, i) => {
+        renderSingleTapio(cells[i], ds, windowSize, currentYear, emType);
+    });
 }
 
 function renderSingleTapio(container, ds, windowSize, currentYear, emType) {
     const rect = container.getBoundingClientRect();
-    const width = rect.width || 350;
-    const height = rect.height || 280;
-    const margin = { top: 28, right: 20, bottom: 50, left: 62 };
+    const width = Math.round(rect.width) || 350;
+    const height = Math.round(rect.height) || 280;
+    // Room for a 12 px axis label plus its title line under the plot.
+    const margin = { top: 28, right: 20, bottom: 54, left: 64 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
     if (w <= 0 || h <= 0) return;
@@ -191,11 +196,8 @@ function renderSingleTapio(container, ds, windowSize, currentYear, emType) {
     const g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Title
-    svg.append('text')
-        .attr('x', margin.left).attr('y', 16)
-        .style('font-size', '11px').style('font-weight', '600').style('fill', ds.color)
-        .text(ds.name);
+    // Title: ink, with the series colour as the swatch in front of it (r2).
+    facetTitle(svg, margin.left, 16, ds.name, ds.color, COLORS.dark);
 
     const points = ds.points;
 
@@ -255,37 +257,55 @@ function renderSingleTapio(container, ds, windowSize, currentYear, emType) {
         .attr('y1', 0).attr('y2', h)
         .attr('stroke', COLORS.gray).attr('stroke-width', 0.5);
 
-    // Axes
-    g.append('g')
+    // Axes. Facet type stays at 12 px whatever the cell size, so when a facet
+    // is narrow or short it is the number of ticks that comes down.
+    const gx = g.append('g')
         .attr('transform', `translate(0,${h})`)
         .attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d + '%'));
+        .call(d3.axisBottom(xScale).ticks(facetTicks(w, 64, 3, 7)).tickFormat(d => d + '%'));
 
-    g.append('g')
+    const gy = g.append('g')
         .attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + '%'));
+        .call(d3.axisLeft(yScale).ticks(facetTicks(h, 48, 3, 6)).tickFormat(d => d + '%'));
+
+    dropCornerTick(gx, gy);
 
     // Axis labels
     g.append('text')
-        .attr('x', w / 2).attr('y', h + 34)
+        .attr('x', w / 2).attr('y', h + 42)
         .attr('text-anchor', 'middle')
-        .style('font-size', '9px').style('fill', COLORS.gray)
-        .text(`GDP pc growth (${windowSize}y, %)`);
+        .style('font-size', '12px').style('fill', COLORS.gray)
+        .text(tLabel(`GDP pc growth (${windowSize}y, %)`,
+                     `Crecimiento del PIB pc (${windowSize} años, %)`,
+                     `人均 GDP 增长率（${windowSize} 年，%）`));
 
     g.append('text')
         .attr('transform', 'rotate(-90)')
-        .attr('x', -h / 2).attr('y', -38)
+        .attr('x', -h / 2).attr('y', -46)
         .attr('text-anchor', 'middle')
-        .style('font-size', '9px').style('fill', COLORS.gray)
-        .text(`${emType} growth (${windowSize}y, %)`);
+        .style('font-size', '12px').style('fill', COLORS.gray)
+        .text(tLabel(`${emType} growth (${windowSize}y, %)`,
+                     `Crecimiento de ${emType} (${windowSize} años, %)`,
+                     `${emType} 增长率（${windowSize} 年，%）`));
 
-    // Quadrant labels
-    g.append('text').attr('x', w - 4).attr('y', 10).attr('text-anchor', 'end')
-        .style('font-size', '8px').style('fill', '#2a9d8f').style('opacity', 0.6)
-        .text('Absolute decoupling');
-    g.append('text').attr('x', 4).attr('y', h - 4).attr('text-anchor', 'start')
-        .style('font-size', '8px').style('fill', '#e76f51').style('opacity', 0.6)
-        .text('Divergent growth');
+    // Quadrant watermarks. They are corner labels, so they only earn their
+    // place once the facet is wide enough for them not to meet the dots.
+    if (w > 230) {
+        // 11-IX (r2): they were painted in the quadrant's own tint (2.67:1 and
+        // 2.49:1 on the cream). They are chrome, not marks, so they go to the
+        // tertiary ink (--cl, 5.4:1) and keep their tint in a 9 px swatch.
+        const qLabel = (x, y, anchor, color, text) => {
+            g.append('rect')
+                .attr('x', anchor === 'end' ? x - 9 : x).attr('y', y - 8)
+                .attr('width', 9).attr('height', 9).attr('fill', color).attr('opacity', 0.85);
+            g.append('text').attr('x', anchor === 'end' ? x - 14 : x + 14).attr('y', y)
+                .attr('text-anchor', anchor)
+                .style('font-size', '12px').style('fill', '#665a4e')
+                .text(text);
+        };
+        qLabel(w - 4, 12, 'end', '#2a9d8f', tLabel('Absolute decoupling', 'Desacoplamiento absoluto', '绝对脱钩'));
+        qLabel(4, h - 5, 'start', '#e76f51', tLabel('Divergent growth', 'Crecimiento divergente', '发散增长'));
+    }
 
     // Bubble size scale (if var_ghg data is available)
     const hasVarGhg = points.some(d => d.varGhg != null);
@@ -325,13 +345,22 @@ function renderSingleTapio(container, ds, windowSize, currentYear, emType) {
     // Label on current year point
     const curPt = points.find(d => d.year === currentYear);
     if (curPt) {
+        // 11-IX (r2): the year used to be printed in the pattern's own colour
+        // (#8ECAE6 read 1.44:1) and on top of its own marker. It steps off the
+        // dot on a hairline leader and is set in the ink.
+        const cx = xScale(curPt.gdpGrowth), cy = yScale(curPt.ghgGrowth);
+        const up = cy > 26;
+        const ly = up ? cy - 20 : cy + 24;
+        g.append('line')
+            .attr('x1', cx).attr('y1', up ? cy - 5 : cy + 5)
+            .attr('x2', cx).attr('y2', up ? ly + 4 : ly - 10)
+            .attr('stroke', COLORS.dark).attr('stroke-width', 1).attr('opacity', 0.5);
         g.append('text')
-            .attr('x', xScale(curPt.gdpGrowth))
-            .attr('y', yScale(curPt.ghgGrowth) - 10)
+            .attr('x', cx).attr('y', ly)
             .attr('text-anchor', 'middle')
-            .style('font-size', '9px')
+            .style('font-size', '12px')
             .style('font-weight', '600')
-            .style('fill', PATTERN_META[curPt.pat]?.color || COLORS.dark)
+            .style('fill', COLORS.dark)
             .text(curPt.year);
     }
 }

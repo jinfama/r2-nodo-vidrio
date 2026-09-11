@@ -3,9 +3,9 @@
 // Continuous fill + continuous legend, no country selection in map view
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260911a';
-import State from '../state.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911b';
+import State from '../state.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
     INDICATOR_LABELS,
     getMapColor,
@@ -16,8 +16,9 @@ import {
     formatRatio,
     formatEmissions,
     formatGDP,
-    resolveIndicatorValue
-} from '../utils.js?v=20260911a';
+    resolveIndicatorValue,
+    tLabel
+} from '../utils.js?v=20260911b';
 
 // ---- Module state ----
 let svg1, g1, projection1, pathGen1, countryPaths1;
@@ -123,11 +124,11 @@ function initMapPane(idx) {
             Tooltip.show(`
                 <div class="tooltip-title"><span>${name}</span><span>${year}</span></div>
                 <div class="tooltip-row"><span class="tooltip-label">${INDICATOR_LABELS[indicator] || indicator}</span><span class="tooltip-value">${formatValue(mainValue, indicator)}</span></div>
-                <div class="tooltip-row"><span class="tooltip-label">World rank</span><span class="tooltip-value">${rank ? formatRank(rank, total) : '\u2014'}</span></div>
-                <div class="tooltip-row"><span class="tooltip-label">vs World avg</span><span class="tooltip-value">${ratioVal ? formatRatio(ratioVal) : '\u2014'}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">${tLabel('World rank', 'Puesto mundial', '世界排名')}</span><span class="tooltip-value">${rank ? formatRank(rank, total) : '\u2014'}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">${tLabel('vs World avg', 'frente a la media mundial', '与世界平均之比')}</span><span class="tooltip-value">${ratioVal ? formatRatio(ratioVal) : '\u2014'}</span></div>
                 ${(indicator === 'ghg' || indicator === 'ghg_pc') && val ? `
-                <div class="tooltip-row"><span class="tooltip-label">CO\u2082 fossil</span><span class="tooltip-value">${formatEmissions(val.co2ff)}</span></div>
-                <div class="tooltip-row"><span class="tooltip-label">GHG per capita</span><span class="tooltip-value">${val.ghg_pc != null ? val.ghg_pc.toFixed(1) + ' t' : '\u2014'}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">${tLabel('CO₂ fossil', 'CO₂ fósil', '化石 CO₂')}</span><span class="tooltip-value">${formatEmissions(val.co2ff)}</span></div>
+                <div class="tooltip-row"><span class="tooltip-label">${tLabel('GHG per capita', 'GEI per cápita', '人均温室气体')}</span><span class="tooltip-value">${val.ghg_pc != null ? val.ghg_pc.toFixed(1) + ' t' : '\u2014'}</span></div>
                 ` : ''}
             `, event);
         })

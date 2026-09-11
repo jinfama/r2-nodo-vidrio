@@ -284,6 +284,21 @@ body{font-family:var(--ff);background:var(--bg);color:var(--cd);font-size:13px;l
 .analysis-chart-title{font-family:var(--ff-display);font-size:17px;font-weight:500;letter-spacing:.01em;color:var(--cd)}
 .analysis-chart-subtitle{font-family:var(--ff-serif);font-style:italic;font-size:14px;color:var(--cl)}
 .analysis-chart-wrapper{flex:1;position:relative;min-height:200px;overflow:hidden}
+/* Facet grids (Recessions, Tapio): the rows share the height of the scene,
+   so 1 facet fills it, 2 take half each and 6 make a 3x2 that still fills it.
+   Row count and row height are written inline by js/analysis/facet-grid.js. */
+.facet-grid{display:grid;flex:1 1 0;min-height:0;width:100%;align-content:start}
+.facet-grid-scroll{overscroll-behavior:contain}
+.facet-cell{position:relative;min-width:0;min-height:0;overflow:hidden}
+.analysis-chart-wrapper svg{display:block}
+.facet-grid .axis text{font-size:12px}
+/* 11-IX (r2): the same 12 px floor for the single-chart paths of Analysis.
+   The one-country view of Recessions drew its axes at 10 px while every facet
+   beside it respected the floor of facet-grid.js. If an axis crowds, it is the
+   NUMBER of ticks that comes down, never the body. */
+#analysis-chart-wrapper .axis text{font-size:12px}
+.facet-legend{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 20px;padding:6px 12px 0}
+.facet-legend span{font-size:12px}
 /* Autocomplete */
 .autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--bg);border:1px solid var(--cb);border-top:none;max-height:240px;overflow-y:auto;z-index:50;display:none}
 .autocomplete-dropdown.visible{display:block}
@@ -458,7 +473,7 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
 }
 @media(max-width:900px){.country-profile{width:100%}#globe-mount,#globe-year-display{display:none}#globe-legend{display:none}.chart-options-bar{gap:8px}.explore-sidebar{width:50px;min-width:50px}.sidebar-tile span{display:none}}
 @media(max-width:700px){.app-logo span{display:none}.app-logo{font-size:12px;letter-spacing:.16em;gap:8px!important}.app-logo .mark{width:24px;height:24px}}
-@media(max-width:600px){.tab-btn{padding:0 10px;font-size:10px}.chart-type-btn{padding:0 12px;font-size:11px}.chart-options-bar{padding:6px 12px;gap:6px}.analysis-chart-area{padding:8px 10px 4px}.profile-charts-grid{grid-template-columns:1fr}.profile-chart-section,.profile-chart-section:nth-child(2n),.profile-chart-section:nth-child(3n){border-right:none}}
+@media(max-width:600px){.tab-btn{padding:0 10px;font-size:10px}.chart-type-btn{padding:0 12px;font-size:11px}.chart-options-bar{padding:6px 12px;gap:6px}.analysis-chart-area{padding:8px 10px 4px}.facet-legend{gap:2px 12px;padding:4px 4px 0}.facet-legend span{font-size:12px}.profile-charts-grid{grid-template-columns:1fr}.profile-chart-section,.profile-chart-section:nth-child(2n),.profile-chart-section:nth-child(3n){border-right:none}}
 
 /* ============================================================
    MOBILE PASS (sprint visores 2026-09)
@@ -555,7 +570,38 @@ body.resizing-right-panel{cursor:col-resize;user-select:none}
 @media(max-width:900px){
   .tl-handle::before{content:'';position:absolute;inset:-16px;border-radius:50%}
   .tl-track{touch-action:pan-y}
-  .chip-remove{min-width:28px;min-height:28px;display:inline-flex;align-items:center;justify-content:center;margin-left:0}
+  /* 11-IX (r2): the audit counted 12 controls under 44 px in What if? and 29
+     in Analysis. The TYPE does not grow — that is what holds the Gill look
+     together — only the box around it, and where a row cannot afford the
+     height the target is enlarged with an invisible ::after instead. */
+  .chip-remove{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;margin-left:0}
+  .lang-btn{height:44px;min-width:44px}
+  .header-btn{width:44px;height:44px}
+  .ctrl-btn{min-height:44px;height:auto;padding:0 12px}
+  .gas-preset{min-height:44px;display:flex;align-items:center}
+  /* the footer row: 19 px tall buttons on a touch screen */
+  .app-footer{height:auto;min-height:52px;padding:2px 10px;gap:8px}
+  .footer-btn{position:relative;min-height:44px;display:inline-flex;align-items:center;padding:0 8px}
+  /* the brand line used to eat the "About & sources" link with an ellipsis
+     (in Chinese it was cut at 320/17 px, so the link did not exist on a
+     phone). The authors step aside — they are in About, in every PNG export
+     and in the citation — and the duplicate FULLSCREEN goes too, since the
+     header already carries it. What is left is the link, at full length. */
+  .footer-authors{display:none}
+  #footer-fullscreen{display:none}
+  .footer-brand{flex-shrink:0}
+  /* the rest of the sub-44 px row: the two timeline controls, the profile
+     close, the Analysis selects and the footer link */
+  .tl-play,.tl-speed{width:44px;height:44px}
+  .profile-close{width:44px;height:44px}
+  .ctrl-select{min-height:44px}
+  #app input[type=text],#app input[type=search]{min-height:44px}
+  .app-footer a{display:inline-block;padding:15px 0}
+  /* a 12-14 px checkbox keeps its SIZE — shrinking or growing the box would
+     break the rows it sits in — and gains its 44 px through an invisible pad,
+     which is what the finger actually hits */
+  #app input[type=checkbox]{position:relative}
+  #app input[type=checkbox]::after{content:'';position:absolute;inset:-15px}
 }
 /* ---------- keyboard focus: one visible ring for the whole chrome ----------
    The selects and inputs below switch their outline off and only move a
@@ -628,72 +674,100 @@ textarea:focus-visible,[tabindex]:focus-visible{
 .method-comp-card .mc-title{font-size:12px;font-weight:700;color:var(--cd);margin-bottom:4px}
 .method-comp-card .mc-desc{font-size:11px;color:var(--cg);line-height:1.6}
 /* ============================================================
-   WHAT IF? — the shell of the section (2026-09-11)
+   WHAT IF? — the shell of the section (recomposed 2026-09-11, r2)
    Shared chrome for the two views (js/whatif/ahead-view.js and
    js/whatif/behind-view.js). Gill identity: cream ground, warm ink,
    hairline rules, spaced capitals, ONE accent (the vermilion), square
    corners, weight 500 at most. Anything a view draws INSIDE its own
    container reuses these classes; nothing here is view-specific.
-     .wi-head/.wi-title/.wi-sub  section header (title + subtitle)
-     .wi-mode-switch/.wi-mode    Ahead | Behind switch (active = --verm-deep)
-     .wi-body                    two columns on the desktop, one on a phone
-     .wi-dials                   the dials column / the phone accordion
-     .wi-dial/.wi-dial-head      one dial and its name + unit
+
+   The composition, after the reading of 11-IX:
+     header    the explanation on the left, the TWO MODES CENTRED
+               (the old "WHAT IF? / Three dials…" plate is gone; the
+               name of the section is already in the tab bar, and the
+               header now says what the thing IS and how it is played)
+     dials     one BOX per dial, ruled caption band + presets + slider
+     stage     the figure, taller, and a VERTICAL thermometer beside it
+               (SVG, warming ramp: cold straw → vermilion → maroon)
+     results   the four numerals together, and the prose to their right
+     honesty   the §8.4 notice anchored at the foot, folded
+
+     .wi-head/.wi-lede/.wi-mode-switch/.wi-mode      the header
+     .wi-dials/.wi-dial/.wi-dial-head/.wi-dial-body  one dial box
      .wi-presets/.wi-preset      the preset tablets (active = --verm-deep)
      .wi-slider/.wi-slider-value the fine slider and its tabular readout
-     .wi-scale-note              the scale sentence under each dial (Perpetua)
+     .wi-scale-note              the scale sentence inside a dial box
+     .wi-aside                   a fold inside a dial box
      .wi-solve                   the "Solve for…" panel
      .wi-field/.wi-field-label/.wi-select   a labelled control
      .wi-btn-primary/.wi-solve-apply        primary buttons
      .wi-scene                   the scene column (scrolls on its own)
      .wi-view                    one view's container (#whatif-ahead|behind)
-     .wi-chart/.wi-chart-svg     the big figure
-     .wi-therm/.wi-therm-rail/.wi-therm-needle/.wi-therm-tick/.wi-therm-note
-     .wi-cards/.wi-card          the four result cards
+     .wi-stage/.wi-chart/.wi-chart-svg      figure + thermometer row
+     .wi-therm/.wi-therm-cap/.wi-therm-box/.wi-therm-svg  the thermometer
+     .wi-therm-rail/-needle/-tick/-band     the flat rail (phone strip only)
+     .wi-results/.wi-cards/.wi-card/.wi-readout   numerals + prose
      .wi-sentence                the generated sentence (Perpetua)
      .wi-mini                    the income thumbnail (Behind)
-     .wi-behind-controls         the Behind control row
+     .wi-behind-controls         the Behind control column
      .wi-honesty                 the honesty text (folds away on a phone only)
      .wi-loading/.wi-error       the two states of the lazy fetch
    ============================================================ */
 #section-whatif{background:var(--bg)}
-.wi-head{order:-3;flex-shrink:0;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:12px 20px 10px;border-bottom:1px solid var(--cb)}
-.wi-title{font-family:var(--ff-caps);font-size:15px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--verm-ink);line-height:1}
-.wi-sub{font-family:var(--ff-serif);font-style:italic;font-size:14px;line-height:1.3;color:var(--cg);margin-top:5px}
-.wi-mode-switch{display:flex;gap:0;flex-shrink:0}
-.wi-mode{height:30px;padding:0 14px;border:1px solid var(--cb);border-right-width:0;background:var(--bg);color:var(--cl);font-family:var(--ff-caps);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:var(--tr);white-space:nowrap}
+.wi-vh{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ---- header: explanation left, the two modes centred ---------------- */
+.wi-head{order:-3;flex-shrink:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:18px;padding:9px 20px;border-bottom:1px solid var(--cb)}
+.wi-lede{grid-column:1;margin:0;font-family:var(--ff-serif);font-size:13.5px;line-height:1.45;color:var(--cg);max-width:58ch}
+.wi-lede em{font-style:italic;color:var(--cd)}
+.wi-mode-switch{grid-column:2;justify-self:center;display:flex;gap:0;flex-shrink:0}
+.wi-head-tail{grid-column:3}
+.wi-mode{height:30px;padding:0 16px;border:1px solid var(--cb);border-right-width:0;background:var(--bg);color:var(--cl);font-family:var(--ff-caps);font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:var(--tr);white-space:nowrap}
 .wi-mode:last-child{border-right-width:1px}
 .wi-mode:hover{background:var(--bgl);color:var(--cd)}
 .wi-mode.active{background:var(--verm-deep);border-color:var(--verm-deep);color:var(--cream)}
 .wi-mode.active+.wi-mode{border-left-color:var(--verm-deep)}
 .wi-mode-when{opacity:.82;white-space:nowrap}
+
 .wi-body{flex:1;min-height:0;display:flex;overflow:hidden}
-/* the dials column */
-.wi-dials{width:326px;flex-shrink:0;border-right:1px solid var(--cb);overflow-y:auto;overflow-x:hidden;padding:14px 16px 24px;background:var(--bg)}
+
+/* ---- the dials column: one box per thing you can touch -------------- */
+.wi-dials{width:324px;flex-shrink:0;border-right:1px solid var(--cb);overflow-y:auto;overflow-x:hidden;padding:13px 15px 22px;background:var(--bg)}
 .wi-dials-toggle{display:none}
 .wi-dials-body{display:block}
 .wi-dials-slot{display:block;min-width:0}
 .wi-dials-slot[hidden]{display:none}
-.wi-dial{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--cb)}
-.wi-dial-head{display:flex;flex-direction:column;gap:2px;margin-bottom:9px}
-.wi-dial-name{font-family:var(--ff-caps);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--cd)}
-.wi-dial-unit{font-size:11px;color:var(--cl)}
+.wi-dial{border:1px solid var(--cb);background:var(--foam);margin-bottom:11px;min-width:0}
+.wi-dial:last-child{margin-bottom:0}
+.wi-dial-head{display:flex;flex-direction:column;gap:1px;padding:7px 10px 6px;border-bottom:1px solid var(--cb);background:var(--bgl)}
+.wi-dial-name{font-family:var(--ff-caps);font-size:11.5px;font-weight:500;letter-spacing:.19em;text-transform:uppercase;color:var(--cd);line-height:1.2}
+.wi-dial-unit{font-size:10.5px;line-height:1.3;color:var(--cl)}
+.wi-dial-body{padding:9px 10px 10px;min-width:0}
 .wi-presets{display:flex;flex-wrap:wrap;gap:4px}
-.wi-preset{min-height:26px;padding:4px 9px;border:1px solid var(--cb);border-radius:0;background:var(--bg);color:var(--cg);font-family:var(--ff);font-size:11px;font-weight:500;line-height:1.25;cursor:pointer;transition:var(--tr);white-space:nowrap;text-align:center}
+.wi-preset{min-height:26px;padding:4px 8px;border:1px solid var(--cb);border-radius:0;background:var(--bg);color:var(--cg);font-family:var(--ff);font-size:11px;font-weight:500;line-height:1.25;cursor:pointer;transition:var(--tr);white-space:nowrap;text-align:center}
 .wi-preset:hover{background:var(--bgl);color:var(--cd)}
 .wi-preset.active{background:var(--verm-deep);border-color:var(--verm-deep);color:var(--cream)}
 .wi-preset:disabled{cursor:default}
-.wi-slider{display:flex;align-items:center;gap:10px;margin-top:10px}
+.wi-slider{display:flex;align-items:center;gap:9px;margin-top:9px}
 .wi-slider input[type=range]{flex:1;min-width:0;height:22px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer}
 .wi-slider input[type=range]:focus{outline:none}
 .wi-slider input[type=range]::-webkit-slider-runnable-track{height:1px;background:var(--cb)}
 .wi-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-6px;border:0;border-radius:0;background:var(--verm-deep)}
 .wi-slider input[type=range]::-moz-range-track{height:1px;background:var(--cb)}
 .wi-slider input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:0;background:var(--verm-deep)}
-.wi-slider-value{min-width:64px;text-align:right;font-size:12.5px;font-weight:500;color:var(--cd);font-variant-numeric:tabular-nums lining-nums}
-.wi-scale-note{margin-top:9px;font-family:var(--ff-serif);font-style:italic;font-size:12.5px;line-height:1.45;color:var(--cg)}
+.wi-slider-value{min-width:62px;text-align:right;font-size:12.5px;font-weight:500;color:var(--cd);font-variant-numeric:tabular-nums lining-nums}
+.wi-scale-note{margin:8px 0 0;font-family:var(--ff-serif);font-style:italic;font-size:12px;line-height:1.4;color:var(--cg)}
+/* a fold inside a dial box: the long note goes out of the way */
+.wi-aside{margin-top:8px;border-top:1px solid var(--cb);padding-top:5px}
+.wi-aside>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;min-height:22px;font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl)}
+.wi-aside>summary::-webkit-details-marker{display:none}
+.wi-aside>summary::after{content:"\25BC";font-size:7.5px;line-height:1;color:var(--cl);transition:transform .2s}
+.wi-aside[open]>summary::after{transform:rotate(180deg)}
+.wi-aside>summary:hover{color:var(--cd)}
+.wi-aside p{margin:5px 0 2px;font-size:11.5px;line-height:1.5;color:var(--cg)}
+
 /* the Solve panel */
-.wi-solve{margin-top:4px;border:1px solid var(--cb);background:var(--foam);padding:11px 12px 12px}
+.wi-solve{margin-top:11px;border:1px solid var(--cb);background:var(--foam);padding:10px 11px 11px}
 .wi-solve-head{font-family:var(--ff-caps);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--verm-ink);margin-bottom:9px}
 .wi-solve .wi-field{margin-bottom:9px}
 .wi-field{display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -701,50 +775,121 @@ textarea:focus-visible,[tabindex]:focus-visible{
 .wi-select{width:100%;padding:6px 24px 6px 9px;border:1px solid var(--cb);border-radius:0;font-size:12px;font-family:var(--ff);background:var(--bg);color:var(--cd);cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234d443c'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
 .wi-btn-primary,.wi-solve-apply{min-height:34px;padding:0 14px;border:1px solid var(--verm-deep);border-radius:0;background:var(--verm-deep);color:var(--cream);font-family:var(--ff-caps);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:var(--tr)}
 .wi-btn-primary:hover,.wi-solve-apply:hover{background:var(--cd);border-color:var(--cd)}
-/* the scene column */
-.wi-scene{flex:1;min-width:0;position:relative;overflow-y:auto;overflow-x:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:14px}
-.wi-view{display:flex;flex-direction:column;gap:14px;min-width:0}
+
+/* ---- the scene column ----------------------------------------------- */
+.wi-scene{flex:1;min-width:0;position:relative;overflow-y:auto;overflow-x:hidden;padding:14px 18px 0;display:flex;flex-direction:column;gap:12px}
+.wi-view{display:flex;flex-direction:column;gap:12px;min-width:0;flex:1 1 auto}
 .wi-view[hidden]{display:none}
+
+/* the stage: the figure, taller, and the vertical thermometer beside it.
+   11-IX (r2): it is no longer a fixed height. It has a floor (the old clamp)
+   and a ceiling, and takes whatever the scene has left in between — on a
+   1080p screen that used to be 227 px of blank cream between the numerals and
+   the honesty rule. The thermometer column widens with it so the rail does not
+   turn into a thread. */
+.wi-stage{display:grid;grid-template-columns:minmax(0,1fr) clamp(176px,12.5vw,228px);gap:14px;align-items:stretch;flex:1 1 auto;min-height:clamp(268px,41vh,432px);max-height:clamp(268px,62vh,660px);min-width:0}
+.wi-stage-fig{display:flex;flex-direction:column;gap:7px;min-width:0;min-height:0}
+.wi-stage-fig>.wi-chart{flex:1;min-height:0}
 .wi-chart{position:relative;width:100%;min-width:0;border:1px solid var(--cb);background:var(--foam)}
-/* Fluid: at a fixed 320 px the figure took 43 % of the column on a 900 px
-   laptop and pushed the closing sentence under the fold. */
-.wi-chart-svg{display:block;width:100%;height:clamp(200px,28vh,400px)}
-/* the thermometer */
-.wi-therm{min-width:0}
+.wi-chart-svg{display:block;width:100%;height:clamp(220px,32vh,400px)}
+/* 11-IX (r2): both figures are taken out of flow inside their (relative) box.
+   An inline SVG with a viewBox has an intrinsic ratio, so with height:100% it
+   reported its LAST drawn height as its minimum content height — the stage
+   could then never give space back and the scene scrolled behind the sticky
+   honesty rule. Out of flow, the box is sized by the layout alone. */
+.wi-stage .wi-chart-svg{position:absolute;inset:0;width:100%;height:100%}
+.wi-therm-svg{position:absolute;inset:0}
+/* the caption over the figure: what it shows, and the one control it owns.
+   The legend is no longer here — it is written on the drawing itself. */
+.wi-fig-cap{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:19px;font-family:var(--ff-caps);font-size:9.5px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--cl);flex:0 0 auto}
+.wi-fig-tool{display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap;min-height:19px;color:var(--cl)}
+.wi-fig-tool:hover{color:var(--cd)}
+.wi-fig-tool input{width:12px;height:12px;margin:0;accent-color:var(--verm-deep)}
+/* the one control that lives on the figure (the 2051–2100 tail) */
+.wi-chart-tool{position:absolute;top:5px;right:7px;z-index:2;display:inline-flex;align-items:center;gap:6px;min-height:24px;padding:2px 7px;background:var(--foam);border:1px solid var(--cb);cursor:pointer;font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl)}
+.wi-chart-tool:hover{color:var(--cd)}
+.wi-chart-tool input{width:12px;height:12px;margin:0;accent-color:var(--verm-deep)}
+
+/* the vertical thermometer (the warming ramp is drawn inside the SVG) */
+.wi-therm{min-width:0;display:flex;flex-direction:column;min-height:0}
+.wi-stage>.wi-therm{height:100%}
+.wi-therm-cap{display:flex;align-items:baseline;justify-content:space-between;gap:4px 8px;flex-wrap:wrap;min-width:0;padding-bottom:5px;border-bottom:1px solid var(--cb);font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--cl)}
+.wi-therm-cap b{font-weight:500;color:var(--verm-ink)}
+.wi-therm-box{flex:1;min-height:0;position:relative;margin-top:5px}
+.wi-therm-svg{display:block;width:100%;height:100%}
+.wi-therm-foot{margin:5px 0 0;font-size:10.5px;line-height:1.45;color:var(--cl)}
+/* the flat rail survives for the phone's live strip */
 .wi-therm-rail{position:relative;height:12px;border:1px solid var(--cb);background:var(--bgl)}
 .wi-therm-needle{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--verm-deep)}
 .wi-therm-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--cl)}
 .wi-therm-band{position:absolute;top:0;bottom:0;background:var(--cb)}
 .wi-therm-scale{display:flex;justify-content:space-between;margin-top:5px;font-size:10px;letter-spacing:.08em;color:var(--cl)}
-.wi-therm-note{margin-top:7px;font-size:12px;line-height:1.55;color:var(--cg);max-width:82ch}
-/* the four cards */
-.wi-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--cb);border:1px solid var(--cb)}
-.wi-card{background:var(--bg);padding:10px 12px 11px;display:flex;flex-direction:column;gap:5px;min-width:0}
-.wi-card-label{font-family:var(--ff-caps);font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);line-height:1.35}
-.wi-card-value{font-family:var(--ff-serif);font-size:23px;line-height:1.05;color:var(--cd);font-variant-numeric:tabular-nums lining-nums}
-.wi-card-sub{font-size:12px;line-height:1.4;color:var(--cg)}
+.wi-therm-note{margin:0;font-size:11.5px;line-height:1.5;color:var(--cg);max-width:86ch}
+
+/* ---- results: the four numerals together, the prose beside them ----- */
+.wi-results{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:1px;background:var(--cb);border:1px solid var(--cb);min-width:0}
+.wi-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--cb);min-width:0}
+.wi-card{background:var(--bg);padding:9px 12px 10px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.wi-card-label{font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);line-height:1.3}
+.wi-card-value{font-family:var(--ff-serif);font-size:25px;line-height:1.02;color:var(--cd);font-variant-numeric:tabular-nums lining-nums;overflow-wrap:break-word}
+.wi-card-value.is-pair{font-size:20px}
+.wi-card-sub{font-size:11.5px;line-height:1.35;color:var(--cg)}
+/* the cumulative measured against the budget it is spending */
+.wi-bar{display:block;position:relative;height:7px;margin-top:3px;background:var(--bgl);border:1px solid var(--cb)}
+.wi-bar-fill{position:absolute;top:0;bottom:0;left:0;background:var(--verm-deep)}
+.wi-bar-mark{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--cd)}
+.wi-bar-note{display:block;font-size:10px;line-height:1.3;color:var(--cl)}
+
+/* ---- the card figures -----------------------------------------------
+   11-IX (r2). Juan: «poner juntos los cuadros de cumulative, budget…, pero
+   más visual». Only CUMULATIVE had a drawing; the other three of Ahead and
+   the four of Behind were a numeral floating over a third to a half of blank
+   card. Every card now ends in a micro-figure built from the same parts as
+   the rest of the chrome — a 1 px rule, a vermilion mass, a grey ghost for
+   the world being compared against, a hairline for a zero or a year — and it
+   is pinned to the foot of the card (margin-top:auto), so the card reads as
+   numeral above, evidence below, with no void in between. */
+.wi-fig{display:block;margin-top:auto;padding-top:8px;flex:0 0 auto;min-width:0}
+.wi-fig-track{display:block;position:relative;height:7px;background:var(--bgl);border:1px solid var(--cb)}
+.wi-fig-track+.wi-fig-track{margin-top:4px}
+.wi-fig-mass{position:absolute;top:0;bottom:0;background:var(--verm-deep)}
+.wi-fig-ghost{position:absolute;top:0;bottom:0;background:var(--cb)}
+.wi-fig-zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--cd)}
+.wi-fig-tick{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--cd)}
+.wi-fig-tick.is-soft{background:var(--cl);top:-1px;bottom:-1px}
+.wi-fig-key{display:flex;justify-content:space-between;gap:8px;margin-top:4px;font-family:var(--ff-caps);font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--cl);font-variant-numeric:tabular-nums lining-nums}
+.wi-fig-key span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wi-fig-key b{font-weight:500;color:var(--cg)}
+.wi-fig-key i{display:inline-block;width:10px;height:5px;margin-right:4px;vertical-align:middle;background:var(--cb);font-style:normal}
+.wi-fig-key i.is-mass{background:var(--verm-deep)}
+.wi-fig[hidden]{display:none}
+.wi-readout{background:var(--bg);padding:10px 14px 11px;display:flex;flex-direction:column;gap:7px;min-width:0;overflow-y:auto}
+.wi-readout-head{font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--verm-ink)}
+
 /* the generated sentence */
-.wi-sentence{font-family:var(--ff-serif);font-size:15.5px;line-height:1.55;color:var(--cd);max-width:74ch}
+.wi-sentence{margin:0;font-family:var(--ff-serif);font-size:14.5px;line-height:1.5;color:var(--cd);min-width:0}
 .wi-sentence strong{font-weight:700;color:var(--verm-ink)}
 /* Perpetua has no subscript two and its degree ring is an oversized
    hairline: both glyphs are drawn in the sans face (see ctx.sciFix). */
 .wi-sub{font-family:var(--ff);font-size:.66em;line-height:0;vertical-align:-.2em;letter-spacing:0}
 .wi-sci{font-family:var(--ff)}
-.wi-sentence+.wi-sentence{margin-top:-4px;color:var(--cg)}
+.wi-sentence+.wi-sentence{color:var(--cg);font-size:13.5px}
+
 /* Behind */
-.wi-behind-controls{display:flex;flex-direction:column;gap:12px;min-width:0}
-.wi-mini{display:flex;align-items:center;gap:12px;border:1px solid var(--cb);padding:8px 12px;min-width:0}
-.wi-mini-label{font-family:var(--ff-caps);font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);white-space:nowrap}
-.wi-mini-svg{flex:1;min-width:0;height:46px;display:block}
+.wi-behind-controls{display:flex;flex-direction:column;gap:11px;min-width:0}
+/* 11-IX (r2): the income strip used to run at 21:1 (and 55:1 on a 1080p
+   screen), which is a rule, not a chart. The label moved above the drawing so
+   the two curves get the full width and a height they can be read at. */
+.wi-mini{display:flex;flex-direction:column;gap:2px;border:1px solid var(--cb);background:var(--foam);padding:5px 10px 6px;min-width:0;flex:0 0 auto}
+.wi-mini-label{font-family:var(--ff-caps);font-size:9px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cl);white-space:nowrap}
+.wi-mini-svg{width:100%;min-width:0;height:62px;display:block}
+
 /* the honesty text */
 /* The warning of spec 8.4 used to sit 154 px under the fold of a 1440x900
-   laptop. It is now a one-line notice anchored to the foot of the scene
-   column - it carries the load-bearing sentence itself - with the full
-   paragraph one click away. */
-.wi-honesty{position:sticky;bottom:0;z-index:3;margin-top:auto;padding-top:9px;padding-bottom:24px;background:var(--bg);border-top:1px solid var(--cb);transition:border-color .2s}
-/* "there is more below": a one-pixel vermilion rule on the anchored notice.
-   A gradient here would wash the last line of the closing sentence, which is
-   the one thing this column exists to deliver. */
+   laptop. It is a one-line notice anchored to the foot of the scene column
+   - it carries the load-bearing sentence itself - with the full paragraph
+   one click away. */
+.wi-honesty{position:sticky;bottom:0;z-index:3;padding-top:9px;padding-bottom:20px;background:var(--bg);border-top:1px solid var(--cb);transition:border-color .2s}
 .wi-scene.is-more .wi-honesty{border-top-color:var(--verm-deep)}
 .wi-honesty-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:26px;padding:0 0 8px;border:0;background:transparent;color:var(--cg);font-family:var(--ff-caps);font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;text-align:left}
 .wi-honesty-toggle:hover{color:var(--cd)}
@@ -755,6 +900,7 @@ textarea:focus-visible,[tabindex]:focus-visible{
 .wi-honesty-prob:empty{display:none}
 .wi-honesty-body{font-size:12px;line-height:1.65;color:var(--cg);max-width:92ch}
 .wi-honesty-body strong{font-weight:500;color:var(--cd)}
+
 /* lazy fetch: loading and error, both on the cream */
 .wi-loading,.wi-error{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;background:var(--bg)}
 .wi-loading[hidden],.wi-error[hidden]{display:none}
@@ -764,38 +910,64 @@ textarea:focus-visible,[tabindex]:focus-visible{
 .wi-spinner{width:150px;height:2px;background:var(--cb);position:relative;overflow:hidden}
 .wi-spinner::after{content:'';position:absolute;left:-40%;width:40%;height:100%;background:var(--verm-deep);animation:ls 1.2s ease-in-out infinite}
 .wi-caret{font-size:8px;color:var(--cl);transition:transform .2s}
-/* one column on a phone: the dials fold above the scene, the honesty folds */
+
+/* ---- one column on a phone -------------------------------------------
+   The order the reading asked for: explanation + the two buttons, the
+   live reading, the scene, the results, and the dials in an accordion
+   at the foot. The live strip is the first child of the view, so it
+   rides at the top of the scene and answers the sliders below. */
 @media(max-width:900px){
-  .wi-head{padding:10px 16px 9px}
+  .wi-head{grid-template-columns:minmax(0,1fr);gap:9px;padding:10px 16px}
+  .wi-lede{grid-column:1;max-width:none;font-size:13px}
+  .wi-mode-switch{grid-column:1;justify-self:stretch;width:100%}
+  .wi-mode{flex:1 1 0}
+  .wi-head-tail{display:none}
   .wi-body{flex-direction:column;overflow-y:auto;overflow-x:hidden}
-  .wi-dials{width:auto;flex-shrink:0;border-right:0;border-bottom:1px solid var(--cb);padding:0;overflow:visible}
-  .wi-dials-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:46px;padding:0 16px;border:0;background:var(--bg);color:var(--cd);font-family:var(--ff-caps);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
-  .wi-dials-body{display:none;padding:4px 16px 18px}
+  .wi-scene{order:1;overflow:visible;padding:12px 16px 16px}
+  .wi-dials{order:2;width:auto;flex-shrink:0;border-right:0;border-top:1px solid var(--cb);padding:0;overflow:visible;background:var(--bg)}
+  .wi-dials-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:46px;padding:0 16px;border:0;background:var(--bgl);color:var(--cd);font-family:var(--ff-caps);font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+  .wi-dials-body{display:none;padding:12px 16px 20px}
   .wi-dials.open .wi-dials-body{display:block}
   .wi-dials.open .wi-caret{transform:rotate(180deg)}
-  .wi-scene{overflow:visible;padding:14px 16px 22px}
   .wi-preset{min-height:44px;padding:6px 12px;font-size:12px}
   .wi-slider input[type=range]{height:44px}
   .wi-slider input[type=range]::-webkit-slider-thumb{width:18px;height:18px;margin-top:-8.5px}
   .wi-slider input[type=range]::-moz-range-thumb{width:18px;height:18px}
   .wi-btn-primary,.wi-solve-apply,.wi-select{min-height:44px}
-  .wi-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .wi-chart-svg{height:250px}
+  .wi-aside>summary{min-height:44px}
+  .wi-fig-tool{min-height:44px}
+  .wi-view{flex:0 0 auto}
+  .wi-stage{grid-template-columns:minmax(0,1fr) 104px;gap:9px;flex:0 0 auto;min-height:300px;max-height:300px}
+  .wi-results{grid-template-columns:minmax(0,1fr)}
+  .wi-readout{overflow:visible}
+  .wi-mini-svg{height:52px}
+  /* The live strip at the top already carries the headline number, its bar and
+     its marks; the matching card said the same thing twice on one screen. On a
+     phone the card goes and the card that is left takes the full row. */
+  .wi-card[data-wi-card="cum"],.wi-card[data-wib-card="delta-t"]{display:none}
+  .wi-card[data-wi-card="e2050"],.wi-card[data-wib-card="gdp"]{grid-column:1/-1}
   .wi-honesty{position:static;margin-top:2px;padding-top:11px;padding-bottom:0}
   .wi-honesty-toggle{min-height:44px;padding:0;letter-spacing:.16em}
-  /* 44 px, and the period no longer has to shrink to 9.5 px to fit */
-  .wi-mode{min-height:44px;height:auto;padding:6px 10px}
   /* Five slabs of solid vermilion at once on a phone is six times the
      accent area of the desktop: the active preset keeps the rule and the
      ink, the solid stays for the mode switch alone. */
   .wi-preset.active{background:var(--bg);border-color:var(--verm-deep);color:var(--verm-ink)}
 }
+/* A short laptop (1280x720 and the like): the stage gives back the 50 px the
+   four numerals need, so the results are not cut in half by the honesty bar. */
+@media(min-width:901px) and (max-height:800px){
+  .wi-stage{min-height:clamp(232px,33vh,320px);max-height:clamp(232px,38vh,380px)}
+  .wi-scene{gap:10px;padding-top:12px}
+  .wi-card{padding:8px 12px 9px}
+  .wi-card-value{font-size:23px}
+  .wi-sentence{font-size:14px}
+}
 @media(max-width:560px){
-  .wi-cards{grid-template-columns:1fr}
-  .wi-mode{flex:1 1 0;min-width:0;padding:6px 8px;font-size:10px;letter-spacing:.1em;white-space:normal;line-height:1.25}
+  .wi-card-value{font-size:21px}
+  .wi-card-value.is-pair{font-size:17px}
+  .wi-mode{min-width:0;padding:6px 8px;font-size:10px;letter-spacing:.1em;white-space:normal;line-height:1.25;height:auto;min-height:44px}
   .wi-mode-when{display:block}
-  .wi-mode-switch{width:100%}
-  .wi-sentence{font-size:14.5px}
+  .wi-sentence{font-size:14px}
 }
 /* ============================================================
    SQUARE CORNERS — the house rule, and the only exceptions alive
@@ -841,7 +1013,7 @@ Infante-Amate, J., Travieso, E. &amp; Aguilera, E. (2025). &ldquo;Green growth i
 Travieso, E., Infante-Amate, J. &amp; Aguilera, E. (2025). &ldquo;The history of a +3&deg;C future: Global and regional drivers of greenhouse gas emissions (1820&ndash;2050).&rdquo; <em>Global Environmental Change</em>, 92, 103009. <a href="https://www.sciencedirect.com/science/article/pii/S0959378025000469" target="_blank">DOI</a><br>
 Infante-Amate, J., Travieso, E. &amp; Aguilera, E. (2024). &ldquo;Unsustainable prosperity? Decoupling wellbeing, economic growth, and greenhouse gas emissions over the past 150 years.&rdquo; <em>World Development</em>, 184, 106754. <a href="https://doi.org/10.1016/j.worlddev.2024.106754" target="_blank">DOI</a>
 </div>
-<div class="intro-desc-sm">
+<div class="intro-desc-sm" data-i18n-html="introMore">
 For more information on data sources, methodology, and citations, see <a href="#" onclick="document.getElementById('intro-enter').click();setTimeout(function(){document.querySelector('[data-section=about]').click()},800);return false;">About</a>.
 </div>
 <button class="intro-enter" id="intro-enter" data-i18n="introButton">Explore trajectories</button>
@@ -863,9 +1035,9 @@ For more information on data sources, methodology, and citations, see <a href="#
 <button class="tab-btn" data-section="about" data-i18n="navAbout">About</button>
 </nav>
 <div class="header-actions">
-<div class="lang-switcher" aria-label="Language"><button class="lang-btn" data-lang="en">EN</button><button class="lang-btn" data-lang="es">ES</button><button class="lang-btn" data-lang="zh">中文</button></div>
+<div class="lang-switcher" aria-label="Language" data-i18n-aria="ariaLanguage"><button class="lang-btn" data-lang="en">EN</button><button class="lang-btn" data-lang="es">ES</button><button class="lang-btn" data-lang="zh">中文</button></div>
 <button class="header-btn" id="btn-home" title="Back to intro" data-i18n-title="homeTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-<button class="header-btn" id="btn-fullscreen" title="Fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
+<button class="header-btn" id="btn-fullscreen" title="Fullscreen" data-i18n-title="footFullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg></button>
 </div>
 </header>
 
@@ -884,7 +1056,7 @@ For more information on data sources, methodology, and citations, see <a href="#
 <div style="padding:10px 16px;border-bottom:1px solid var(--cb)">
 <div style="position:relative">
 <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--cl);pointer-events:none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-<input type="text" id="globe-search-input" placeholder="Search countries..." style="width:100%;padding:8px 14px 8px 36px;border:1px solid var(--cb);background:var(--bg);font-size:13px;font-family:var(--ff);color:var(--cd)">
+<input type="text" id="globe-search-input" placeholder="Search countries..." data-i18n-placeholder="phSearchCountries" style="width:100%;padding:8px 14px 8px 36px;border:1px solid var(--cb);background:var(--bg);font-size:13px;font-family:var(--ff);color:var(--cd)">
 <div class="search-results" id="globe-search-results"></div>
 </div>
 </div>
@@ -893,51 +1065,51 @@ For more information on data sources, methodology, and citations, see <a href="#
 <button class="profile-close">&times;</button>
 </div>
 <div class="profile-stats-row" id="profile-stats-row">
-<div class="profile-stat"><div class="profile-stat-label">Pop</div><div class="profile-stat-value" id="pstat-pop">&mdash;</div></div>
-<div class="profile-stat"><div class="profile-stat-label">GDP pc</div><div class="profile-stat-value" id="pstat-gdppc">&mdash;</div></div>
-<div class="profile-stat"><div class="profile-stat-label">HDI</div><div class="profile-stat-value" id="pstat-hdi">&mdash;</div></div>
-<div class="profile-stat"><div class="profile-stat-label">GHG</div><div class="profile-stat-value" id="pstat-ghg">&mdash;</div></div>
-<div class="profile-stat"><div class="profile-stat-label">Cropland</div><div class="profile-stat-value" id="pstat-crop">&mdash;</div></div>
-<div class="profile-stat"><div class="profile-stat-label">MFA</div><div class="profile-stat-value" id="pstat-mfa">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatPop">Pop</div><div class="profile-stat-value" id="pstat-pop">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatGdpPc">GDP pc</div><div class="profile-stat-value" id="pstat-gdppc">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatHdi">HDI</div><div class="profile-stat-value" id="pstat-hdi">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatGhg">GHG</div><div class="profile-stat-value" id="pstat-ghg">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatCropland">Cropland</div><div class="profile-stat-value" id="pstat-crop">&mdash;</div></div>
+<div class="profile-stat"><div class="profile-stat-label" data-i18n="pstatMfa">MFA</div><div class="profile-stat-value" id="pstat-mfa">&mdash;</div></div>
 </div>
 <div class="profile-charts-grid">
 <!-- Row 1: Socioeconomic -->
 <div class="profile-chart-section" data-indicator="pop">
-<div class="profile-chart-title">Population <span class="profile-unit">(M)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartPop">Population <span class="profile-unit">(M)</span></div>
 <div class="profile-chart" id="pchart-pop"></div>
 </div>
 <div class="profile-chart-section" data-indicator="gdp_pc">
-<div class="profile-chart-title">GDP per capita <span class="profile-unit">($PPP)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartGdpPc">GDP per capita <span class="profile-unit">($PPP)</span></div>
 <div class="profile-chart" id="pchart-gdp"></div>
 </div>
 <div class="profile-chart-section" data-indicator="hdi">
-<div class="profile-chart-title">HDI</div>
+<div class="profile-chart-title" data-i18n-html="pchartHdi">HDI</div>
 <div class="profile-chart" id="pchart-hdi"></div>
 </div>
 <!-- Row 2: Environmental -->
 <div class="profile-chart-section" data-indicator="ghg">
-<div class="profile-chart-title">GHG emissions <span class="profile-unit">(Mt)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartGhg">GHG emissions <span class="profile-unit">(Mt)</span></div>
 <div class="profile-chart" id="pchart-emissions"></div>
 </div>
 <div class="profile-chart-section" data-indicator="crop_total">
-<div class="profile-chart-title">Cropland <span class="profile-unit">(Mha)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartCropland">Cropland <span class="profile-unit">(Mha)</span></div>
 <div class="profile-chart" id="pchart-cropland"></div>
 </div>
 <div class="profile-chart-section" data-indicator="mfa_ext_tot">
-<div class="profile-chart-title">Material extraction <span class="profile-unit">(Mt)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartMfa">Material extraction <span class="profile-unit">(Mt)</span></div>
 <div class="profile-chart" id="pchart-mfa"></div>
 </div>
 <!-- Row 3: Intensities -->
 <div class="profile-chart-section">
-<div class="profile-chart-title">GHG / GDP <span class="profile-unit">(kg/$)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartGhgGdp">GHG / GDP <span class="profile-unit">(kg/$)</span></div>
 <div class="profile-chart" id="pchart-intensity"></div>
 </div>
 <div class="profile-chart-section">
-<div class="profile-chart-title">Cropland / GDP <span class="profile-unit">(ha/k$)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartCropGdp">Cropland / GDP <span class="profile-unit">(ha/k$)</span></div>
 <div class="profile-chart" id="pchart-crop-intensity"></div>
 </div>
 <div class="profile-chart-section">
-<div class="profile-chart-title">MFA / GDP <span class="profile-unit">(kg/$)</span></div>
+<div class="profile-chart-title" data-i18n-html="pchartMfaGdp">MFA / GDP <span class="profile-unit">(kg/$)</span></div>
 <div class="profile-chart" id="pchart-mfa-intensity"></div>
 </div>
 </div>
@@ -950,34 +1122,34 @@ For more information on data sources, methodology, and citations, see <a href="#
 <div class="section" id="section-explore" style="flex-direction:row">
 <!-- LEFT SIDEBAR: Indicator tiles -->
 <div class="explore-sidebar" id="explore-sidebar">
-<button class="sidebar-tile" data-indicator="pop" title="Population">
+<button class="sidebar-tile" data-indicator="pop" title="Population" data-i18n-title="tilePopTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-<span>Pop</span>
+<span data-i18n="tilePop">Pop</span>
 </button>
-<button class="sidebar-tile" data-indicator="gdp" title="GDP">
+<button class="sidebar-tile" data-indicator="gdp" title="GDP" data-i18n-title="tileGdpTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-<span>GDP</span>
+<span data-i18n="tileGdp">GDP</span>
 </button>
-<button class="sidebar-tile" data-indicator="hdi" title="Human Development">
+<button class="sidebar-tile" data-indicator="hdi" title="Human Development" data-i18n-title="tileHdiTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-<span>HDI</span>
+<span data-i18n="tileHdi">HDI</span>
 </button>
 <div class="sidebar-separator"></div>
-<button class="sidebar-tile active" data-indicator="ghg" title="GHG Emissions">
+<button class="sidebar-tile active" data-indicator="ghg" title="GHG Emissions" data-i18n-title="tileGhgTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 18c0-3.5 2-6 4-8 2 2 4 4.5 4 8a4 4 0 01-8 0z"/><path d="M4 21c0-5 3.5-9 8-13 4.5 4 8 8 8 13" opacity=".4"/></svg>
-<span>GHG</span>
+<span data-i18n="tileGhg">GHG</span>
 </button>
-<button class="sidebar-tile" data-indicator="mfa" title="Material Flows">
+<button class="sidebar-tile" data-indicator="mfa" title="Material Flows" data-i18n-title="tileMfaTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 20l5-5 4 2 5-7 6 4"/><line x1="2" y1="20" x2="22" y2="20" opacity=".4"/><rect x="3" y="16" width="3" height="4" rx=".5" opacity=".3" fill="currentColor"/><rect x="8" y="13" width="3" height="7" rx=".5" opacity=".3" fill="currentColor"/><rect x="14" y="10" width="3" height="10" rx=".5" opacity=".3" fill="currentColor"/><rect x="19" y="12" width="3" height="8" rx=".5" opacity=".3" fill="currentColor"/></svg>
-<span>Materials</span>
+<span data-i18n="tileMaterials">Materials</span>
 </button>
-<button class="sidebar-tile" data-indicator="crops" title="Crops / Land Use">
+<button class="sidebar-tile" data-indicator="crops" title="Crops / Land Use" data-i18n-title="tileCropsTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22V12"/><path d="M8 18c0-3-1.5-5.5 4-10 5.5 4.5 4 7 4 10"/><path d="M7 14c-3-1-5 0-5 3" opacity=".5"/><path d="M17 14c3-1 5 0 5 3" opacity=".5"/><line x1="4" y1="22" x2="20" y2="22" opacity=".3"/></svg>
-<span>Crops</span>
+<span data-i18n="tileCrops">Crops</span>
 </button>
-<button class="sidebar-tile" data-indicator="bio" title="Biodiversity">
+<button class="sidebar-tile" data-indicator="bio" title="Biodiversity" data-i18n-title="tileBioTitle">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 20c0-6 4-12 9-14-2 4-3 8-3 14"/><path d="M13 20c0-6-4-12-9-14 2 4 3 8 3 14"/><line x1="12" y1="10" x2="12" y2="22"/></svg>
-<span>Bio</span>
+<span data-i18n="tileBio">Bio</span>
 </button>
 </div>
 <!-- MAIN CONTENT AREA -->
@@ -985,17 +1157,17 @@ For more information on data sources, methodology, and citations, see <a href="#
 <!-- ROW 1: Sub-view tabs -->
 <div class="map-subtab-bar">
 <div class="subtab-pill">
-<button class="map-subtab active" data-view="map"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Map</button>
-<button class="map-subtab" data-view="trend"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Trend</button>
-<button class="map-subtab" data-view="composition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="20" rx="0.5"/><rect x="16" y="2" width="6" height="10" rx="0.5"/><rect x="16" y="14" width="6" height="8" rx="0.5"/></svg> Composition</button>
-<button class="map-subtab" data-view="ranking"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="14" width="3" height="7"/><rect x="10.5" y="9" width="3" height="12"/><rect x="16" y="4" width="3" height="17"/></svg> Ranking</button>
-<button class="map-subtab" data-view="table"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="0"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg> Table</button>
+<button class="map-subtab active" data-view="map"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> <span data-i18n="viewMap">Map</span></button>
+<button class="map-subtab" data-view="trend"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> <span data-i18n="viewTrend">Trend</span></button>
+<button class="map-subtab" data-view="composition"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="12" height="20" rx="0.5"/><rect x="16" y="2" width="6" height="10" rx="0.5"/><rect x="16" y="14" width="6" height="8" rx="0.5"/></svg> <span data-i18n="viewComposition">Composition</span></button>
+<button class="map-subtab" data-view="ranking"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="14" width="3" height="7"/><rect x="10.5" y="9" width="3" height="12"/><rect x="16" y="4" width="3" height="17"/></svg> <span data-i18n="viewRanking">Ranking</span></button>
+<button class="map-subtab" data-view="table"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="0"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg> <span data-i18n="viewTable">Table</span></button>
 </div>
 <!-- F3 - phone-only entry points: the country picker (already wired in
      js/components/country-picker.js) and the settings bottom sheet. -->
 <div class="subtab-bar-actions">
-<button class="subtab-action-btn" id="explore-open-picker" title="Countries" aria-label="Countries"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-<button class="subtab-action-btn" id="explore-settings-btn" aria-expanded="false" aria-controls="explore-right-panel"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg> Settings</button>
+<button class="subtab-action-btn" id="explore-open-picker" title="Countries" aria-label="Countries" data-i18n-title="btnCountries" data-i18n-aria="btnCountries"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+<button class="subtab-action-btn" id="explore-settings-btn" aria-expanded="false" aria-controls="explore-right-panel"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg> <span data-i18n="btnSettings">Settings</span></button>
 </div>
 </div>
 <div class="explore-chips-bar" id="explore-chips-bar" style="display:none">
@@ -1006,21 +1178,21 @@ For more information on data sources, methodology, and citations, see <a href="#
 <!-- Ranking-specific controls (shown only in ranking view) -->
 <div class="opt-group" id="ranking-indicator-group" style="display:none">
 <select class="ctrl-select" id="ranking-indicator" style="width:140px">
-<option value="ghg" selected>GHG total</option>
-<option value="co2ff">CO&#8322; fossil fuel</option>
-<option value="ghg_pc">GHG per capita</option>
-<option value="gdp_pc">GDP per capita</option>
-<option value="hdi">HDI</option>
-<option value="pop">Population</option>
+<option value="ghg" selected data-i18n-html="optGhgTotal">GHG total</option>
+<option value="co2ff" data-i18n-html="optCo2ff">CO&#8322; fossil fuel</option>
+<option value="ghg_pc" data-i18n-html="optGhgPc">GHG per capita</option>
+<option value="gdp_pc" data-i18n-html="optGdpPc">GDP per capita</option>
+<option value="hdi" data-i18n-html="optHdi">HDI</option>
+<option value="pop" data-i18n-html="optPop">Population</option>
 </select></div>
 <div class="opt-group" id="ranking-scope-group" style="display:none">
 <select class="ctrl-select" id="ranking-scope" style="width:120px">
-<option value="annual" selected>Annual</option>
-<option value="cumulative">Cumulative</option>
+<option value="annual" selected data-i18n-html="optAnnual">Annual</option>
+<option value="cumulative" data-i18n-html="optCumulative">Cumulative</option>
 </select></div>
 <div class="opt-group" id="ranking-count-group" style="display:none">
 <select class="ctrl-select" id="ranking-count" style="width:80px">
-<option value="20">Top 20</option><option value="30">Top 30</option><option value="50">Top 50</option><option value="0" selected>All</option>
+<option value="20" data-i18n-html="optTop20">Top 20</option><option value="30" data-i18n-html="optTop30">Top 30</option><option value="50" data-i18n-html="optTop50">Top 50</option><option value="0" selected data-i18n-html="optAll">All</option>
 </select>
 </div>
 </div>
@@ -1064,70 +1236,70 @@ For more information on data sources, methodology, and citations, see <a href="#
 </div><!-- /explore-main -->
 <!-- RIGHT PANEL: 3 collapsible sections -->
 <div class="explore-right-panel" id="explore-right-panel">
-<div class="right-panel-resizer" id="right-panel-resizer" title="Resize settings panel"></div>
+<div class="right-panel-resizer" id="right-panel-resizer" title="Resize settings panel" data-i18n-title="ttResizePanel"></div>
 <!-- F3 - visible header + close control when the panel acts as a bottom sheet -->
 <div class="sheet-header">
-<span class="sheet-title">Explore settings</span>
-<button class="sheet-close" id="explore-sheet-close" aria-label="Close settings">&times;</button>
+<span class="sheet-title" data-i18n="sheetTitle">Explore settings</span>
+<button class="sheet-close" id="explore-sheet-close" aria-label="Close settings" data-i18n-aria="ariaCloseSettings">&times;</button>
 </div>
 <!-- SECTION 1: Settings -->
 <div class="right-panel-section" id="rp-section-settings">
-<div class="right-panel-title rp-collapsible" data-target="rp-body-settings">Settings <span class="rp-arrow">&#9660;</span></div>
+<div class="right-panel-title rp-collapsible" data-target="rp-body-settings"><span data-i18n="rpSettings">Settings</span> <span class="rp-arrow">&#9660;</span></div>
 <div id="rp-body-settings">
 <!-- Per-capita toggle (shared for ghg, mfa, gdp) -->
 <div class="right-panel-row" id="right-panel-percapita" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Unit</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblUnit">Unit</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="explore-total-btn">total</button>
-<button class="ctrl-btn" id="explore-percapita-btn">per capita</button>
+<button class="ctrl-btn active" id="explore-total-btn" data-i18n="btnTotalLc">total</button>
+<button class="ctrl-btn" id="explore-percapita-btn" data-i18n="btnPerCapitaLc">per capita</button>
 </div>
 </div>
 <!-- Map compare (only for map view) -->
 <div class="right-panel-row" id="rp-row-map-compare" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Compare</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblCompare">Compare</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="map-count-1" title="Single map">1 map</button>
-<button class="ctrl-btn" id="map-count-2" title="Compare two years">2 maps</button>
+<button class="ctrl-btn active" id="map-count-1" title="Single map" data-i18n-title="ttSingleMap" data-i18n="btn1Map">1 map</button>
+<button class="ctrl-btn" id="map-count-2" title="Compare two years" data-i18n-title="ttCompareYears" data-i18n="btn2Maps">2 maps</button>
 </div>
 </div>
 <!-- Chart settings (for trend/composition views) -->
 <div id="right-panel-chart-settings" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--cb)">
 <div class="right-panel-row" id="rp-row-draw">
-<span class="opt-label" style="margin-bottom:4px;display:block">Draw</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblDraw">Draw</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="trend-draw-line" title="Lines"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3,17 8,10 14,14 21,6"/></svg></button>
-<button class="ctrl-btn" id="trend-draw-stacked" title="Stacked area"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor"><path d="M3,20V15l6,-3l6,2l6,-4v10Z" opacity=".35" stroke="none"/><path d="M3,15V10l6,-4l6,3l6,-5v6l-6,4l-6,-2l-6,3Z" opacity=".2" stroke="none"/><polyline points="3,15 9,12 15,14 21,10" fill="none" stroke-width="1.5"/><polyline points="3,10 9,6 15,9 21,4" fill="none" stroke-width="1.5"/></svg></button>
+<button class="ctrl-btn active" id="trend-draw-line" title="Lines" data-i18n-title="ttLines"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3,17 8,10 14,14 21,6"/></svg></button>
+<button class="ctrl-btn" id="trend-draw-stacked" title="Stacked area" data-i18n-title="ttStacked"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" stroke="currentColor"><path d="M3,20V15l6,-3l6,2l6,-4v10Z" opacity=".35" stroke="none"/><path d="M3,15V10l6,-4l6,3l6,-5v6l-6,4l-6,-2l-6,3Z" opacity=".2" stroke="none"/><polyline points="3,15 9,12 15,14 21,10" fill="none" stroke-width="1.5"/><polyline points="3,10 9,6 15,9 21,4" fill="none" stroke-width="1.5"/></svg></button>
 </div>
 </div>
 <div class="right-panel-row" id="rp-row-values">
-<span class="opt-label" style="margin-bottom:4px;display:block">Values</span>
-<select class="ctrl-select" id="trend-value-mode" title="Value transformation" style="width:100%">
-<option value="abs">Absolute</option>
-<option value="pctWorld">% of world total</option>
-<option value="pctGroup">% of selected</option>
-<option value="index">Index (first yr = 100)</option>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblValues">Values</span>
+<select class="ctrl-select" id="trend-value-mode" title="Value transformation" data-i18n-title="ttValueTransform" style="width:100%">
+<option value="abs" data-i18n-html="optAbsolute">Absolute</option>
+<option value="pctWorld" data-i18n-html="optPctWorld">% of world total</option>
+<option value="pctGroup" data-i18n-html="optPctGroup">% of selected</option>
+<option value="index" data-i18n-html="optIndex">Index (first yr = 100)</option>
 </select>
 </div>
 <div class="right-panel-row" id="rp-row-scale">
-<span class="opt-label" style="margin-bottom:4px;display:block">Scale</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblScale">Scale</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="trend-scale-linear">Linear</button>
-<button class="ctrl-btn" id="trend-log-toggle">Log</button>
+<button class="ctrl-btn active" id="trend-scale-linear" data-i18n="btnLinear">Linear</button>
+<button class="ctrl-btn" id="trend-log-toggle" data-i18n="btnLog">Log</button>
 </div>
 </div>
 <div class="right-panel-row">
-<span class="opt-label" style="margin-bottom:4px;display:block">Panels</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblPanels">Panels</span>
 <div class="ctrl-btn-row" id="explore-panels-group">
-<button class="ctrl-btn active" data-facet="overlay">All</button>
-<button class="ctrl-btn" data-facet="country">Country</button>
-<button class="ctrl-btn" data-facet="component">Component</button>
+<button class="ctrl-btn active" data-facet="overlay" data-i18n="btnAll">All</button>
+<button class="ctrl-btn" data-facet="country" data-i18n="btnCountry">Country</button>
+<button class="ctrl-btn" data-facet="component" data-i18n="btnComponent">Component</button>
 </div>
 </div>
 <div class="right-panel-row" id="right-panel-yaxis-row" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Y axis</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblYAxis">Y axis</span>
 <div class="ctrl-btn-row" id="explore-yaxis-group">
-<button class="ctrl-btn active" data-yaxis="shared">Shared</button>
-<button class="ctrl-btn" data-yaxis="free">Free</button>
+<button class="ctrl-btn active" data-yaxis="shared" data-i18n="btnShared">Shared</button>
+<button class="ctrl-btn" data-yaxis="free" data-i18n="btnFree">Free</button>
 </div>
 </div>
 </div>
@@ -1135,98 +1307,98 @@ For more information on data sources, methodology, and citations, see <a href="#
 </div><!-- /rp-section-settings -->
 <!-- SECTION 2: Indicator -->
 <div class="right-panel-section" id="rp-section-indicator">
-<div class="right-panel-title rp-collapsible" data-target="rp-body-indicator">Indicator <span class="rp-arrow">&#9660;</span></div>
+<div class="right-panel-title rp-collapsible" data-target="rp-body-indicator"><span data-i18n="rpIndicator">Indicator</span> <span class="rp-arrow">&#9660;</span></div>
 <div id="rp-body-indicator">
 <!-- GHG: gas presets + checkboxes -->
 <div id="right-panel-ghg-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Gas type</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblGasType">Gas type</span>
 <div id="explore-gastype-checks">
-<div class="gas-preset active" data-preset="co2_total" style="padding:3px 8px;font-size:11px;cursor:pointer">Total CO&#8322;</div>
-<div class="gas-preset" data-preset="total" style="padding:3px 8px;font-size:11px;cursor:pointer">Total GHG</div>
+<div class="gas-preset active" data-preset="co2_total" style="padding:3px 8px;font-size:11px;cursor:pointer" data-i18n-html="presetTotalCO2">Total CO&#8322;</div>
+<div class="gas-preset" data-preset="total" style="padding:3px 8px;font-size:11px;cursor:pointer" data-i18n-html="presetTotalGHG">Total GHG</div>
 <div class="gas-sep"></div>
-<div class="gas-preset" data-preset="co2_decomp" style="padding:3px 8px;font-size:11px;cursor:pointer">CO&#8322; decomposed</div>
-<div class="gas-preset" data-preset="ghg_decomp" style="padding:3px 8px;font-size:11px;cursor:pointer">GHG decomposed</div>
+<div class="gas-preset" data-preset="co2_decomp" style="padding:3px 8px;font-size:11px;cursor:pointer" data-i18n-html="presetCO2Decomp">CO&#8322; decomposed</div>
+<div class="gas-preset" data-preset="ghg_decomp" style="padding:3px 8px;font-size:11px;cursor:pointer" data-i18n-html="presetGHGDecomp">GHG decomposed</div>
 <div class="gas-sep"></div>
-<label class="gas-check"><input type="checkbox" value="coal"> Coal CO&#8322;</label>
-<label class="gas-check"><input type="checkbox" value="oil"> Oil CO&#8322;</label>
-<label class="gas-check"><input type="checkbox" value="gas"> Gas CO&#8322;</label>
-<label class="gas-check"><input type="checkbox" value="co2luc"> CO&#8322; land use</label>
-<label class="gas-check"><input type="checkbox" value="ch4"> CH&#8324;</label>
-<label class="gas-check"><input type="checkbox" value="n2o"> N&#8322;O</label>
-<label class="gas-check"><input type="checkbox" value="fgas"> F-gases</label>
+<label class="gas-check"><input type="checkbox" value="coal"> <span data-i18n-html="gasCoal">Coal CO&#8322;</span></label>
+<label class="gas-check"><input type="checkbox" value="oil"> <span data-i18n-html="gasOil">Oil CO&#8322;</span></label>
+<label class="gas-check"><input type="checkbox" value="gas"> <span data-i18n-html="gasGas">Gas CO&#8322;</span></label>
+<label class="gas-check"><input type="checkbox" value="co2luc"> <span data-i18n-html="gasCo2luc">CO&#8322; land use</span></label>
+<label class="gas-check"><input type="checkbox" value="ch4"> <span data-i18n-html="gasCh4">CH&#8324;</span></label>
+<label class="gas-check"><input type="checkbox" value="n2o"> <span data-i18n-html="gasN2o">N&#8322;O</span></label>
+<label class="gas-check"><input type="checkbox" value="fgas"> <span data-i18n-html="gasFgas">F-gases</span></label>
 </div>
 <div id="gas-dropdown-toggle" style="display:none"></div>
 </div>
 <!-- MFA: flow selector + material checkboxes -->
 <div id="right-panel-mfa-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Flow type</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblFlowType">Flow type</span>
 <select class="ctrl-select" id="mfa-flow-select" style="width:100%;margin-bottom:8px">
-<option value="ext" selected>Extraction</option>
-<option value="con">Consumption</option>
-<option value="imp">Imports</option>
-<option value="exp">Exports</option>
-<option value="bal">Physical trade balance</option>
-<option value="mf">Material footprint</option>
+<option value="ext" selected data-i18n-html="flowExt">Extraction</option>
+<option value="con" data-i18n-html="flowCon">Consumption</option>
+<option value="imp" data-i18n-html="flowImp">Imports</option>
+<option value="exp" data-i18n-html="flowExp">Exports</option>
+<option value="bal" data-i18n-html="flowBal">Physical trade balance</option>
+<option value="mf" data-i18n-html="flowMf">Material footprint</option>
 </select>
-<span class="opt-label" style="margin-bottom:4px;display:block">Material</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblMaterial">Material</span>
 <div id="mfa-material-checks">
-<div class="gas-preset active" data-mat-preset="total" style="padding:4px 8px;font-size:11px;cursor:pointer">Total</div>
-<div class="gas-preset" data-mat-preset="decomposed" style="padding:4px 8px;font-size:11px;cursor:pointer">All decomposed</div>
+<div class="gas-preset active" data-mat-preset="total" style="padding:4px 8px;font-size:11px;cursor:pointer" data-i18n="presetMatTotal">Total</div>
+<div class="gas-preset" data-mat-preset="decomposed" style="padding:4px 8px;font-size:11px;cursor:pointer" data-i18n="presetDecomposed">All decomposed</div>
 <div class="gas-sep"></div>
-<label class="gas-check"><input type="checkbox" value="bio"> Biomass</label>
-<label class="gas-check"><input type="checkbox" value="ff"> Fossil fuels</label>
-<label class="gas-check"><input type="checkbox" value="met"> Metal ores</label>
-<label class="gas-check"><input type="checkbox" value="min"> Non-metallic minerals</label>
+<label class="gas-check"><input type="checkbox" value="bio"> <span data-i18n="matBio">Biomass</span></label>
+<label class="gas-check"><input type="checkbox" value="ff"> <span data-i18n="matFf">Fossil fuels</span></label>
+<label class="gas-check"><input type="checkbox" value="met"> <span data-i18n="matMet">Metal ores</span></label>
+<label class="gas-check"><input type="checkbox" value="min"> <span data-i18n="matMin">Non-metallic minerals</span></label>
 </div>
 </div>
 <!-- HDI: conventional / augmented -->
 <div id="right-panel-hdi-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Type</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblType">Type</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="explore-hdi-conv" data-hdi="hdi">Conventional</button>
-<button class="ctrl-btn" id="explore-hdi-aug" data-hdi="hdi_ng">Augmented (Prados)</button>
+<button class="ctrl-btn active" id="explore-hdi-conv" data-hdi="hdi" data-i18n="btnHdiConv">Conventional</button>
+<button class="ctrl-btn" id="explore-hdi-aug" data-hdi="hdi_ng" data-i18n="btnHdiAug">Augmented (Prados)</button>
 </div>
 </div>
 <!-- Crops / Land Use: land type selector -->
 <div id="right-panel-crops-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Land type</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblLandType">Land type</span>
 <div id="crops-landtype-checks">
-<div class="gas-preset active" data-crop-preset="total" style="padding:4px 8px;font-size:11px;cursor:pointer">Total agricultural area</div>
-<div class="gas-preset" data-crop-preset="decomposed" style="padding:4px 8px;font-size:11px;cursor:pointer">All decomposed</div>
+<div class="gas-preset active" data-crop-preset="total" style="padding:4px 8px;font-size:11px;cursor:pointer" data-i18n="presetCropTotal">Total agricultural area</div>
+<div class="gas-preset" data-crop-preset="decomposed" style="padding:4px 8px;font-size:11px;cursor:pointer" data-i18n="presetDecomposed">All decomposed</div>
 <div class="gas-sep"></div>
-<label class="gas-check"><input type="checkbox" value="crop_cropland"> Cropland</label>
-<label class="gas-check"><input type="checkbox" value="crop_arable"> Arable land</label>
-<label class="gas-check"><input type="checkbox" value="crop_permanent"> Permanent crops</label>
-<label class="gas-check"><input type="checkbox" value="crop_pastures"> Permanent pastures</label>
+<label class="gas-check"><input type="checkbox" value="crop_cropland"> <span data-i18n="cropCropland">Cropland</span></label>
+<label class="gas-check"><input type="checkbox" value="crop_arable"> <span data-i18n="cropArable">Arable land</span></label>
+<label class="gas-check"><input type="checkbox" value="crop_permanent"> <span data-i18n="cropPermanent">Permanent crops</span></label>
+<label class="gas-check"><input type="checkbox" value="crop_pastures"> <span data-i18n="cropPastures">Permanent pastures</span></label>
 </div>
 </div>
 <!-- Biodiversity -->
 <!-- Population: total / density -->
 <div id="right-panel-pop-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block">Type</span>
+<span class="opt-label" style="margin-bottom:4px;display:block" data-i18n="lblType">Type</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="pop-type-total" data-pop="total">Total</button>
-<button class="ctrl-btn" id="pop-type-density" data-pop="density">Density (/km²)</button>
+<button class="ctrl-btn active" id="pop-type-total" data-pop="total" data-i18n="btnPopTotal">Total</button>
+<button class="ctrl-btn" id="pop-type-density" data-pop="density" data-i18n="btnPopDensity">Density (/km²)</button>
 </div>
 </div>
 <div id="right-panel-bio-opts" style="display:none">
-<span class="opt-label" style="margin-bottom:4px;display:block;color:var(--cl)">Red List Index (0&ndash;1, where 1 = all species least concern)</span>
+<span class="opt-label" style="margin-bottom:4px;display:block;color:var(--cl)" data-i18n-html="bioNote">Red List Index (0&ndash;1, where 1 = all species least concern)</span>
 </div>
 </div>
 </div><!-- /rp-section-indicator -->
 <!-- SECTION 3: Countries -->
 <div class="right-panel-section" id="right-panel-countries">
-<div class="right-panel-title rp-collapsible" data-target="rp-body-countries">Countries <span class="rp-arrow">&#9660;</span></div>
+<div class="right-panel-title rp-collapsible" data-target="rp-body-countries"><span data-i18n="rpCountries">Countries</span> <span class="rp-arrow">&#9660;</span></div>
 <div id="rp-body-countries">
 <div style="position:relative;margin-bottom:6px">
-<input type="text" class="ctrl-input" id="right-panel-search" placeholder="Search..." style="width:100%;padding-left:28px;font-size:12px">
+<input type="text" class="ctrl-input" id="right-panel-search" placeholder="Search..." data-i18n-placeholder="phSearch" style="width:100%;padding-left:28px;font-size:12px">
 <svg style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--cl);pointer-events:none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 </div>
 <div class="ctrl-btn-row" style="margin-bottom:6px;flex-wrap:wrap">
 <button class="ctrl-btn" id="rp-preset-g7" style="font-size:10px">G7</button>
 <button class="ctrl-btn" id="rp-preset-brics" style="font-size:10px">BRICS</button>
-<button class="ctrl-btn" id="rp-preset-all" style="font-size:10px">All</button>
-<button class="ctrl-btn" id="rp-preset-clear" style="font-size:10px">Clear</button>
+<button class="ctrl-btn" id="rp-preset-all" style="font-size:10px" data-i18n="btnAll">All</button>
+<button class="ctrl-btn" id="rp-preset-clear" style="font-size:10px" data-i18n="btnClear">Clear</button>
 </div>
 <div class="right-panel-country-list" id="right-panel-country-list"></div>
 </div>
@@ -1237,152 +1409,152 @@ For more information on data sources, methodology, and citations, see <a href="#
 <!-- ==================== ANALYSIS ==================== -->
 <div class="section" id="section-analysis">
 <div class="chart-type-bar">
-<button class="chart-type-btn active" data-analysis="intensities"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/></svg> Intensities</button>
-<button class="chart-type-btn" data-analysis="drivers"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="4" height="7"/><rect x="10" y="4" width="4" height="17"/><rect x="18" y="9" width="4" height="12"/></svg> Drivers</button>
-<button class="chart-type-btn" data-analysis="correlations"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="16" r="2"/><circle cx="10" cy="10" r="2.5"/><circle cx="17" cy="14" r="1.5"/><circle cx="18" cy="6" r="2"/></svg> Correlations</button>
-<button class="chart-type-btn" data-analysis="recessions"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,7 9,12 15,8 21,17"/><polyline points="16,17 21,17 21,12"/></svg> Recessions</button>
-<button class="chart-type-btn" data-analysis="tapio"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3,17 L12,10 L21,3"/><path d="M3,17 L12,15 L21,16"/></svg> Tapio</button>
+<button class="chart-type-btn active" data-analysis="intensities"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/></svg> <span data-i18n="anIntensities">Intensities</span></button>
+<button class="chart-type-btn" data-analysis="drivers"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="4" height="7"/><rect x="10" y="4" width="4" height="17"/><rect x="18" y="9" width="4" height="12"/></svg> <span data-i18n="anDrivers">Drivers</span></button>
+<button class="chart-type-btn" data-analysis="correlations"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="16" r="2"/><circle cx="10" cy="10" r="2.5"/><circle cx="17" cy="14" r="1.5"/><circle cx="18" cy="6" r="2"/></svg> <span data-i18n="anCorrelations">Correlations</span></button>
+<button class="chart-type-btn" data-analysis="recessions"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,7 9,12 15,8 21,17"/><polyline points="16,17 21,17 21,12"/></svg> <span data-i18n="anRecessions">Recessions</span></button>
+<button class="chart-type-btn" data-analysis="tapio"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3,17 L12,10 L21,3"/><path d="M3,17 L12,15 L21,16"/></svg> <span data-i18n="anTapio">Tapio</span></button>
 </div>
 <div class="analysis-top-bar">
 <button class="ctrl-btn" id="analysis-open-picker" style="flex-shrink:0;display:inline-flex;align-items:center;gap:5px">
-<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Countries
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span data-i18n="btnCountries">Countries</span>
 </button>
 <div class="chips-row" id="analysis-chips"></div>
 <div class="ctrl-btn-row" style="margin-left:auto">
 <button class="ctrl-btn" id="analysis-preset-g7">G7</button>
 <button class="ctrl-btn" id="analysis-preset-brics">BRICS</button>
-<button class="ctrl-btn" id="analysis-preset-clear">Clear</button>
+<button class="ctrl-btn" id="analysis-preset-clear" data-i18n="btnClear">Clear</button>
 </div>
 </div>
 <div class="chart-options-bar" id="analysis-options">
 <!-- Intensities controls -->
 <div data-mode-controls="intensities" style="display:none">
-<div class="opt-group"><span class="opt-label">Y axis</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblYAxis">Y axis</span>
 <select class="ctrl-select" id="intensity-y-select" style="width:170px">
-<option value="ghg">GHG emissions</option>
-<option value="ghg_pc">GHG per capita</option>
-<option value="co2ff">CO&#8322; fossil fuel</option>
-<option value="co2ff_pc">CO&#8322; FF per capita</option>
-<option value="gdp_pc">GDP per capita</option>
-<option value="gdp_total">GDP total</option>
-<option value="hdi">HDI</option>
-<option value="hdi_ng">AHDI (Prados)</option>
-<option value="pop">Population</option>
+<option value="ghg" data-i18n-html="optGhgEmissions">GHG emissions</option>
+<option value="ghg_pc" data-i18n-html="optGhgPc">GHG per capita</option>
+<option value="co2ff" data-i18n-html="optCo2ff">CO&#8322; fossil fuel</option>
+<option value="co2ff_pc" data-i18n-html="optCo2ffPc">CO&#8322; FF per capita</option>
+<option value="gdp_pc" data-i18n-html="optGdpPc">GDP per capita</option>
+<option value="gdp_total" data-i18n-html="optGdpTotal">GDP total</option>
+<option value="hdi" data-i18n-html="optHdi">HDI</option>
+<option value="hdi_ng" data-i18n-html="optAhdi">AHDI (Prados)</option>
+<option value="pop" data-i18n-html="optPop">Population</option>
 </select></div>
-<div class="opt-group"><span class="opt-label">/ X axis</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblSlashXAxis">/ X axis</span>
 <select class="ctrl-select" id="intensity-x-select" style="width:170px">
-<option value="gdp_pc" selected>GDP per capita</option>
-<option value="gdp_total">GDP total</option>
-<option value="ghg">GHG emissions</option>
-<option value="ghg_pc">GHG per capita</option>
-<option value="co2ff">CO&#8322; fossil fuel</option>
-<option value="co2ff_pc">CO&#8322; FF per capita</option>
-<option value="pop">Population</option>
-<option value="hdi">HDI</option>
-<option value="hdi_ng">AHDI (Prados)</option>
+<option value="gdp_pc" selected data-i18n-html="optGdpPc">GDP per capita</option>
+<option value="gdp_total" data-i18n-html="optGdpTotal">GDP total</option>
+<option value="ghg" data-i18n-html="optGhgEmissions">GHG emissions</option>
+<option value="ghg_pc" data-i18n-html="optGhgPc">GHG per capita</option>
+<option value="co2ff" data-i18n-html="optCo2ff">CO&#8322; fossil fuel</option>
+<option value="co2ff_pc" data-i18n-html="optCo2ffPc">CO&#8322; FF per capita</option>
+<option value="pop" data-i18n-html="optPop">Population</option>
+<option value="hdi" data-i18n-html="optHdi">HDI</option>
+<option value="hdi_ng" data-i18n-html="optAhdi">AHDI (Prados)</option>
 </select></div>
 </div>
 <!-- Drivers controls -->
 <div data-mode-controls="drivers" style="display:none">
-<div class="opt-group"><span class="opt-label">From</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblFrom">From</span>
 <select class="ctrl-select" id="drivers-period-start" style="width:90px">
 <option value="1850">1850</option><option value="1900">1900</option>
 <option value="1950">1950</option><option value="1960">1960</option><option value="1970">1970</option>
 <option value="1980">1980</option><option value="1990" selected>1990</option><option value="2000">2000</option><option value="2010">2010</option>
 </select></div>
-<div class="opt-group"><span class="opt-label">To</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblTo">To</span>
 <select class="ctrl-select" id="drivers-period-end" style="width:90px">
 <option value="1970">1970</option><option value="1980">1980</option><option value="1990">1990</option>
 <option value="2000">2000</option><option value="2010">2010</option><option value="2020">2020</option><option value="2024" selected>2024</option>
 </select></div>
-<div class="opt-group"><span class="opt-label">Chart</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblChart">Chart</span>
 <select class="ctrl-select" id="drivers-viz-select" style="width:140px">
-<option value="waterfall" selected>Waterfall</option>
-<option value="bar">Grouped comparison</option>
-<option value="faceted">Faceted waterfall</option>
+<option value="waterfall" selected data-i18n-html="optWaterfall">Waterfall</option>
+<option value="bar" data-i18n-html="optGroupedBar">Grouped comparison</option>
+<option value="faceted" data-i18n-html="optFaceted">Faceted waterfall</option>
 </select></div>
 </div>
 <!-- Correlations controls -->
 <div data-mode-controls="correlations" style="display:none">
-<div class="opt-group"><span class="opt-label">X axis</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblXAxis">X axis</span>
 <select class="ctrl-select" id="corr-x-select" style="width:120px">
-<option value="gdp" selected>GDP</option>
-<option value="ghg">GHG</option>
-<option value="co2ff">CO&#8322; fossil</option>
-<option value="hdi">HDI</option>
-<option value="hdi_ng">AHDI (Prados)</option>
-<option value="pop">Population</option>
+<option value="gdp" selected data-i18n-html="optGdp">GDP</option>
+<option value="ghg" data-i18n-html="optGhg">GHG</option>
+<option value="co2ff" data-i18n-html="optCo2Fossil">CO&#8322; fossil</option>
+<option value="hdi" data-i18n-html="optHdi">HDI</option>
+<option value="hdi_ng" data-i18n-html="optAhdi">AHDI (Prados)</option>
+<option value="pop" data-i18n-html="optPop">Population</option>
 </select>
-<div class="ctrl-btn-row" id="corr-x-pc-group"><button class="ctrl-btn" data-axis="x" data-mode="total">Total</button><button class="ctrl-btn active" data-axis="x" data-mode="pc">Per cap</button></div>
-<div class="ctrl-btn-row"><button class="ctrl-btn" data-axis="x" data-scale="linear">Lin</button><button class="ctrl-btn active" data-axis="x" data-scale="log">Log</button></div>
+<div class="ctrl-btn-row" id="corr-x-pc-group"><button class="ctrl-btn" data-axis="x" data-mode="total" data-i18n="btnTotal">Total</button><button class="ctrl-btn active" data-axis="x" data-mode="pc" data-i18n="btnPerCap">Per cap</button></div>
+<div class="ctrl-btn-row"><button class="ctrl-btn" data-axis="x" data-scale="linear" data-i18n="btnLin">Lin</button><button class="ctrl-btn active" data-axis="x" data-scale="log" data-i18n="btnLog">Log</button></div>
 </div>
-<div class="opt-group"><span class="opt-label">Y axis</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblYAxis">Y axis</span>
 <select class="ctrl-select" id="corr-y-select" style="width:120px">
-<option value="ghg" selected>GHG</option>
-<option value="co2ff">CO&#8322; fossil</option>
-<option value="gdp">GDP</option>
-<option value="hdi">HDI</option>
-<option value="hdi_ng">AHDI (Prados)</option>
-<option value="pop">Population</option>
+<option value="ghg" selected data-i18n-html="optGhg">GHG</option>
+<option value="co2ff" data-i18n-html="optCo2Fossil">CO&#8322; fossil</option>
+<option value="gdp" data-i18n-html="optGdp">GDP</option>
+<option value="hdi" data-i18n-html="optHdi">HDI</option>
+<option value="hdi_ng" data-i18n-html="optAhdi">AHDI (Prados)</option>
+<option value="pop" data-i18n-html="optPop">Population</option>
 </select>
-<div class="ctrl-btn-row" id="corr-y-pc-group"><button class="ctrl-btn active" data-axis="y" data-mode="total">Total</button><button class="ctrl-btn" data-axis="y" data-mode="pc">Per cap</button></div>
-<div class="ctrl-btn-row"><button class="ctrl-btn active" data-axis="y" data-scale="linear">Lin</button><button class="ctrl-btn" data-axis="y" data-scale="log">Log</button></div>
+<div class="ctrl-btn-row" id="corr-y-pc-group"><button class="ctrl-btn active" data-axis="y" data-mode="total" data-i18n="btnTotal">Total</button><button class="ctrl-btn" data-axis="y" data-mode="pc" data-i18n="btnPerCap">Per cap</button></div>
+<div class="ctrl-btn-row"><button class="ctrl-btn active" data-axis="y" data-scale="linear" data-i18n="btnLin">Lin</button><button class="ctrl-btn" data-axis="y" data-scale="log" data-i18n="btnLog">Log</button></div>
 </div>
-<div class="opt-group"><span class="opt-label">Size</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblSize">Size</span>
 <select class="ctrl-select" id="corr-size-select" style="width:100px">
-<option value="pop" selected>Population</option>
-<option value="gdp_total">GDP total</option>
-<option value="gdp_pc">GDP pc</option>
+<option value="pop" selected data-i18n-html="optPop">Population</option>
+<option value="gdp_total" data-i18n-html="optGdpTotal">GDP total</option>
+<option value="gdp_pc" data-i18n-html="optGdpPcShort">GDP pc</option>
 </select></div>
-<div class="opt-group"><span class="opt-label">Axes</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblAxes">Axes</span>
 <div class="ctrl-btn-row" id="corr-axis-mode-group">
-<button class="ctrl-btn active" data-corr-axis-mode="fixed">Fixed</button>
-<button class="ctrl-btn" data-corr-axis-mode="mobile">Mobile</button>
+<button class="ctrl-btn active" data-corr-axis-mode="fixed" data-i18n="corrFixed">Fixed</button>
+<button class="ctrl-btn" data-corr-axis-mode="mobile" data-i18n="corrMobile">Mobile</button>
 </div></div>
-<div class="opt-group"><span class="opt-label">Scope</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblScope">Scope</span>
 <div class="ctrl-btn-row" id="corr-scope-group">
-<button class="ctrl-btn active" data-corr-scope="all">All countries</button>
-<button class="ctrl-btn" data-corr-scope="selected">Selected only</button>
+<button class="ctrl-btn active" data-corr-scope="all" data-i18n="corrScopeAll">All countries</button>
+<button class="ctrl-btn" data-corr-scope="selected" data-i18n="corrScopeSel">Selected only</button>
 </div></div>
 </div>
 <!-- Recessions controls -->
 <div data-mode-controls="recessions" style="display:none">
-<div class="opt-group"><span class="opt-label">View</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblView">View</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="recession-view-reductions">Reductions</button>
-<button class="ctrl-btn" id="recession-view-decomposition">Decomposition</button>
+<button class="ctrl-btn active" id="recession-view-reductions" data-i18n="recReductions">Reductions</button>
+<button class="ctrl-btn" id="recession-view-decomposition" data-i18n="recDecomposition">Decomposition</button>
 </div></div>
-<div class="opt-group"><span class="opt-label">Chart</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblChart">Chart</span>
 <div class="ctrl-btn-row">
-<button class="ctrl-btn active" id="recession-chart-annual">Annual</button>
-<button class="ctrl-btn" id="recession-chart-cumulative">Cumulative</button>
+<button class="ctrl-btn active" id="recession-chart-annual" data-i18n="optAnnual">Annual</button>
+<button class="ctrl-btn" id="recession-chart-cumulative" data-i18n="optCumulative">Cumulative</button>
 </div></div>
-<div class="opt-group"><span class="opt-label">Y axis</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblYAxis">Y axis</span>
 <div class="ctrl-btn-row" id="recession-yaxis-group">
-<button class="ctrl-btn" data-recession-yaxis="shared">Shared</button>
-<button class="ctrl-btn active" data-recession-yaxis="free">Free</button>
+<button class="ctrl-btn" data-recession-yaxis="shared" data-i18n="btnShared">Shared</button>
+<button class="ctrl-btn active" data-recession-yaxis="free" data-i18n="btnFree">Free</button>
 </div></div>
 </div>
 <!-- Tapio controls -->
 <div data-mode-controls="tapio" style="display:none">
-<div class="opt-group"><span class="opt-label">Emission type</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblEmissionType">Emission type</span>
 <select class="ctrl-select" id="tapio-type-select" style="width:150px">
-<option value="pat" selected>GHG (total)</option>
-<option value="pat_ff">CO&#8322; fossil fuel</option>
+<option value="pat" selected data-i18n-html="optTapioGhg">GHG (total)</option>
+<option value="pat_ff" data-i18n-html="optCo2ff">CO&#8322; fossil fuel</option>
 </select></div>
-<div class="opt-group"><span class="opt-label">Year window</span>
+<div class="opt-group"><span class="opt-label" data-i18n="lblYearWindow">Year window</span>
 <select class="ctrl-select" id="tapio-window-select" style="width:100px">
-<option value="1">Annual</option>
-<option value="5">5 years</option>
-<option value="10" selected>10 years</option>
-<option value="20">20 years</option>
+<option value="1" data-i18n-html="optAnnual">Annual</option>
+<option value="5" data-i18n-html="tapioWin5">5 years</option>
+<option value="10" selected data-i18n-html="tapioWin10">10 years</option>
+<option value="20" data-i18n-html="tapioWin20">20 years</option>
 </select></div>
 </div>
 </div>
 <div class="analysis-chart-area">
 <div class="analysis-chart-header">
-<div class="analysis-chart-title" id="analysis-title">Select an analysis type</div>
-<div class="analysis-chart-subtitle" id="analysis-subtitle">Choose countries and analysis mode</div>
+<div class="analysis-chart-title" id="analysis-title" data-i18n="analysisTitleDefault">Select an analysis type</div>
+<div class="analysis-chart-subtitle" id="analysis-subtitle" data-i18n="analysisSubtitleDefault">Choose countries and analysis mode</div>
 </div>
 <div class="analysis-chart-wrapper" id="analysis-chart-wrapper"></div>
 </div>
@@ -1396,14 +1568,13 @@ For more information on data sources, methodology, and citations, see <a href="#
      #whatif-behind and touch nothing else. -->
 <div class="section" id="section-whatif">
 <div class="wi-head">
-<div class="wi-title-group">
-<h2 class="wi-title" data-i18n="whatifTitle">What if?</h2>
-<p class="wi-sub" data-i18n="whatifSubtitle">Three dials, one carbon budget</p>
-</div>
+<h2 class="wi-vh" data-i18n="whatifTitle">What if?</h2>
+<p class="wi-lede" id="whatif-lede">Emissions are people &times; income &times; the CO<span class="wi-sub">2</span> it takes to make a dollar. Move the three dials and read what the carbon budget says.</p>
 <div class="wi-mode-switch" role="tablist" data-i18n-title="whatifModeLabel" title="Mode">
 <button class="wi-mode active" type="button" role="tab" aria-selected="true" data-whatif-mode="ahead" data-i18n-html="whatifModeAhead">Ahead <span class="wi-mode-when">&middot; 2025&ndash;2050</span></button>
 <button class="wi-mode" type="button" role="tab" aria-selected="false" data-whatif-mode="behind" data-i18n-html="whatifModeBehind">Behind <span class="wi-mode-when">&middot; 1850&ndash;2024</span></button>
 </div>
+<div class="wi-head-tail" aria-hidden="true"></div>
 </div>
 <div class="wi-body">
 <aside class="wi-dials" id="whatif-dials">
@@ -1476,7 +1647,7 @@ For more information on data sources, methodology, and citations, see <a href="#
     <div class="about-avatar"><img src="img/juaninfante.jpg" alt="Juan Infante-Amate"></div>
     <div class="about-card-name">Juan Infante-Amate</div>
     <div class="about-card-role">Universidad de Granada</div>
-    <div class="about-card-desc">Environmental &amp; Economic History</div>
+    <div class="about-card-desc" data-i18n="teamDesc1">Environmental &amp; Economic History</div>
     <div class="about-card-links">
     <a class="about-link" href="https://www.ugr.es/en/staff/juan-infante-amate" target="_blank" title="Website"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg></a>
     <a class="about-link" href="https://scholar.google.com/citations?user=s89YchgAAAAJ" target="_blank" title="Google Scholar" style="color:#4285F4"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/></svg></a>
@@ -1490,7 +1661,7 @@ For more information on data sources, methodology, and citations, see <a href="#
     <div class="about-avatar"><img src="img/emiliano.webp" alt="Emiliano Travieso"></div>
     <div class="about-card-name">Emiliano Travieso</div>
     <div class="about-card-role">Universidad Carlos III de Madrid</div>
-    <div class="about-card-desc">Economic &amp; Environmental History</div>
+    <div class="about-card-desc" data-i18n="teamDesc2">Economic &amp; Environmental History</div>
     <div class="about-card-links">
     <a class="about-link" href="https://www.emilianotravieso.com/" target="_blank" title="Website"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg></a>
     <a class="about-link" href="https://scholar.google.com/citations?user=i8KskpQAAAAJ" target="_blank" title="Google Scholar" style="color:#4285F4"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/></svg></a>
@@ -1504,7 +1675,7 @@ For more information on data sources, methodology, and citations, see <a href="#
     <div class="about-avatar"><img src="img/eduardo.jpg" alt="Eduardo Aguilera"></div>
     <div class="about-card-name">Eduardo Aguilera</div>
     <div class="about-card-role">CSIC &middot; IEGD</div>
-    <div class="about-card-desc">Agroecology &amp; Climate Science</div>
+    <div class="about-card-desc" data-i18n="teamDesc3">Agroecology &amp; Climate Science</div>
     <div class="about-card-links">
     <a class="about-link" href="https://iegd.csic.es/es/personal/eduardo-manuel-aguilera-fernandez" target="_blank" title="Website"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg></a>
     <a class="about-link" href="https://scholar.google.es/citations?user=3c01eqQAAAAJ" target="_blank" title="Google Scholar" style="color:#4285F4"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/></svg></a>
@@ -1539,8 +1710,8 @@ For more information on data sources, methodology, and citations, see <a href="#
 
   <!-- ===== METHODOLOGY TAB ===== -->
   <div class="about-panel" id="about-panel-methodology" style="display:none">
-    <h2 class="about-h2" style="margin-bottom:6px">Data Sources &amp; Methodology</h2>
-    <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px">
+    <h2 class="about-h2" style="margin-bottom:6px" data-i18n-html="mtHead1">Data Sources &amp; Methodology</h2>
+    <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px" data-i18n-html="mtHead2">
     This platform integrates multiple datasets to provide a comprehensive view of global environmental and human development trends. Select an indicator below to view its detailed methodology, sources, coverage, and citation requirements.
     </p>
 
@@ -1548,237 +1719,237 @@ For more information on data sources, methodology, and citations, see <a href="#
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:24px">
       <button class="method-indicator-btn active" data-method="gdp">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 6 13.5 14.5 8.5 9.5 2 16"/><polyline points="16 6 22 6 22 12"/></svg></div>
-        <div>GDP</div>
+        <div data-i18n-html="mtHead3">GDP</div>
         <div class="method-btn-sub">Maddison 2023</div>
       </button>
       <button class="method-indicator-btn" data-method="hdi">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
-        <div>HDI</div>
+        <div data-i18n-html="mtHead4">HDI</div>
         <div class="method-btn-sub">UNDP + Prados</div>
       </button>
       <button class="method-indicator-btn" data-method="pop">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
-        <div>Population</div>
+        <div data-i18n-html="mtHead5">Population</div>
         <div class="method-btn-sub">UN WPP</div>
       </button>
       <button class="method-indicator-btn" data-method="ghg">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 18c0-3.5 2-6 4-8 2 2 4 4.5 4 8a4 4 0 01-8 0z"/><path d="M4 21c0-5 3.5-9 8-13 4.5 4 8 8 8 13" opacity=".4"/></svg></div>
-        <div>GHG</div>
+        <div data-i18n-html="mtHead6">GHG</div>
         <div class="method-btn-sub">GCB + PRIMAP</div>
       </button>
       <button class="method-indicator-btn" data-method="mfa">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 20l5-5 4 2 5-7 6 4"/><line x1="2" y1="20" x2="22" y2="20" opacity=".4"/></svg></div>
-        <div>Materials</div>
+        <div data-i18n-html="mtHead7">Materials</div>
         <div class="method-btn-sub">UNEP IRP</div>
       </button>
       <button class="method-indicator-btn" data-method="crops">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22V8"/><path d="M8 12c0-3 2-5 4-7 2 2 4 4 4 7"/><path d="M6 16c0-2.5 3-4.5 6-6 3 1.5 6 3.5 6 6" opacity=".5"/></svg></div>
-        <div>Land Use</div>
+        <div data-i18n-html="mtHead8">Land Use</div>
         <div class="method-btn-sub">HYDE 3.3</div>
       </button>
       <button class="method-indicator-btn" data-method="bio">
         <div><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25"/><path d="M7 14c0 1.5 2 2.5 4 3.5"/></svg></div>
-        <div>Biodiversity</div>
+        <div data-i18n-html="mtHead9">Biodiversity</div>
         <div class="method-btn-sub">IUCN Red List</div>
       </button>
     </div>
 
     <!-- ========== GDP PANEL ========== -->
     <div class="method-panel active" id="method-panel-gdp">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">GDP &mdash; Maddison Project Database</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">Gross Domestic Product per capita in long-run perspective</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtGdp1">GDP &mdash; Maddison Project Database</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtGdp2">Gross Domestic Product per capita in long-run perspective</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1750&ndash;2024</td></tr>
-        <tr><td>Unit</td><td>2011 international $ (PPP)</td></tr>
-        <tr><td>Resolution</td><td>Annual</td></tr>
+        <tr><td data-i18n-html="mtGdp3">Coverage</td><td data-i18n-html="mtGdp4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtGdp5">Year range</td><td>1750&ndash;2024</td></tr>
+        <tr><td data-i18n-html="mtGdp6">Unit</td><td data-i18n-html="mtGdp7">2011 international $ (PPP)</td></tr>
+        <tr><td data-i18n-html="mtGdp8">Resolution</td><td data-i18n-html="mtGdp9">Annual</td></tr>
       </table>
 
-      <div class="method-section-head">Description</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtGdp10">Description</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGdp11">
       The primary source is the <strong>Maddison Project Database</strong> (2023 update), the most comprehensive long-run comparative economic dataset available. Originally initiated by Angus Maddison, the database is now maintained by a team at the University of Groningen. It provides GDP per capita estimates in 2011 international dollars (purchasing power parity) for a wide range of countries, in many cases extending back to the 18th century and earlier.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGdp12">
       The 2023 update incorporates new benchmark estimates and methodological improvements, offering the most reliable picture of the long-run evolution of the world economy. For this platform, the Maddison series are extended with <strong>World Bank World Development Indicators (WDI)</strong> for the most recent years not yet covered by the Maddison release.
       </p>
 
-      <div class="method-section-head">Gap-filling methodology</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtGdp13">Gap-filling methodology</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGdp14">
       For countries and years not covered by the Maddison Project Database, GDP per capita is estimated using a hierarchical approach: (1) growth rates from the World Bank WDI are applied to extend existing series forward; (2) for historical gaps, regional growth patterns (population-weighted) are applied to anchor the country&rsquo;s nearest known value; (3) for countries with no data, the population-weighted regional average is assigned.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite">
+      <div class="method-section-head" data-i18n-html="mtGdp15">How to cite</div>
+      <div class="method-cite" data-i18n-html="mtGdp16">
         Bolt, J. &amp; van Zanden, J.L. (2024). &ldquo;Maddison style estimates of the evolution of the world economy: A new 2023 update.&rdquo; <em>Journal of Economic Surveys</em>. <a href="https://doi.org/10.1111/joes.12618" target="_blank" style="color:var(--c1)">doi:10.1111/joes.12618</a>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8" data-i18n-html="mtGdp17">
       <strong>Suggested citation:</strong> &ldquo;GDP data from the Maddison Project Database 2023 (Bolt &amp; van Zanden, 2024), extended with World Bank WDI.&rdquo;
       </p>
     </div>
 
     <!-- ========== HDI PANEL ========== -->
     <div class="method-panel" id="method-panel-hdi" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Human Development Index (HDI)</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">Standard HDI (UNDP) and Augmented HDI (Prados de la Escosura)</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtHdi1">Human Development Index (HDI)</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtHdi2">Standard HDI (UNDP) and Augmented HDI (Prados de la Escosura)</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1870&ndash;2024</td></tr>
-        <tr><td>Unit</td><td>Index 0&ndash;1</td></tr>
-        <tr><td>Variants</td><td>HDI, Augmented HDI (with democracy), HDI without income (HDI<sub>ni</sub>)</td></tr>
+        <tr><td data-i18n-html="mtHdi3">Coverage</td><td data-i18n-html="mtHdi4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtHdi5">Year range</td><td>1870&ndash;2024</td></tr>
+        <tr><td data-i18n-html="mtHdi6">Unit</td><td data-i18n-html="mtHdi7">Index 0&ndash;1</td></tr>
+        <tr><td data-i18n-html="mtHdi8">Variants</td><td data-i18n-html="mtHdi9">HDI, Augmented HDI (with democracy), HDI without income (HDI<sub>ni</sub>)</td></tr>
       </table>
 
       <!-- Standard HDI -->
-      <div class="method-section-head">The Human Development Index (HDI)</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtHdi10">The Human Development Index (HDI)</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi11">
       The <strong>Human Development Index (HDI)</strong> was introduced by the United Nations Development Programme in 1990 as part of its first <em>Human Development Report</em>. Conceived by economists Mahbub ul Haq and Amartya Sen, it was designed to shift the focus of development economics beyond income alone, providing a summary measure of average achievement in three key dimensions of human development:
       </p>
       <div class="method-comp-grid">
         <div class="method-comp-card" style="border-left:3px solid #2a9d8f">
-          <div class="mc-title">Health</div>
-          <div class="mc-desc">Life expectancy at birth.</div>
+          <div class="mc-title" data-i18n-html="mtHdi12">Health</div>
+          <div class="mc-desc" data-i18n-html="mtHdi13">Life expectancy at birth.</div>
         </div>
         <div class="method-comp-card" style="border-left:3px solid #1e6091">
-          <div class="mc-title">Education</div>
-          <div class="mc-desc">Mean years of schooling &amp; expected years of schooling.</div>
+          <div class="mc-title" data-i18n-html="mtHdi14">Education</div>
+          <div class="mc-desc" data-i18n-html="mtHdi15">Mean years of schooling &amp; expected years of schooling.</div>
         </div>
         <div class="method-comp-card" style="border-left:3px solid #e9c46a">
-          <div class="mc-title">Standard of living</div>
-          <div class="mc-desc">GNI per capita (PPP$).</div>
+          <div class="mc-title" data-i18n-html="mtHdi16">Standard of living</div>
+          <div class="mc-desc" data-i18n-html="mtHdi17">GNI per capita (PPP$).</div>
         </div>
       </div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi18">
       The HDI is the <strong>geometric mean</strong> of normalized indices for each dimension, producing a value between 0 and 1. The UNDP publishes HDI values annually for over 190 countries, with data available from <strong>1990 to 2023</strong> in the latest Human Development Report (UNDP, 2025).
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px" data-i18n-html="mtHdi19">
       The HDI has become the world&rsquo;s most widely used composite indicator of human development, providing a counterpart to purely economic measures such as GDP per capita. For more information, see the <a href="https://hdr.undp.org/data-center/human-development-index" target="_blank" style="color:var(--c1);text-decoration:none;border-bottom:1px solid var(--c1)">UNDP Human Development Data Center</a>.
       </p>
 
       <!-- AHDI -->
-      <div class="method-section-head">The Augmented Human Development Index (AHDI)</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtHdi20">The Augmented Human Development Index (AHDI)</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi21">
       The <strong>AHDI</strong>, proposed by Prados de la Escosura (2023), extends the standard HDI in two important ways: (1) it adds a fourth dimension &mdash; <strong>liberal democracy</strong> &mdash; and (2) it provides historical estimates going back to <strong>1870</strong>, far beyond the UNDP&rsquo;s 1990 starting point. The AHDI is the geometric mean of four normalized components:
       </p>
       <div class="method-comp-grid">
         <div class="method-comp-card" style="border-left:3px solid #1e6091">
-          <div class="mc-title">Income</div>
-          <div class="mc-desc">GDP per capita (GK$1990). Kakwani transform with Mo&nbsp;=&nbsp;$100, M&nbsp;=&nbsp;$47,000.</div>
+          <div class="mc-title" data-i18n-html="mtHdi22">Income</div>
+          <div class="mc-desc" data-i18n-html="mtHdi23">GDP per capita (GK$1990). Kakwani transform with Mo&nbsp;=&nbsp;$100, M&nbsp;=&nbsp;$47,000.</div>
         </div>
         <div class="method-comp-card" style="border-left:3px solid #2a9d8f">
-          <div class="mc-title">Life expectancy</div>
-          <div class="mc-desc">Years at birth. Kakwani transform with Mo&nbsp;=&nbsp;20, M&nbsp;=&nbsp;85.</div>
+          <div class="mc-title" data-i18n-html="mtHdi24">Life expectancy</div>
+          <div class="mc-desc" data-i18n-html="mtHdi25">Years at birth. Kakwani transform with Mo&nbsp;=&nbsp;20, M&nbsp;=&nbsp;85.</div>
         </div>
         <div class="method-comp-card" style="border-left:3px solid #e9c46a">
-          <div class="mc-title">Education</div>
-          <div class="mc-desc">Mean years of schooling. Kakwani transform with Mo&nbsp;=&nbsp;0, M&nbsp;=&nbsp;15.</div>
+          <div class="mc-title" data-i18n-html="mtHdi26">Education</div>
+          <div class="mc-desc" data-i18n-html="mtHdi27">Mean years of schooling. Kakwani transform with Mo&nbsp;=&nbsp;0, M&nbsp;=&nbsp;15.</div>
         </div>
         <div class="method-comp-card" style="border-left:3px solid #e63946">
-          <div class="mc-title">Liberal democracy</div>
-          <div class="mc-desc">V-Dem v2x_libdem index, used directly on a 0&ndash;1 scale.</div>
+          <div class="mc-title" data-i18n-html="mtHdi28">Liberal democracy</div>
+          <div class="mc-desc" data-i18n-html="mtHdi29">V-Dem v2x_libdem index, used directly on a 0&ndash;1 scale.</div>
         </div>
       </div>
 
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi30">
       Each component is normalized using Prados&rsquo; non-linear <strong>Kakwani transformation</strong>, which captures diminishing returns &mdash; improvements at low levels count more than at high levels:
       </p>
       <div class="method-formula">
       I = [log(M &minus; Mo) &minus; log(M &minus; x)] / log(M &minus; Mo)
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-bottom:12px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-bottom:12px" data-i18n-html="mtHdi31">
       where <em>x</em> is the actual value, <em>Mo</em> is the minimum, and <em>M</em> is the maximum. The liberal democracy index from V-Dem (0&ndash;1) is used directly without transformation.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:8px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:8px" data-i18n-html="mtHdi32">
       The composite AHDI is:
       </p>
       <div class="method-formula">
       AHDI = (I<sub>Income</sub> &times; I<sub>LE</sub> &times; I<sub>Edu</sub> &times; I<sub>LDI</sub>)<sup>1/4</sup>
       </div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:24px" data-i18n-html="mtHdi33">
       Prados published raw component values for <strong>162 countries</strong> at 24 benchmark years (1870, 1880, &hellip;, 2010, 2015, 2020) in the <em>Economic History Review</em>. This constitutes the most comprehensive long-run dataset on human development currently available.
       </p>
 
       <!-- Goalposts table -->
-      <div class="method-section-head">Component goalposts</div>
+      <div class="method-section-head" data-i18n-html="mtHdi34">Component goalposts</div>
       <table class="method-table" style="margin-bottom:24px">
-        <tr style="background:var(--bgl);font-weight:500"><td>Component</td><td>Minimum (Mo)</td><td>Maximum (M)</td><td>Transform</td></tr>
-        <tr><td>Income (GDP pc GK$1990)</td><td>$100</td><td>$47,000</td><td>Kakwani (log)</td></tr>
-        <tr><td>Life expectancy (years)</td><td>20</td><td>85</td><td>Kakwani (log)</td></tr>
-        <tr><td>Education (mean yrs schooling)</td><td>0</td><td>15</td><td>Kakwani (log)</td></tr>
-        <tr><td>Liberal democracy (V-Dem)</td><td>0</td><td>1</td><td>Direct (no transform)</td></tr>
+        <tr style="background:var(--bgl);font-weight:500"><td data-i18n-html="mtHdi35">Component</td><td data-i18n-html="mtHdi36">Minimum (Mo)</td><td data-i18n-html="mtHdi37">Maximum (M)</td><td data-i18n-html="mtHdi38">Transform</td></tr>
+        <tr><td data-i18n-html="mtHdi39">Income (GDP pc GK$1990)</td><td>$100</td><td>$47,000</td><td data-i18n-html="mtHdi40">Kakwani (log)</td></tr>
+        <tr><td data-i18n-html="mtHdi41">Life expectancy (years)</td><td>20</td><td>85</td><td data-i18n-html="mtHdi42">Kakwani (log)</td></tr>
+        <tr><td data-i18n-html="mtHdi43">Education (mean yrs schooling)</td><td>0</td><td>15</td><td data-i18n-html="mtHdi44">Kakwani (log)</td></tr>
+        <tr><td data-i18n-html="mtHdi45">Liberal democracy (V-Dem)</td><td>0</td><td>1</td><td data-i18n-html="mtHdi46">Direct (no transform)</td></tr>
       </table>
 
       <!-- Processing pipeline -->
-      <div class="method-section-head">Processing pipeline for this dashboard</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtHdi47">Processing pipeline for this dashboard</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi48">
       The original datasets cover different numbers of countries with unbalanced panels: Prados provides 162 countries across 24 sparse benchmark years (1870&ndash;2020), while the UNDP covers 206 entities but only from 1990. For this dashboard, these sources were merged, extended, and gap-filled into a complete panel of <strong>199 UN-recognized countries &times; 155 years (1870&ndash;2024)</strong>.
       </p>
 
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi49">
       <strong>Step 1 &mdash; Annual interpolation of benchmarks:</strong> Prados published raw component values at 24 benchmark years. We linearly interpolated the raw components to annual frequency within each country&rsquo;s data range, then applied the Kakwani transformation formulas and geometric mean. The reconstructed AHDI was verified against Prados&rsquo; published values (maximum absolute error &lt; 0.0001).
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi50">
       <strong>Step 2 &mdash; Extension to 2024:</strong> Prados&rsquo; series ends in 2020. We extended AHDI to 2024 by applying year-on-year growth rates from the UNDP HDI components (life expectancy, education, income) and V-Dem (liberal democracy). The UNDP HDI series ends in 2023; we project to 2024 by applying the 2022&rarr;2023 growth rate.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi51">
       <strong>Step 3 &mdash; Backcasting HDI before 1990:</strong> To extend HDI before 1990, we exploit the fact that three of Prados&rsquo; four components (income, life expectancy, education) map onto the UNDP&rsquo;s three dimensions. We compute a 3-component Prados index (excluding democracy):
       </p>
       <div class="method-formula">
       P3 = (I<sub>Income</sub> &times; I<sub>LE</sub> &times; I<sub>Edu</sub>)<sup>1/3</sup>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-bottom:6px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-bottom:6px" data-i18n-html="mtHdi52">
       For years before 1990, HDI is backcasted by ratio-splicing to the UNDP 1990 baseline:
       </p>
       <div class="method-formula">
       HDI<sub>year</sub> = HDI<sub>UNDP,1990</sub> &times; (P3<sub>year</sub> / P3<sub>1990</sub>)
       </div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi53">
       This preserves the UNDP&rsquo;s methodology and weighting at the 1990 anchor point while extending backward using Prados&rsquo; historical component estimates.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi54">
       <strong>Step 4 &mdash; Gap-filling hierarchy:</strong> Even after interpolation and extension, many country-year cells remain empty. Gaps are filled using a three-level hierarchical approach: (1) growth-based filling using population-weighted regional growth rates; (2) linear interpolation for small internal gaps; (3) regional average assignment for countries with no data at all.
       </p>
 
       <!-- Reliability indicators -->
-      <div class="method-section-head">Reliability indicators</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtHdi55">Reliability indicators</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtHdi56">
       Every observation is tagged with a reliability indicator so users always know the quality of what they are seeing:
       </p>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
         <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--bgl)">
           <div style="width:6px;min-height:100%;flex-shrink:0;background:#1e6091"></div>
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px">Original <span style="font-weight:400;color:var(--cl)">&mdash; high reliability</span></div>
-            <div style="font-size:12px;color:var(--cg);line-height:1.7"><strong>AHDI:</strong> Prados de la Escosura&rsquo;s published benchmark observations (24 specific years per country). <strong>HDI:</strong> UNDP HDR 2025 annual values (1990&ndash;2023).</div>
+            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px" data-i18n-html="mtHdi57">Original <span style="font-weight:400;color:var(--cl)">&mdash; high reliability</span></div>
+            <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtHdi58"><strong>AHDI:</strong> Prados de la Escosura&rsquo;s published benchmark observations (24 specific years per country). <strong>HDI:</strong> UNDP HDR 2025 annual values (1990&ndash;2023).</div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--bgl)">
           <div style="width:6px;min-height:100%;flex-shrink:0;background:#e9c46a"></div>
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px">Interpolated / Estimated <span style="font-weight:400;color:var(--cl)">&mdash; medium reliability</span></div>
-            <div style="font-size:12px;color:var(--cg);line-height:1.7">Includes: AHDI years between benchmarks (linear interpolation), AHDI 2021&ndash;2024 extension, HDI pre-1990 backcast, HDI 2024 extrapolation, and growth-based filling for countries with partial data.</div>
+            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px" data-i18n-html="mtHdi59">Interpolated / Estimated <span style="font-weight:400;color:var(--cl)">&mdash; medium reliability</span></div>
+            <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtHdi60">Includes: AHDI years between benchmarks (linear interpolation), AHDI 2021&ndash;2024 extension, HDI pre-1990 backcast, HDI 2024 extrapolation, and growth-based filling for countries with partial data.</div>
           </div>
         </div>
         <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;background:var(--bgl)">
           <div style="width:6px;min-height:100%;flex-shrink:0;background:#e63946"></div>
           <div>
-            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px">Regional average <span style="font-weight:400;color:var(--cl)">&mdash; low reliability</span></div>
-            <div style="font-size:12px;color:var(--cg);line-height:1.7">For countries with no original data at all, we assign the population-weighted average of their region for each year. This provides a plausible order-of-magnitude estimate but carries substantial uncertainty.</div>
+            <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:2px" data-i18n-html="mtHdi61">Regional average <span style="font-weight:400;color:var(--cl)">&mdash; low reliability</span></div>
+            <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtHdi62">For countries with no original data at all, we assign the population-weighted average of their region for each year. This provides a plausible order-of-magnitude estimate but carries substantial uncertainty.</div>
           </div>
         </div>
       </div>
 
       <!-- Citations -->
-      <div class="method-section-head">Required citations</div>
-      <div class="method-cite" style="border-left-color:#2a9d8f">
+      <div class="method-section-head" data-i18n-html="mtHdi63">Required citations</div>
+      <div class="method-cite" style="border-left-color:#2a9d8f" data-i18n-html="mtHdi64">
         <strong>For HDI (1990&ndash;2023, UNDP original data):</strong><br>
         UNDP (2025), <em>Human Development Report 2025</em>. United Nations Development Programme. <a href="https://hdr.undp.org/" target="_blank" style="color:var(--c1);text-decoration:none;border-bottom:1px solid var(--c1)">hdr.undp.org</a>
       </div>
-      <div class="method-cite">
+      <div class="method-cite" data-i18n-html="mtHdi65">
         <strong>For AHDI (1870&ndash;2020, Prados original data):</strong><br>
         Prados de la Escosura, L. (2023), &ldquo;Augmented Human Development in the Age of Globalisation.&rdquo; <em>Economic History Review</em>. DOI: <a href="https://doi.org/10.1111/ehr.13244" target="_blank" style="color:var(--c1);text-decoration:none;border-bottom:1px solid var(--c1)">10.1111/ehr.13244</a>
       </div>
-      <div class="method-cite" style="border-left-color:#495057">
+      <div class="method-cite" style="border-left-color:#495057" data-i18n-html="mtHdi66">
         <strong>For extended/complete series (HDI pre-1990, AHDI post-2020, gap-filled data):</strong><br>
         Infante-Amate, J. (2025). University of Granada. The backcasting, extension, and gap-filling estimates are the work of Juan Infante-Amate. When using these extended series, please cite this tool in addition to the original sources.
       </div>
@@ -1786,196 +1957,196 @@ For more information on data sources, methodology, and citations, see <a href="#
 
     <!-- ========== POPULATION PANEL ========== -->
     <div class="method-panel" id="method-panel-pop" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Population</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">UN World Population Prospects via Our World in Data</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtPop1">Population</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtPop2">UN World Population Prospects via Our World in Data</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1750&ndash;2100</td></tr>
-        <tr><td>Unit</td><td>Persons</td></tr>
-        <tr><td>Resolution</td><td>Annual</td></tr>
+        <tr><td data-i18n-html="mtPop3">Coverage</td><td data-i18n-html="mtPop4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtPop5">Year range</td><td>1750&ndash;2100</td></tr>
+        <tr><td data-i18n-html="mtPop6">Unit</td><td data-i18n-html="mtPop7">Persons</td></tr>
+        <tr><td data-i18n-html="mtPop8">Resolution</td><td data-i18n-html="mtPop9">Annual</td></tr>
       </table>
 
-      <div class="method-section-head">Description</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtPop10">Description</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtPop11">
       Population estimates and projections are sourced from the <strong>United Nations World Population Prospects (WPP)</strong>, accessed via Our World in Data. The WPP is the primary source for global demographic data, produced by the Population Division of the UN Department of Economic and Social Affairs.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtPop12">
       The dataset provides annual estimates of total population for every country from 1950 to the present, with demographic projections extending to 2100 under various scenarios (medium, high, low variant). Historical estimates extend back to 1750 for major countries, drawing on historical demography research and census data.
       </p>
 
-      <div class="method-section-head">Methodology</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtPop13">Methodology</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtPop14">
       The UN WPP uses the cohort-component method to project populations, starting from a base-year population by age and sex, and applying assumptions about future fertility, mortality, and international migration. Historical estimates integrate census data, vital registration systems, and demographic surveys. Our World in Data harmonizes country boundaries and provides consistent time series across political boundary changes.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite">
+      <div class="method-section-head" data-i18n-html="mtPop15">How to cite</div>
+      <div class="method-cite" data-i18n-html="mtPop16">
         United Nations, Department of Economic and Social Affairs, Population Division (2024). <em>World Population Prospects 2024</em>. <a href="https://population.un.org/wpp/" target="_blank" style="color:var(--c1)">population.un.org/wpp</a>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8" data-i18n-html="mtPop17">
       <strong>Suggested citation:</strong> &ldquo;Population data from UN World Population Prospects (2024) via Our World in Data.&rdquo;
       </p>
     </div>
 
     <!-- ========== GHG PANEL ========== -->
     <div class="method-panel" id="method-panel-ghg" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Greenhouse Gas Emissions</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">Multi-source compilation by gas type</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtGhg1">Greenhouse Gas Emissions</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtGhg2">Multi-source compilation by gas type</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1750&ndash;2024</td></tr>
-        <tr><td>Unit</td><td>Mt CO&#8322;-eq (GWP100) or individual gas units</td></tr>
-        <tr><td>Gases</td><td>CO&#8322; (fossil), CO&#8322; (land use), CH&#8324;, N&#8322;O, F-gases</td></tr>
+        <tr><td data-i18n-html="mtGhg3">Coverage</td><td data-i18n-html="mtGhg4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtGhg5">Year range</td><td>1750&ndash;2024</td></tr>
+        <tr><td data-i18n-html="mtGhg6">Unit</td><td data-i18n-html="mtGhg7">Mt CO&#8322;-eq (GWP100) or individual gas units</td></tr>
+        <tr><td data-i18n-html="mtGhg8">Gases</td><td data-i18n-html="mtGhg9">CO&#8322; (fossil), CO&#8322; (land use), CH&#8324;, N&#8322;O, F-gases</td></tr>
       </table>
 
-      <div class="method-section-head">Description</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtGhg10">Description</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGhg11">
       Greenhouse gas emissions are compiled from multiple specialized sources, depending on the gas type. This multi-source approach ensures the highest quality data for each gas component while maintaining full country and temporal coverage.
       </p>
 
-      <div class="method-section-head">Sources by gas type</div>
+      <div class="method-section-head" data-i18n-html="mtGhg12">Sources by gas type</div>
       <table class="method-table" style="margin-bottom:20px">
-        <tr style="background:var(--bgl);font-weight:500"><td>Gas / Component</td><td>Source</td></tr>
-        <tr><td>CO&#8322; from fossil fuels &amp; industry</td><td>Global Carbon Budget 2024 (Friedlingstein et al., 2024)</td></tr>
-        <tr><td>CO&#8322; from land use &amp; land-use change</td><td>Jones et al. (2023), LUH2 dataset</td></tr>
-        <tr><td>CH&#8324; (methane)</td><td>PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
-        <tr><td>N&#8322;O (nitrous oxide)</td><td>PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
-        <tr><td>F-gases (fluorinated gases)</td><td>PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
+        <tr style="background:var(--bgl);font-weight:500"><td data-i18n-html="mtGhg13">Gas / Component</td><td data-i18n-html="mtGhg14">Source</td></tr>
+        <tr><td data-i18n-html="mtGhg15">CO&#8322; from fossil fuels &amp; industry</td><td data-i18n-html="mtGhg16">Global Carbon Budget 2024 (Friedlingstein et al., 2024)</td></tr>
+        <tr><td data-i18n-html="mtGhg17">CO&#8322; from land use &amp; land-use change</td><td data-i18n-html="mtGhg18">Jones et al. (2023), LUH2 dataset</td></tr>
+        <tr><td data-i18n-html="mtGhg19">CH&#8324; (methane)</td><td data-i18n-html="mtGhg20">PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
+        <tr><td data-i18n-html="mtGhg21">N&#8322;O (nitrous oxide)</td><td data-i18n-html="mtGhg22">PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
+        <tr><td data-i18n-html="mtGhg23">F-gases (fluorinated gases)</td><td data-i18n-html="mtGhg24">PRIMAP-hist v2.6 (G&uuml;tschow et al., 2024)</td></tr>
       </table>
 
-      <div class="method-section-head">Decomposition</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtGhg25">Decomposition</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGhg26">
       Total GHG emissions are decomposed into five main components: CO&#8322; from fossil fuels and industry (CO&#8322;ff), CO&#8322; from land use and land-use change (CO&#8322;luc), methane (CH&#8324;), nitrous oxide (N&#8322;O), and fluorinated gases (F-gases). CO&#8322; from fossil fuels is further sub-decomposed by fuel type: <strong>coal</strong>, <strong>oil</strong>, <strong>gas</strong>, <strong>cement</strong>, and <strong>flaring</strong>.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtGhg27">
       All gases are converted to CO&#8322;-equivalents using 100-year Global Warming Potentials (GWP100) from the IPCC AR6. Individual gas data are also available in native units.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite" style="border-left-color:var(--c2)">
+      <div class="method-section-head" data-i18n-html="mtGhg28">How to cite</div>
+      <div class="method-cite" style="border-left-color:var(--c2)" data-i18n-html="mtGhg29">
         <strong>CO&#8322; fossil fuels:</strong> Friedlingstein, P. et al. (2024). &ldquo;Global Carbon Budget 2024.&rdquo; <em>Earth System Science Data</em>. <a href="https://doi.org/10.5194/essd-16-5567-2024" target="_blank" style="color:var(--c1)">doi:10.5194/essd-16-5567-2024</a>
       </div>
-      <div class="method-cite" style="border-left-color:#27ae60">
+      <div class="method-cite" style="border-left-color:#27ae60" data-i18n-html="mtGhg30">
         <strong>CO&#8322; land use:</strong> Jones, M.W. et al. (2023). &ldquo;National contributions to climate change due to historical emissions of carbon dioxide, methane, and nitrous oxide since 1850.&rdquo; <em>Scientific Data</em>, 10, 155.
       </div>
-      <div class="method-cite" style="border-left-color:#7b2d8e">
+      <div class="method-cite" style="border-left-color:#7b2d8e" data-i18n-html="mtGhg31">
         <strong>CH&#8324;, N&#8322;O, F-gases:</strong> G&uuml;tschow, J. et al. (2024). PRIMAP-hist v2.6: country-reported data priority. <em>Zenodo</em>. <a href="https://doi.org/10.5281/zenodo.10705513" target="_blank" style="color:var(--c1)">doi:10.5281/zenodo.10705513</a>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px" data-i18n-html="mtGhg32">
       <strong>Suggested citation:</strong> Cite the relevant source(s) depending on the gas type(s) used in your analysis.
       </p>
     </div>
 
     <!-- ========== MFA PANEL ========== -->
     <div class="method-panel" id="method-panel-mfa" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Material Flow Analysis</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">Economy-wide material flow indicators</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtMfa1">Material Flow Analysis</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtMfa2">Economy-wide material flow indicators</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1970&ndash;2024 (IRP); world from 1900; 6 countries with pre-1970 historical series</td></tr>
-        <tr><td>Unit</td><td>Tonnes (total &amp; per capita)</td></tr>
-        <tr><td>Materials</td><td>Biomass, fossil fuels, metal ores, non-metallic minerals</td></tr>
-        <tr><td>Flows</td><td>Extraction, consumption, imports, exports, material footprint</td></tr>
+        <tr><td data-i18n-html="mtMfa3">Coverage</td><td data-i18n-html="mtMfa4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtMfa5">Year range</td><td data-i18n-html="mtMfa6">1970&ndash;2024 (IRP); world from 1900; 6 countries with pre-1970 historical series</td></tr>
+        <tr><td data-i18n-html="mtMfa7">Unit</td><td data-i18n-html="mtMfa8">Tonnes (total &amp; per capita)</td></tr>
+        <tr><td data-i18n-html="mtMfa9">Materials</td><td data-i18n-html="mtMfa10">Biomass, fossil fuels, metal ores, non-metallic minerals</td></tr>
+        <tr><td data-i18n-html="mtMfa11">Flows</td><td data-i18n-html="mtMfa12">Extraction, consumption, imports, exports, material footprint</td></tr>
       </table>
 
-      <div class="method-section-head">Primary source</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtMfa13">Primary source</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtMfa14">
       The primary source is the <strong>UNEP International Resource Panel (IRP) Global Material Flows Database</strong>, accessed via the OECD. This database provides economy-wide material flow accounts for all UN member states from 1970 to the present. Material categories include <strong>biomass</strong> (food crops, fodder, wood, etc.), <strong>fossil fuels</strong> (coal, oil, gas), <strong>metal ores</strong> (iron, copper, aluminum, etc.), and <strong>non-metallic minerals</strong> (sand, gravel, limestone, etc.).
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtMfa15">
       Flow types available include domestic extraction (DE), domestic material consumption (DMC), imports, exports, physical trade balance (imports minus exports), and material footprint (MF, also known as raw material consumption). Both total and per-capita values are provided.
       </p>
 
-      <div class="method-section-head">Historical extension</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtMfa16">Historical extension</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtMfa17">
       Historical series extending back to 1900 at the global level draw on the pioneering work of <strong>Krausmann et al. (2018)</strong>, who reconstructed the socioeconomic metabolism of the global economy from 1900 to 2015. At the country level, pre-1970 data are available for a small number of countries (approximately 6) with dedicated historical MFA studies.
       </p>
 
-      <div class="method-section-head">Backcast methodology</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtMfa18">Backcast methodology</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtMfa19">
       For the period before 1970, country-level estimates are produced by applying regional growth rates (derived from Krausmann et al.&rsquo;s global/regional series) to the 1970 anchor values from the IRP database. This provides a consistent backcast but should be interpreted with caution for individual country trajectories.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite" style="border-left-color:#e67e22">
+      <div class="method-section-head" data-i18n-html="mtMfa20">How to cite</div>
+      <div class="method-cite" style="border-left-color:#e67e22" data-i18n-html="mtMfa21">
         UNEP International Resource Panel (2024). Global Material Flows Database. <a href="https://www.resourcepanel.org/global-material-flows-database" target="_blank" style="color:var(--c1)">resourcepanel.org</a>
       </div>
-      <div class="method-cite" style="border-left-color:#e67e22">
+      <div class="method-cite" style="border-left-color:#e67e22" data-i18n-html="mtMfa22">
         Krausmann, F. et al. (2018). &ldquo;From resource extraction to outflows of wastes and emissions: The socioeconomic metabolism of the global economy, 1900&ndash;2015.&rdquo; <em>Global Environmental Change</em>, 52, 131&ndash;140.
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px" data-i18n-html="mtMfa23">
       <strong>Suggested citation:</strong> &ldquo;Material flow data from UNEP IRP (2024) and Krausmann et al. (2018).&rdquo;
       </p>
     </div>
 
     <!-- ========== CROPS / LAND USE PANEL ========== -->
     <div class="method-panel" id="method-panel-crops" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Land Use &mdash; Crops and Pastures</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">Historical land-use reconstructions</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtCrops1">Land Use &mdash; Crops and Pastures</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtCrops2">Historical land-use reconstructions</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>235 countries</td></tr>
-        <tr><td>Year range</td><td>1750&ndash;2024</td></tr>
-        <tr><td>Unit</td><td>Mha (million hectares)</td></tr>
-        <tr><td>Variables</td><td>Cropland, arable land, permanent crops, permanent pastures, agricultural area total</td></tr>
+        <tr><td data-i18n-html="mtCrops3">Coverage</td><td data-i18n-html="mtCrops4">235 countries</td></tr>
+        <tr><td data-i18n-html="mtCrops5">Year range</td><td>1750&ndash;2024</td></tr>
+        <tr><td data-i18n-html="mtCrops6">Unit</td><td data-i18n-html="mtCrops7">Mha (million hectares)</td></tr>
+        <tr><td data-i18n-html="mtCrops8">Variables</td><td data-i18n-html="mtCrops9">Cropland, arable land, permanent crops, permanent pastures, agricultural area total</td></tr>
       </table>
 
-      <div class="method-section-head">Primary sources</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtCrops10">Primary sources</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtCrops11">
       Historical land-use data are from the <strong>HYDE 3.3 database</strong> (Klein Goldewijk et al., 2023), which provides spatially explicit reconstructions of cropland, arable land, permanent crops, and permanent pastures from 10,000 BCE to the present. For this platform, we use HYDE 3.3 data from 1750 onward, providing the longest available country-level land-use time series.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtCrops12">
       For the most recent years, <strong>FAOSTAT Land Use statistics</strong> supplement the dataset, providing annual updates on agricultural land use based on national reporting to the Food and Agriculture Organization.
       </p>
 
-      <div class="method-section-head">Variables</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtCrops13">Variables</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtCrops14">
       The platform reports five land-use variables: <strong>cropland</strong> (total area under crops), <strong>arable land</strong> (temporary crops, meadows for mowing, and fallow), <strong>permanent crops</strong> (land cultivated with long-term crops such as orchards, vineyards), <strong>permanent pastures</strong> (land used permanently for herbaceous forage), and <strong>total agricultural area</strong> (the sum of all categories). Values are reported in million hectares (Mha) and also per capita.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite" style="border-left-color:#27ae60">
+      <div class="method-section-head" data-i18n-html="mtCrops15">How to cite</div>
+      <div class="method-cite" style="border-left-color:#27ae60" data-i18n-html="mtCrops16">
         Klein Goldewijk, K. et al. (2023). &ldquo;The HYDE 3.3 spatially explicit database of human-induced global land-use change over the past 12,000 years.&rdquo; <em>Earth System Science Data</em>. <a href="https://doi.org/10.5194/essd-15-2459-2023" target="_blank" style="color:var(--c1)">doi:10.5194/essd-15-2459-2023</a>
       </div>
-      <div class="method-cite" style="border-left-color:#27ae60">
+      <div class="method-cite" style="border-left-color:#27ae60" data-i18n-html="mtCrops17">
         FAOSTAT Land Use statistics. Food and Agriculture Organization of the United Nations. <a href="https://www.fao.org/faostat/en/#data/RL" target="_blank" style="color:var(--c1)">fao.org/faostat</a>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px" data-i18n-html="mtCrops18">
       <strong>Suggested citation:</strong> &ldquo;Land-use data from HYDE 3.3 (Klein Goldewijk et al., 2023) and FAOSTAT.&rdquo;
       </p>
     </div>
 
     <!-- ========== BIODIVERSITY PANEL ========== -->
     <div class="method-panel" id="method-panel-bio" style="display:none">
-      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px">Biodiversity &mdash; Red List Index</h3>
-      <p style="font-size:11px;color:var(--cl);margin-bottom:16px">IUCN Red List Index (UN SDG indicator 15.5.1)</p>
+      <h3 style="font-size:18px;font-weight:700;color:var(--cd);margin-bottom:4px" data-i18n-html="mtBio1">Biodiversity &mdash; Red List Index</h3>
+      <p style="font-size:11px;color:var(--cl);margin-bottom:16px" data-i18n-html="mtBio2">IUCN Red List Index (UN SDG indicator 15.5.1)</p>
 
       <table class="method-table">
-        <tr><td>Coverage</td><td>199 countries</td></tr>
-        <tr><td>Year range</td><td>1993&ndash;2024</td></tr>
-        <tr><td>Unit</td><td>Index 0&ndash;1</td></tr>
-        <tr><td>SDG indicator</td><td>15.5.1</td></tr>
+        <tr><td data-i18n-html="mtBio3">Coverage</td><td data-i18n-html="mtBio4">199 countries</td></tr>
+        <tr><td data-i18n-html="mtBio5">Year range</td><td>1993&ndash;2024</td></tr>
+        <tr><td data-i18n-html="mtBio6">Unit</td><td data-i18n-html="mtBio7">Index 0&ndash;1</td></tr>
+        <tr><td data-i18n-html="mtBio8">SDG indicator</td><td>15.5.1</td></tr>
       </table>
 
-      <div class="method-section-head">Description</div>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <div class="method-section-head" data-i18n-html="mtBio9">Description</div>
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtBio10">
       The <strong>IUCN Red List Index (RLI)</strong> measures trends in the overall conservation status of groups of species. It is based on genuine changes in the number of species in each category of extinction risk on the IUCN Red List of Threatened Species, and is used as the official UN Sustainable Development Goal indicator <strong>15.5.1</strong> (progress towards reducing biodiversity loss).
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtBio11">
       A value of <strong>1.0</strong> means all species are classified as &ldquo;Least Concern&rdquo; (i.e., none are expected to become extinct in the near future). A value of <strong>0</strong> means all species have gone extinct. A declining RLI indicates that the expected rate of future species extinctions is worsening.
       </p>
-      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px">
+      <p style="font-family:var(--ff-serif);font-size:15.5px;color:var(--cg);line-height:1.6;margin-bottom:12px" data-i18n-html="mtBio12">
       The index is calculated for each country based on species whose ranges overlap with that country&rsquo;s territory. It covers mammals, birds, amphibians, reef-forming corals, and cycads &mdash; all groups that have been comprehensively assessed on the IUCN Red List at least twice.
       </p>
 
-      <div class="method-section-head">How to cite</div>
-      <div class="method-cite" style="border-left-color:#c0392b">
+      <div class="method-section-head" data-i18n-html="mtBio13">How to cite</div>
+      <div class="method-cite" style="border-left-color:#c0392b" data-i18n-html="mtBio14">
         IUCN (2024). The IUCN Red List of Threatened Species. Version 2024-1. <a href="https://www.iucnredlist.org" target="_blank" style="color:var(--c1)">iucnredlist.org</a>
       </div>
-      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px">
+      <p style="font-size:12px;color:var(--cg);line-height:1.8;margin-top:12px" data-i18n-html="mtBio15">
       <strong>Suggested citation:</strong> &ldquo;Red List Index data from IUCN (2024), used as UN SDG indicator 15.5.1.&rdquo;
       </p>
     </div>
@@ -1984,38 +2155,38 @@ For more information on data sources, methodology, and citations, see <a href="#
 
   <!-- ===== PUBLICATIONS TAB ===== -->
   <div class="about-panel" id="about-panel-publications" style="display:none">
-    <h2 class="about-h2" style="margin-bottom:20px">Key Publications</h2>
+    <h2 class="about-h2" style="margin-bottom:20px" data-i18n-html="mtPub1">Key Publications</h2>
     <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:32px">
     <div style="padding:12px 16px;border-left:3px solid var(--c2);background:var(--bgl)">
     <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:4px">Green growth in the mirror of history</div>
-    <div style="font-size:12px;color:var(--cg);line-height:1.7">Infante-Amate, J., Travieso, E., &amp; Aguilera, E. (2025). Green growth in the mirror of history. <em>Nature Communications</em>, <em>16</em>, 3766. <a href="https://doi.org/10.1038/s41467-025-58777-4" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1038/s41467-025-58777-4</a></div>
-    <a href="https://www.nature.com/articles/s41467-025-58777-4" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none">Read paper &rarr;</a>
+    <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtPub2">Infante-Amate, J., Travieso, E., &amp; Aguilera, E. (2025). Green growth in the mirror of history. <em>Nature Communications</em>, <em>16</em>, 3766. <a href="https://doi.org/10.1038/s41467-025-58777-4" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1038/s41467-025-58777-4</a></div>
+    <a href="https://www.nature.com/articles/s41467-025-58777-4" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none" data-i18n-html="pubRead">Read paper &rarr;</a>
     </div>
     <div style="padding:12px 16px;border-left:3px solid var(--c1);background:var(--bgl)">
     <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:4px">The history of a +3&deg;C future</div>
-    <div style="font-size:12px;color:var(--cg);line-height:1.7">Travieso, E., Infante-Amate, J., &amp; Aguilera, E. (2025). The history of a +3&deg;C future: Global and regional drivers of greenhouse gas emissions (1820&ndash;2050). <em>Global Environmental Change</em>, <em>92</em>, 103009. <a href="https://doi.org/10.1016/j.gloenvcha.2025.103009" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1016/j.gloenvcha.2025.103009</a></div>
-    <a href="https://www.sciencedirect.com/science/article/pii/S0959378025000469" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none">Read paper &rarr;</a>
+    <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtPub3">Travieso, E., Infante-Amate, J., &amp; Aguilera, E. (2025). The history of a +3&deg;C future: Global and regional drivers of greenhouse gas emissions (1820&ndash;2050). <em>Global Environmental Change</em>, <em>92</em>, 103009. <a href="https://doi.org/10.1016/j.gloenvcha.2025.103009" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1016/j.gloenvcha.2025.103009</a></div>
+    <a href="https://www.sciencedirect.com/science/article/pii/S0959378025000469" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none" data-i18n-html="pubRead">Read paper &rarr;</a>
     </div>
     <div style="padding:12px 16px;border-left:3px solid var(--c3);background:var(--bgl)">
     <div style="font-size:12px;font-weight:700;color:var(--cd);margin-bottom:4px">Unsustainable prosperity?</div>
-    <div style="font-size:12px;color:var(--cg);line-height:1.7">Infante-Amate, J., Travieso, E., &amp; Aguilera, E. (2024). Unsustainable prosperity? Decoupling wellbeing, economic growth, and greenhouse gas emissions over the past 150 years. <em>World Development</em>, <em>184</em>, 106754. <a href="https://doi.org/10.1016/j.worlddev.2024.106754" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1016/j.worlddev.2024.106754</a></div>
-    <a href="https://doi.org/10.1016/j.worlddev.2024.106754" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none">Read paper &rarr;</a>
+    <div style="font-size:12px;color:var(--cg);line-height:1.7" data-i18n-html="mtPub4">Infante-Amate, J., Travieso, E., &amp; Aguilera, E. (2024). Unsustainable prosperity? Decoupling wellbeing, economic growth, and greenhouse gas emissions over the past 150 years. <em>World Development</em>, <em>184</em>, 106754. <a href="https://doi.org/10.1016/j.worlddev.2024.106754" target="_blank" style="color:var(--c1);text-decoration:none">https://doi.org/10.1016/j.worlddev.2024.106754</a></div>
+    <a href="https://doi.org/10.1016/j.worlddev.2024.106754" target="_blank" style="font-size:11px;color:var(--c1);text-decoration:none" data-i18n-html="pubRead">Read paper &rarr;</a>
     </div>
     </div>
 
-    <h2 class="about-h2" style="margin-top:32px;margin-bottom:16px">Data Source References</h2>
+    <h2 class="about-h2" style="margin-top:32px;margin-bottom:16px" data-i18n-html="mtPub5">Data Source References</h2>
     <ol style="font-size:12px;color:var(--cg);line-height:2.2;padding-left:20px;margin-bottom:32px">
-      <li>Bolt, J. &amp; van Zanden, J.L. (2024). &ldquo;Maddison style estimates of the evolution of the world economy: A new 2023 update.&rdquo; <em>Journal of Economic Surveys</em>.</li>
-      <li>Prados de la Escosura, L. (2023). &ldquo;Augmented Human Development in the Age of Globalisation.&rdquo; <em>Economic History Review</em>.</li>
-      <li>United Nations, Dept. of Economic and Social Affairs, Population Division (2024). <em>World Population Prospects</em>.</li>
-      <li>Friedlingstein, P. et al. (2024). &ldquo;Global Carbon Budget 2024.&rdquo; <em>Earth System Science Data</em>.</li>
-      <li>Jones, M.W. et al. (2023). &ldquo;National contributions to climate change due to historical emissions of carbon dioxide, methane, and nitrous oxide since 1850.&rdquo; <em>Scientific Data</em>, 10, 155.</li>
-      <li>G&uuml;tschow, J. et al. (2024). PRIMAP-hist v2.6: country-reported data priority. <em>Zenodo</em>. doi:10.5281/zenodo.10705513.</li>
-      <li>UNEP International Resource Panel (2024). Global Material Flows Database.</li>
-      <li>Krausmann, F. et al. (2018). &ldquo;From resource extraction to outflows of wastes and emissions: The socioeconomic metabolism of the global economy, 1900&ndash;2015.&rdquo; <em>Global Environmental Change</em>, 52, 131&ndash;140.</li>
-      <li>Klein Goldewijk, K. et al. (2023). &ldquo;The HYDE 3.3 spatially explicit database of human-induced global land-use change over the past 12,000 years.&rdquo; <em>ESSD</em>.</li>
-      <li>FAOSTAT Land Use statistics. Food and Agriculture Organization of the United Nations.</li>
-      <li>IUCN (2024). The IUCN Red List of Threatened Species. <a href="https://www.iucnredlist.org" target="_blank" style="color:var(--c1)">iucnredlist.org</a></li>
+      <li data-i18n-html="mtPub6">Bolt, J. &amp; van Zanden, J.L. (2024). &ldquo;Maddison style estimates of the evolution of the world economy: A new 2023 update.&rdquo; <em>Journal of Economic Surveys</em>.</li>
+      <li data-i18n-html="mtPub7">Prados de la Escosura, L. (2023). &ldquo;Augmented Human Development in the Age of Globalisation.&rdquo; <em>Economic History Review</em>.</li>
+      <li data-i18n-html="mtPub8">United Nations, Dept. of Economic and Social Affairs, Population Division (2024). <em>World Population Prospects</em>.</li>
+      <li data-i18n-html="mtPub9">Friedlingstein, P. et al. (2024). &ldquo;Global Carbon Budget 2024.&rdquo; <em>Earth System Science Data</em>.</li>
+      <li data-i18n-html="mtPub10">Jones, M.W. et al. (2023). &ldquo;National contributions to climate change due to historical emissions of carbon dioxide, methane, and nitrous oxide since 1850.&rdquo; <em>Scientific Data</em>, 10, 155.</li>
+      <li data-i18n-html="mtPub11">G&uuml;tschow, J. et al. (2024). PRIMAP-hist v2.6: country-reported data priority. <em>Zenodo</em>. doi:10.5281/zenodo.10705513.</li>
+      <li data-i18n-html="mtPub12">UNEP International Resource Panel (2024). Global Material Flows Database.</li>
+      <li data-i18n-html="mtPub13">Krausmann, F. et al. (2018). &ldquo;From resource extraction to outflows of wastes and emissions: The socioeconomic metabolism of the global economy, 1900&ndash;2015.&rdquo; <em>Global Environmental Change</em>, 52, 131&ndash;140.</li>
+      <li data-i18n-html="mtPub14">Klein Goldewijk, K. et al. (2023). &ldquo;The HYDE 3.3 spatially explicit database of human-induced global land-use change over the past 12,000 years.&rdquo; <em>ESSD</em>.</li>
+      <li data-i18n-html="mtPub15">FAOSTAT Land Use statistics. Food and Agriculture Organization of the United Nations.</li>
+      <li data-i18n-html="mtPub16">IUCN (2024). The IUCN Red List of Threatened Species. <a href="https://www.iucnredlist.org" target="_blank" style="color:var(--c1)">iucnredlist.org</a></li>
     </ol>
   </div>
 
@@ -2029,25 +2200,25 @@ For more information on data sources, methodology, and citations, see <a href="#
 <img src="img/ugr.png" alt="UGR" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;opacity:.7">
 <img src="img/csic_logo.jpg" alt="CSIC" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;opacity:.7">
 <img src="img/uc3_logo.png" alt="UC3M" style="width:22px;height:22px;object-fit:contain;flex-shrink:0;opacity:.7">
-<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500"><span data-i18n="footerBrand">Growth &amp; Earth &middot; Infante-Amate, Aguilera &amp; Travieso &middot;</span> <a href="#" onclick="document.querySelector('[data-section=about]').click();return false;" style="color:var(--c1);text-decoration:none;border-bottom:1px dotted var(--c1)" data-i18n="footerAbout">About &amp; sources</a></span>
+<span class="footer-brand" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500"><span class="footer-authors" data-i18n="footerBrand">Growth &amp; Earth &middot; Infante-Amate, Aguilera &amp; Travieso &middot;</span> <a href="#" onclick="document.querySelector('[data-section=about]').click();return false;" style="color:var(--c1);text-decoration:none;border-bottom:1px dotted var(--c1)" data-i18n="footerAbout">About &amp; sources</a></span>
 </div>
 <div class="footer-actions">
-<button class="footer-btn" id="footer-link" title="Copy a link to this exact view (section, indicator, year, countries)">Link</button>
+<button class="footer-btn" id="footer-link" title="Copy a link to this exact view (section, indicator, year, countries)" data-i18n-title="ttFootLink" data-i18n="footLink">Link</button>
 <button class="footer-btn" id="footer-csv">CSV</button>
-<button class="footer-btn" id="footer-png" title="Download the figure on screen as PNG">PNG</button>
-<button class="footer-btn" id="footer-reset" title="Back to the initial view">Reset</button>
-<button class="footer-btn" id="footer-fullscreen">Fullscreen</button>
+<button class="footer-btn" id="footer-png" title="Download the figure on screen as PNG" data-i18n-title="ttFootPng">PNG</button>
+<button class="footer-btn" id="footer-reset" title="Back to the initial view" data-i18n-title="ttFootReset" data-i18n="footReset">Reset</button>
+<button class="footer-btn" id="footer-fullscreen" data-i18n="footFullscreen">Fullscreen</button>
 </div>
 </footer>
 
 <!-- F2 - primary navigation on phones. Same class + data-section as the header
      tabs, so js/app.js wires and highlights them with no extra code. -->
 <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Sections">
-<button class="tab-btn active" data-section="globe" title="Country Profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/></svg><span class="bn-label" data-i18n="navProfile">Country Profile</span></button>
-<button class="tab-btn" data-section="explore" title="Explore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg><span class="bn-label" data-i18n="navExplore">Explore</span></button>
-<button class="tab-btn" data-section="analysis" title="Analysis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/></svg><span class="bn-label" data-i18n="navAnalysis">Analysis</span></button>
-<button class="tab-btn" data-section="whatif" title="What if?"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="9" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="7" cy="18" r="2.2"/></svg><span class="bn-label" data-i18n="navWhatif">What if?</span></button>
-<button class="tab-btn" data-section="about" title="About"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></svg><span class="bn-label" data-i18n="navAbout">About</span></button>
+<button class="tab-btn active" data-section="globe" title="Country Profile" data-i18n-title="navProfile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 4 9 15 15 0 0 1-4 9 15 15 0 0 1-4-9 15 15 0 0 1 4-9z"/></svg><span class="bn-label" data-i18n="navProfileShort">Profile</span></button>
+<button class="tab-btn" data-section="explore" title="Explore" data-i18n-title="navExplore"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg><span class="bn-label" data-i18n="navExplore">Explore</span></button>
+<button class="tab-btn" data-section="analysis" title="Analysis" data-i18n-title="navAnalysis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="20" x2="20" y2="4"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="16" r="2"/></svg><span class="bn-label" data-i18n="navAnalysis">Analysis</span></button>
+<button class="tab-btn" data-section="whatif" title="What if?" data-i18n-title="navWhatif"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/><circle cx="9" cy="6" r="2.2"/><circle cx="15" cy="12" r="2.2"/><circle cx="7" cy="18" r="2.2"/></svg><span class="bn-label" data-i18n="navWhatif">What if?</span></button>
+<button class="tab-btn" data-section="about" title="About" data-i18n-title="navAbout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></svg><span class="bn-label" data-i18n="navAbout">About</span></button>
 </nav>
 </div>
 
@@ -2059,17 +2230,17 @@ For more information on data sources, methodology, and citations, see <a href="#
 <div style="flex:1" id="cpicker-backdrop"></div>
 <div class="cpicker-panel">
 <div class="cpicker-header">
-<span class="cpicker-title">Countries &amp; Regions</span>
+<span class="cpicker-title" data-i18n-html="cpickerTitle">Countries &amp; Regions</span>
 <button class="cpicker-close" id="cpicker-close">&times;</button>
 </div>
 <div class="cpicker-search" style="position:relative">
 <svg style="position:absolute;left:28px;top:50%;transform:translateY(-50%);color:var(--cl);pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-<input type="text" id="cpicker-search" placeholder="Search country or region...">
+<input type="text" id="cpicker-search" placeholder="Search country or region..." data-i18n-placeholder="phSearchCountryRegion">
 </div>
 <div class="cpicker-body" id="cpicker-body"></div>
 </div>
 </div>
 
-<script type="module" src="js/app.js?v=20260911a"></script>
+<script type="module" src="js/app.js?v=20260911b"></script>
 </body>
 </html>

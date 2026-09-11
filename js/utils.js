@@ -92,7 +92,47 @@ export function inkFor(color) {
     return i >= 0 ? COMPARISON_INK[i] : color;
 }
 
-export const INDICATOR_LABELS = {
+// ---------------------------------------------------------------------------
+// i18n of the label tables (2026-09-11)
+// Views read INDICATOR_LABELS / INDICATOR_UNITS / MFA_* / CROPS_* by key. The
+// exported objects below are proxies: the key is looked up in the pack of the
+// language the reader chose, and falls back to English. Nothing in the views
+// changes; they just print Spanish or Chinese after a language switch, and the
+// 'gw:language' event of app.js makes them redraw.
+// ---------------------------------------------------------------------------
+
+function gwLang() {
+    try {
+        if (typeof window !== 'undefined' && window.GrowthEarth && window.GrowthEarth.lang) {
+            const l = window.GrowthEarth.lang();
+            return l === 'es' || l === 'zh' ? l : 'en';
+        }
+        const l = document.documentElement.lang;
+        return l === 'es' || l === 'zh' ? l : 'en';
+    } catch (e) { return 'en'; }
+}
+
+/** A string of the active language, English if that pack does not carry it. */
+export function tLabel(en, es, zh) {
+    const l = gwLang();
+    if (l === 'es') return es == null ? en : es;
+    if (l === 'zh') return zh == null ? en : zh;
+    return en;
+}
+
+function i18nTable(en, es, zh) {
+    const packs = { en: en, es: es, zh: zh };
+    if (typeof Proxy === 'undefined') return en;
+    return new Proxy(en, {
+        get(target, prop) {
+            if (typeof prop !== 'string') return target[prop];
+            const pack = packs[gwLang()] || en;
+            return pack[prop] != null ? pack[prop] : target[prop];
+        }
+    });
+}
+
+const INDICATOR_LABELS_EN = {
     ghg: 'GHG emissions (total)',
     ghg_pc: 'GHG per capita',
     co2ff: 'CO\u2082 fossil fuel',
@@ -172,7 +212,7 @@ export const INDICATOR_LABELS = {
     rli: 'Red List Index'
 };
 
-export const INDICATOR_UNITS = {
+const INDICATOR_UNITS_EN = {
     ghg: 'Mt CO\u2082e',
     ghg_pc: 't CO\u2082e/person',
     co2ff: 'Mt CO\u2082e',
@@ -249,14 +289,14 @@ export function getEffectiveIndicator(base, perCapita, gasType, stateGetter) {
 }
 
 // MFA flow labels for UI
-export const MFA_FLOW_LABELS = {
+const MFA_FLOW_LABELS_EN = {
     ext: 'Extraction', con: 'Consumption',
     imp: 'Imports', exp: 'Exports', bal: 'Physical trade balance', mf: 'Material footprint'
 };
 
 // MFA material component definitions (for decomposition charts)
 export const MFA_MATERIAL_KEYS = ['bio', 'ff', 'met', 'min'];
-export const MFA_MATERIAL_LABELS = {
+const MFA_MATERIAL_LABELS_EN = {
     bio: 'Biomass', ff: 'Fossil fuels', met: 'Metal ores', min: 'Non-metallic minerals'
 };
 export const MFA_MATERIAL_COLORS = {
@@ -265,7 +305,7 @@ export const MFA_MATERIAL_COLORS = {
 
 // Crops / Land Use component definitions (for decomposition charts)
 export const CROPS_COMPONENT_KEYS = ['crop_cropland', 'crop_arable', 'crop_permanent', 'crop_pastures'];
-export const CROPS_COMPONENT_LABELS = {
+const CROPS_COMPONENT_LABELS_EN = {
     crop_cropland: 'Cropland', crop_arable: 'Arable land',
     crop_permanent: 'Permanent crops', crop_pastures: 'Permanent pastures'
 };
@@ -273,6 +313,330 @@ export const CROPS_COMPONENT_COLORS = {
     crop_cropland: '#a8d08d', crop_arable: '#6b8e23',
     crop_permanent: '#228b22', crop_pastures: '#d2b48c'
 };
+
+
+// ---- the Spanish and Chinese packs of the five tables -------------------
+const INDICATOR_LABELS_ES = {
+    ghg: 'Emisiones de GEI (total)',
+    ghg_pc: 'GEI per cápita',
+    co2ff: 'CO₂ de combustibles fósiles',
+    co2ff_pc: 'CO₂ fósil per cápita',
+    co2luc: 'CO₂ de cambio de uso del suelo',
+    co2luc_pc: 'CO₂ de usos del suelo per cápita',
+    ch4: 'CH₄ metano',
+    ch4_pc: 'CH₄ per cápita',
+    n2o: 'N₂O óxido nitroso',
+    n2o_pc: 'N₂O per cápita',
+    fgas: 'Gases fluorados',
+    fgas_pc: 'Gases fluorados per cápita',
+    coal: 'Carbón',
+    coal_pc: 'Carbón per cápita',
+    oil: 'Petróleo',
+    oil_pc: 'Petróleo per cápita',
+    gas: 'Gas natural',
+    gas_pc: 'Gas natural per cápita',
+    ff: 'Total fósil',
+    ff_pc: 'Total fósil per cápita',
+    land: 'Total usos del suelo',
+    land_pc: 'Total usos del suelo per cápita',
+    gdp_pc: 'PIB per cápita',
+    gdp_total: 'PIB (total)',
+    hdi: 'Índice de Desarrollo Humano',
+    hdi_ng: 'IDH ampliado (Prados)',
+    pop: 'Población',
+    pop_density: 'Densidad de población',
+    pat: 'Patrón de Tapio',
+    cum_d: 'Desacoplamiento acumulado',
+    cum_r: 'Recesión acumulada',
+    mfa_ext_tot: 'Extracción de materiales (total)',
+    mfa_con_tot: 'Consumo de materiales (total)',
+    mfa_imp_tot: 'Importaciones de materiales (total)',
+    mfa_exp_tot: 'Exportaciones de materiales (total)',
+    mfa_bal_tot: 'Balanza comercial física (total)',
+    mfa_mf_tot: 'Huella material (total)',
+    mfa_ext_pc: 'Extracción de materiales per cápita',
+    mfa_con_pc: 'Consumo de materiales per cápita',
+    mfa_imp_pc: 'Importaciones de materiales per cápita',
+    mfa_exp_pc: 'Exportaciones de materiales per cápita',
+    mfa_bal_pc: 'Balanza comercial física per cápita',
+    mfa_mf_pc: 'Huella material per cápita',
+    mfa_ext_bio: 'Extracción de biomasa',
+    mfa_ext_ff: 'Extracción de combustibles fósiles',
+    mfa_ext_met: 'Extracción de minerales metálicos',
+    mfa_ext_min: 'Extracción de minerales no metálicos',
+    mfa_con_bio: 'Consumo de biomasa',
+    mfa_con_ff: 'Consumo de combustibles fósiles',
+    mfa_con_met: 'Consumo de minerales metálicos',
+    mfa_con_min: 'Consumo de minerales no metálicos',
+    mfa_imp_bio: 'Importaciones de biomasa',
+    mfa_imp_ff: 'Importaciones de combustibles fósiles',
+    mfa_imp_met: 'Importaciones de minerales metálicos',
+    mfa_imp_min: 'Importaciones de minerales no metálicos',
+    mfa_exp_bio: 'Exportaciones de biomasa',
+    mfa_exp_ff: 'Exportaciones de combustibles fósiles',
+    mfa_exp_met: 'Exportaciones de minerales metálicos',
+    mfa_exp_min: 'Exportaciones de minerales no metálicos',
+    mfa_bal_bio: 'Balanza comercial de biomasa',
+    mfa_bal_ff: 'Balanza comercial de combustibles fósiles',
+    mfa_bal_met: 'Balanza comercial de minerales metálicos',
+    mfa_bal_min: 'Balanza comercial de minerales no metálicos',
+    mfa_mf_bio: 'Huella de biomasa',
+    mfa_mf_ff: 'Huella de combustibles fósiles',
+    mfa_mf_met: 'Huella de minerales metálicos',
+    mfa_mf_min: 'Huella de minerales no metálicos',
+    crop_cropland: 'Tierras de cultivo',
+    crop_arable: 'Tierra arable',
+    crop_permanent: 'Cultivos permanentes',
+    crop_pastures: 'Pastos permanentes',
+    crop_total: 'Superficie agraria (total)',
+    crop_total_pc: 'Superficie agraria per cápita',
+    rli: 'Índice de la Lista Roja',
+};
+
+const INDICATOR_LABELS_ZH = {
+    ghg: '温室气体排放（总量）',
+    ghg_pc: '人均温室气体',
+    co2ff: '化石燃料 CO₂',
+    co2ff_pc: '人均化石 CO₂',
+    co2luc: '土地利用变化 CO₂',
+    co2luc_pc: '人均土地利用 CO₂',
+    ch4: 'CH₄ 甲烷',
+    ch4_pc: '人均 CH₄',
+    n2o: 'N₂O 氧化亚氮',
+    n2o_pc: '人均 N₂O',
+    fgas: '含氟气体',
+    fgas_pc: '人均含氟气体',
+    coal: '煤炭',
+    coal_pc: '人均煤炭',
+    oil: '石油',
+    oil_pc: '人均石油',
+    gas: '天然气',
+    gas_pc: '人均天然气',
+    ff: '化石燃料合计',
+    ff_pc: '人均化石燃料合计',
+    land: '土地利用合计',
+    land_pc: '人均土地利用合计',
+    gdp_pc: '人均 GDP',
+    gdp_total: 'GDP（总量）',
+    hdi: '人类发展指数',
+    hdi_ng: '扩展人类发展指数（Prados）',
+    pop: '人口',
+    pop_density: '人口密度',
+    pat: 'Tapio 模式',
+    cum_d: '累计脱钩',
+    cum_r: '累计衰退',
+    mfa_ext_tot: '物质开采（总量）',
+    mfa_con_tot: '物质消费（总量）',
+    mfa_imp_tot: '物质进口（总量）',
+    mfa_exp_tot: '物质出口（总量）',
+    mfa_bal_tot: '实物贸易差额（总量）',
+    mfa_mf_tot: '物质足迹（总量）',
+    mfa_ext_pc: '人均物质开采',
+    mfa_con_pc: '人均物质消费',
+    mfa_imp_pc: '人均物质进口',
+    mfa_exp_pc: '人均物质出口',
+    mfa_bal_pc: '人均实物贸易差额',
+    mfa_mf_pc: '人均物质足迹',
+    mfa_ext_bio: '生物质开采',
+    mfa_ext_ff: '化石燃料开采',
+    mfa_ext_met: '金属矿开采',
+    mfa_ext_min: '非金属矿开采',
+    mfa_con_bio: '生物质消费',
+    mfa_con_ff: '化石燃料消费',
+    mfa_con_met: '金属矿消费',
+    mfa_con_min: '非金属矿消费',
+    mfa_imp_bio: '生物质进口',
+    mfa_imp_ff: '化石燃料进口',
+    mfa_imp_met: '金属矿进口',
+    mfa_imp_min: '非金属矿进口',
+    mfa_exp_bio: '生物质出口',
+    mfa_exp_ff: '化石燃料出口',
+    mfa_exp_met: '金属矿出口',
+    mfa_exp_min: '非金属矿出口',
+    mfa_bal_bio: '生物质贸易差额',
+    mfa_bal_ff: '化石燃料贸易差额',
+    mfa_bal_met: '金属矿贸易差额',
+    mfa_bal_min: '非金属矿贸易差额',
+    mfa_mf_bio: '生物质足迹',
+    mfa_mf_ff: '化石燃料足迹',
+    mfa_mf_met: '金属矿足迹',
+    mfa_mf_min: '非金属矿足迹',
+    crop_cropland: '耕地',
+    crop_arable: '可耕地',
+    crop_permanent: '永久性作物',
+    crop_pastures: '永久性牧场',
+    crop_total: '农业用地（总面积）',
+    crop_total_pc: '人均农业用地',
+    rli: '红色名录指数',
+};
+
+const INDICATOR_UNITS_ES = {
+    ghg_pc: 't CO₂e/persona',
+    co2ff_pc: 't CO₂e/persona',
+    co2luc_pc: 't CO₂e/persona',
+    ch4_pc: 't CO₂e/persona',
+    n2o_pc: 't CO₂e/persona',
+    fgas_pc: 't CO₂e/persona',
+    coal_pc: 't CO₂e/persona',
+    oil_pc: 't CO₂e/persona',
+    gas_pc: 't CO₂e/persona',
+    ff_pc: 't CO₂e/persona',
+    land_pc: 't CO₂e/persona',
+    hdi: 'Índice (0–1)',
+    hdi_ng: 'Índice (0–1)',
+    rli: 'Índice (0–1)',
+    pop: 'Millones',
+    pop_density: 'personas/km²',
+    pat: 'Categoría',
+    mfa_ext_pc: 't/persona',
+    mfa_con_pc: 't/persona',
+    mfa_imp_pc: 't/persona',
+    mfa_exp_pc: 't/persona',
+    mfa_bal_pc: 't/persona',
+    mfa_mf_pc: 't/persona',
+    crop_total_pc: 'ha/persona',
+};
+
+const INDICATOR_UNITS_ZH = {
+    ghg_pc: '吨 CO₂e/人',
+    co2ff_pc: '吨 CO₂e/人',
+    co2luc_pc: '吨 CO₂e/人',
+    ch4_pc: '吨 CO₂e/人',
+    n2o_pc: '吨 CO₂e/人',
+    fgas_pc: '吨 CO₂e/人',
+    coal_pc: '吨 CO₂e/人',
+    oil_pc: '吨 CO₂e/人',
+    gas_pc: '吨 CO₂e/人',
+    ff_pc: '吨 CO₂e/人',
+    land_pc: '吨 CO₂e/人',
+    hdi: '指数 (0–1)',
+    hdi_ng: '指数 (0–1)',
+    rli: '指数 (0–1)',
+    pop: '百万人',
+    pop_density: '人/km²',
+    pat: '类别',
+    mfa_ext_pc: '吨/人',
+    mfa_con_pc: '吨/人',
+    mfa_imp_pc: '吨/人',
+    mfa_exp_pc: '吨/人',
+    mfa_bal_pc: '吨/人',
+    mfa_mf_pc: '吨/人',
+    crop_total_pc: '公顷/人',
+};
+
+const MFA_FLOW_LABELS_ES = {
+    ext: 'Extracción',
+    con: 'Consumo',
+    imp: 'Importaciones',
+    exp: 'Exportaciones',
+    bal: 'Balanza comercial física',
+    mf: 'Huella material',
+};
+
+const MFA_FLOW_LABELS_ZH = {
+    ext: '开采',
+    con: '消费',
+    imp: '进口',
+    exp: '出口',
+    bal: '实物贸易差额',
+    mf: '物质足迹',
+};
+
+const MFA_MATERIAL_LABELS_ES = {
+    bio: 'Biomasa',
+    ff: 'Combustibles fósiles',
+    met: 'Minerales metálicos',
+    min: 'Minerales no metálicos',
+};
+
+const MFA_MATERIAL_LABELS_ZH = {
+    bio: '生物质',
+    ff: '化石燃料',
+    met: '金属矿',
+    min: '非金属矿',
+};
+
+const CROPS_COMPONENT_LABELS_ES = {
+    crop_cropland: 'Tierras de cultivo',
+    crop_arable: 'Tierra arable',
+    crop_permanent: 'Cultivos permanentes',
+    crop_pastures: 'Pastos permanentes',
+};
+
+const CROPS_COMPONENT_LABELS_ZH = {
+    crop_cropland: '耕地',
+    crop_arable: '可耕地',
+    crop_permanent: '永久性作物',
+    crop_pastures: '永久性牧场',
+};
+
+export const INDICATOR_LABELS = i18nTable(INDICATOR_LABELS_EN, INDICATOR_LABELS_ES, INDICATOR_LABELS_ZH);
+export const INDICATOR_UNITS = i18nTable(INDICATOR_UNITS_EN, INDICATOR_UNITS_ES, INDICATOR_UNITS_ZH);
+export const MFA_FLOW_LABELS = i18nTable(MFA_FLOW_LABELS_EN, MFA_FLOW_LABELS_ES, MFA_FLOW_LABELS_ZH);
+export const MFA_MATERIAL_LABELS = i18nTable(MFA_MATERIAL_LABELS_EN, MFA_MATERIAL_LABELS_ES, MFA_MATERIAL_LABELS_ZH);
+export const CROPS_COMPONENT_LABELS = i18nTable(CROPS_COMPONENT_LABELS_EN, CROPS_COMPONENT_LABELS_ES, CROPS_COMPONENT_LABELS_ZH);
+
+
+// ---- region names -------------------------------------------------------
+// UN sub-regions and Minerva regions are a grouping of the interface, not a
+// datum of a country, so they follow the language of the page. Country names
+// keep the spelling the data gives them.
+const REGION_NAMES_ES = {
+    'Australia and New Zealand': 'Australia y Nueva Zelanda',
+    'Central Asia': 'Asia Central',
+    'Eastern Asia': 'Asia Oriental',
+    'Eastern Europe': 'Europa del Este',
+    'Latin America and the Caribbean': 'América Latina y el Caribe',
+    'Melanesia': 'Melanesia',
+    'Micronesia': 'Micronesia',
+    'Northern Africa': 'África del Norte',
+    'Northern America': 'América del Norte',
+    'Northern Europe': 'Europa del Norte',
+    'Polynesia': 'Polinesia',
+    'South-eastern Asia': 'Asia Sudoriental',
+    'Southern Asia': 'Asia Meridional',
+    'Southern Europe': 'Europa del Sur',
+    'Sub-Saharan Africa': 'África Subsahariana',
+    'Western Asia': 'Asia Occidental',
+    'Western Europe': 'Europa Occidental',
+    'Europe & Central Asia': 'Europa y Asia Central',
+    'East Asia & Pacific': 'Asia Oriental y Pacífico',
+    'Latin America & Caribbean': 'América Latina y Caribe',
+    'Middle East & North Africa': 'Oriente Medio y Norte de África',
+    'North America': 'América del Norte',
+    'South Asia': 'Asia Meridional',
+};
+const REGION_NAMES_ZH = {
+    'Australia and New Zealand': '澳大利亚与新西兰',
+    'Central Asia': '中亚',
+    'Eastern Asia': '东亚',
+    'Eastern Europe': '东欧',
+    'Latin America and the Caribbean': '拉丁美洲与加勒比',
+    'Melanesia': '美拉尼西亚',
+    'Micronesia': '密克罗尼西亚',
+    'Northern Africa': '北非',
+    'Northern America': '北美',
+    'Northern Europe': '北欧',
+    'Polynesia': '波利尼西亚',
+    'South-eastern Asia': '东南亚',
+    'Southern Asia': '南亚',
+    'Southern Europe': '南欧',
+    'Sub-Saharan Africa': '撒哈拉以南非洲',
+    'Western Asia': '西亚',
+    'Western Europe': '西欧',
+    'Europe & Central Asia': '欧洲与中亚',
+    'East Asia & Pacific': '东亚与太平洋',
+    'Latin America & Caribbean': '拉丁美洲与加勒比',
+    'Middle East & North Africa': '中东与北非',
+    'North America': '北美',
+    'South Asia': '南亚',
+};
+
+/** A region name in the language of the page (unknown names pass through). */
+export function regionName(name) {
+    if (!name) return '';
+    return tLabel(name, REGION_NAMES_ES[name] || name, REGION_NAMES_ZH[name] || name);
+}
 
 // Fields that support per-capita (_pc) computation via division by pop
 const PC_FIELDS = new Set(['co2ff', 'co2luc', 'ch4', 'n2o', 'fgas', 'coal', 'oil', 'gas', 'ff', 'land']);
@@ -371,12 +735,12 @@ export function formatValue(value, indicator) {
     if (indicator === 'pat') return String(value);
     // MFA indicators
     if (indicator.startsWith('mfa_')) {
-        if (indicator.endsWith('_pc')) return value.toFixed(1) + ' t/person';
+        if (indicator.endsWith('_pc')) return value.toFixed(1) + tLabel(' t/person', ' t/persona', ' 吨/人');
         return formatMFA(value);
     }
     // Crops / Land Use
     if (indicator.startsWith('crop_')) {
-        if (indicator === 'crop_total_pc') return value.toFixed(2) + ' ha/person';
+        if (indicator === 'crop_total_pc') return value.toFixed(2) + tLabel(' ha/person', ' ha/persona', ' 公顷/人');
         return formatCrops(value);
     }
     // Biodiversity
@@ -800,7 +1164,7 @@ export function buildMapLegendHTML(indicator) {
     const label = INDICATOR_LABELS[indicator] || indicator;
     const unit = INDICATOR_UNITS[indicator];
     const zero = isSignedIndicator(indicator) ? ''
-        : `<span class="map-legend-cat"><i class="map-legend-zero"></i>Zero</span>`;
+        : `<span class="map-legend-cat"><i class="map-legend-zero"></i>${tLabel('Zero', 'Cero', '零')}</span>`;
     return `
         <div class="map-legend-title">${label}${unit ? ' \u00B7 ' + unit : ''}</div>
         <div class="map-legend-scale">
@@ -808,7 +1172,7 @@ export function buildMapLegendHTML(indicator) {
             <div class="map-legend-ticks">${ticks}</div>
         </div>
         <div class="map-legend-cats">
-            <span class="map-legend-cat"><i class="map-legend-nodata"></i>No data</span>
+            <span class="map-legend-cat"><i class="map-legend-nodata"></i>${tLabel('No data', 'Sin datos', '无数据')}</span>
             ${zero}
         </div>`;
 }

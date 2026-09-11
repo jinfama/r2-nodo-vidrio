@@ -4,12 +4,17 @@
 // View 2: Decomposition — Kaya identity (Pop × Income × Intensity)
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
-    COLORS, getColorForIndex, formatEmissions, shortName
-} from '../utils.js?v=20260911a';
+    COLORS, getColorForIndex, formatEmissions, shortName,
+    tLabel
+} from '../utils.js?v=20260911b';
+import {
+    createFacetGrid, resetFacetContainer, sizeFacetGrid, appendFacetCells,
+    createFacetLegend, facetTicks, facetTitle, dropCornerTick
+} from './facet-grid.js?v=20260911b';
 
 const GREEN_COLOR = '#2a9d8f';     // green growth (decoupling)
 const RECESS_COLOR = '#495057';    // recessive (dark gray)
@@ -31,16 +36,6 @@ function formatEmissionTick(value) {
     if (abs >= 0.01) return sign + d3.format('.2~f')(abs);
     if (abs === 0) return '0';
     return sign + d3.format('.2~g')(abs);
-}
-
-function facetLayout(container, count) {
-    const width = container.clientWidth || container.getBoundingClientRect().width || 1000;
-    const cols = count === 1 ? 1
-        : width < 900 ? 1
-        : width < 1450 ? 2
-        : Math.min(3, count);
-    const height = width < 900 ? 280 : 260;
-    return { cols, height };
 }
 
 export function initRecessions() {
@@ -105,7 +100,10 @@ export function updateRecessions() {
 }
 
 export function destroyRecessions() {
-    if (currentContainer) currentContainer.innerHTML = '';
+    if (currentContainer) {
+        currentContainer.innerHTML = '';
+        resetFacetContainer(currentContainer);
+    }
 }
 
 // ============================================================================
@@ -115,14 +113,15 @@ export function destroyRecessions() {
 function renderReductions() {
     const titleEl = document.getElementById('analysis-title');
     const subEl = document.getElementById('analysis-subtitle');
-    if (titleEl) titleEl.textContent = 'Emission Reductions: Green Growth vs Recessions';
+    if (titleEl) titleEl.textContent = tLabel('Emission Reductions: Green Growth vs Recessions', 'Reducciones de emisiones: crecimiento verde frente a recesiones', '减排：绿色增长与经济衰退');
     if (subEl) subEl.textContent = _chartMode === 'annual'
-        ? 'Annual reductions decomposed by economic context'
-        : 'Cumulative emission reductions over time';
+        ? tLabel('Annual reductions decomposed by economic context', 'Reducciones anuales descompuestas por contexto económico', '按经济背景分解的年度减排')
+        : tLabel('Cumulative emission reductions over time', 'Reducciones acumuladas de emisiones a lo largo del tiempo', '累计减排随时间的变化');
 
+    resetFacetContainer(currentContainer);
     const countries = State.get('selectedCountries');
     if (countries.length === 0) {
-        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">Select countries to view emission reduction patterns</div>';
+        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('Select countries to view emission reduction patterns', 'Elige países para ver las pautas de reducción de emisiones', '请选择国家以查看减排模式') + '</div>';
         return;
     }
 
@@ -169,7 +168,7 @@ function renderReductions() {
     }).filter(Boolean);
 
     if (dataSets.length === 0) {
-        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">No reduction data available for selected countries</div>';
+        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('No reduction data available for selected countries', 'No hay datos de reducción para los países elegidos', '所选国家暂无减排数据') + '</div>';
         return;
     }
 
@@ -219,19 +218,36 @@ function renderSingleReductions(container, ds) {
 }
 
 function renderFacetedReductions(container, dataSets) {
-    const { cols, height: cellHeight } = facetLayout(container, dataSets.length);
-    const gridDiv = document.createElement('div');
-    gridDiv.style.cssText = `display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));grid-auto-rows:minmax(${cellHeight}px,auto);gap:24px 18px;width:100%;height:100%;padding:10px;overflow:auto;align-content:start`;
-    container.appendChild(gridDiv);
-
     const currentYear = State.get('currentYear');
     const yearRange = State.get('yearRange');
+
+    // A country with no point inside the window used to leave a hole in the
+    // grid, so the facets are resolved BEFORE the rows are counted.
+    const facets = dataSets
+        .map(ds => ({ ds, points: ds.points.filter(d => d.year >= yearRange[0] && d.year <= currentYear) }))
+        .filter(f => f.points.length > 0);
+    if (facets.length === 0) return;
+
+    const grid = createFacetGrid(container);
+
+    // The legend joins the flex column first: whatever it takes is already
+    // discounted when the grid measures itself.
+    const legend = createFacetLegend();
+    [{ label: tLabel('Green growth', 'Crecimiento verde', '绿色增长'), color: GREEN_COLOR }, { label: tLabel('Recessive', 'Recesivo', '衰退型'), color: RECESS_COLOR }].forEach(item => {
+        legend.innerHTML += `<span style="display:flex;align-items:center;gap:6px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
+            <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
+            ${item.label}</span>`;
+    });
+    container.appendChild(legend);
+
+    sizeFacetGrid(grid, facets.length);
+    const cells = appendFacetCells(grid, facets.length);
 
     let sharedYMax;
     if (!_freeYAxis) {
         let globalMax = 0;
-        dataSets.forEach(ds => {
-            ds.points.filter(d => d.year >= yearRange[0] && d.year <= currentYear).forEach(d => {
+        facets.forEach(f => {
+            f.points.forEach(d => {
                 const total = _chartMode === 'annual'
                     ? Math.abs(d.delta_d) + Math.abs(d.delta_r)
                     : Math.abs(d.cum_d) + Math.abs(d.cum_r);
@@ -241,18 +257,12 @@ function renderFacetedReductions(container, dataSets) {
         sharedYMax = globalMax * 1.08 || 10;
     }
 
-    dataSets.forEach((ds, idx) => {
-        const points = ds.points.filter(d => d.year >= yearRange[0] && d.year <= currentYear);
-        if (points.length === 0) return;
-
-        const cell = document.createElement('div');
-        cell.style.cssText = `position:relative;min-height:${cellHeight}px;overflow:hidden`;
-        gridDiv.appendChild(cell);
-
+    facets.forEach((f, idx) => {
+        const cell = cells[idx];
         const cellRect = cell.getBoundingClientRect();
-        const width = cellRect.width || 350;
-        const height = cellRect.height || cellHeight;
-        const margin = { top: 24, right: 12, bottom: 34, left: 62 };
+        const width = Math.round(cellRect.width) || 350;
+        const height = Math.round(cellRect.height) || 260;
+        const margin = { top: 26, right: 14, bottom: 38, left: 66 };
         const w = width - margin.left - margin.right;
         const h = height - margin.top - margin.bottom;
         if (w <= 0 || h <= 0) return;
@@ -265,27 +275,14 @@ function renderFacetedReductions(container, dataSets) {
         svg.append('defs').append('clipPath').attr('id', `recess-clip-${idx}`)
             .append('rect').attr('width', w).attr('height', h);
 
-        svg.append('text')
-            .attr('x', margin.left).attr('y', 14)
-            .style('font-size', '11px').style('font-weight', '600').style('fill', ds.color)
-            .text(ds.name);
+        facetTitle(svg, margin.left, 15, f.ds.name, f.ds.color, COLORS.dark);
 
         if (_chartMode === 'annual') {
-            renderAnnualBars(g, points, w, h, false, sharedYMax);
+            renderAnnualBars(g, f.points, w, h, false, sharedYMax);
         } else {
-            renderCumulativeArea(g, points, w, h, false, sharedYMax);
+            renderCumulativeArea(g, f.points, w, h, false, sharedYMax);
         }
     });
-
-    // Shared legend
-    const legendDiv = document.createElement('div');
-    legendDiv.style.cssText = 'display:flex;gap:20px;padding:8px 12px;justify-content:center;flex-shrink:0';
-    [{ label: 'Green growth', color: GREEN_COLOR }, { label: 'Recessive', color: RECESS_COLOR }].forEach(item => {
-        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
-            <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
-            ${item.label}</span>`;
-    });
-    container.appendChild(legendDiv);
 }
 
 // ---- Annual stacked bars ----
@@ -303,8 +300,13 @@ function renderAnnualBars(g, points, w, h, isSingle, sharedYMax) {
     }
     const yScale = d3.scaleLinear().domain([0, yMax]).range([h, 0]).nice();
 
+    // Facet type stays at 12 px whatever the cell size, so it is the number of
+    // ticks that gives way when a facet is narrow or short.
+    const xTicks = facetTicks(w, isSingle ? 78 : 88, 3, isSingle ? 11 : 7);
+    const yTicks = facetTicks(h, 48, 3, isSingle ? 7 : 5);
+
     // Grid
-    g.selectAll('.grid-h').data(yScale.ticks(isSingle ? 5 : 4)).join('line')
+    g.selectAll('.grid-h').data(yScale.ticks(yTicks)).join('line')
         .attr('x1', 0).attr('x2', w)
         .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
         .attr('stroke', '#eee').attr('stroke-width', 0.5);
@@ -331,16 +333,19 @@ function renderAnnualBars(g, points, w, h, isSingle, sharedYMax) {
     });
 
     // Axes
-    g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(isSingle ? 10 : 5).tickFormat(d3.format('d')));
-    g.append('g').attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(isSingle ? 6 : 4).tickFormat(formatEmissionTick));
+    const gxAxis = g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
+        .call(d3.axisBottom(xScale).ticks(xTicks).tickFormat(d3.format('d')));
+    const gyAxis = g.append('g').attr('class', 'axis')
+        .call(d3.axisLeft(yScale).ticks(yTicks).tickFormat(formatEmissionTick));
+    dropCornerTick(gxAxis, gyAxis);
 
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.uiText)
-            .text('Annual emission reduction (Mt CO\u2082e)');
+            .style('font-size', '12px').style('fill', COLORS.uiText)
+            .text(tLabel('Annual emission reduction (Mt CO\u2082e)',
+                         'Reducción anual de emisiones (Mt CO\u2082e)',
+                         '年度减排量（Mt CO\u2082e）'));
         addHoverAnnual(g, points, xScale, yScale, w, h);
     }
 
@@ -362,7 +367,10 @@ function renderCumulativeArea(g, points, w, h, isSingle, sharedYMax) {
     }
     const yScale = d3.scaleLinear().domain([0, yMax]).range([h, 0]).nice();
 
-    g.selectAll('.grid-h').data(yScale.ticks(isSingle ? 5 : 4)).join('line')
+    const xTicks = facetTicks(w, isSingle ? 78 : 88, 3, isSingle ? 11 : 7);
+    const yTicks = facetTicks(h, 48, 3, isSingle ? 7 : 5);
+
+    g.selectAll('.grid-h').data(yScale.ticks(yTicks)).join('line')
         .attr('x1', 0).attr('x2', w)
         .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
         .attr('stroke', '#eee').attr('stroke-width', 0.5);
@@ -394,24 +402,27 @@ function renderCumulativeArea(g, points, w, h, isSingle, sharedYMax) {
         const xEnd = xScale(last.year);
         g.append('text').attr('x', xEnd + 4)
             .attr('y', yScale(Math.abs(last.cum_r) + Math.abs(last.cum_d) / 2))
-            .attr('font-size', 9).attr('fill', GREEN_COLOR).attr('dy', '0.35em')
+            .attr('font-size', 12).attr('fill', GREEN_COLOR).attr('dy', '0.35em')
             .text(formatEmissions(Math.abs(last.cum_d)));
         g.append('text').attr('x', xEnd + 4)
             .attr('y', yScale(Math.abs(last.cum_r) / 2))
-            .attr('font-size', 9).attr('fill', RECESS_COLOR).attr('dy', '0.35em')
+            .attr('font-size', 12).attr('fill', RECESS_COLOR).attr('dy', '0.35em')
             .text(formatEmissions(Math.abs(last.cum_r)));
     }
 
-    g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(isSingle ? 10 : 5).tickFormat(d3.format('d')));
-    g.append('g').attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(isSingle ? 6 : 4).tickFormat(formatEmissionTick));
+    const gxAxis = g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
+        .call(d3.axisBottom(xScale).ticks(xTicks).tickFormat(d3.format('d')));
+    const gyAxis = g.append('g').attr('class', 'axis')
+        .call(d3.axisLeft(yScale).ticks(yTicks).tickFormat(formatEmissionTick));
+    dropCornerTick(gxAxis, gyAxis);
 
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.uiText)
-            .text('Cumulative emission reductions (Mt CO\u2082e)');
+            .style('font-size', '12px').style('fill', COLORS.uiText)
+            .text(tLabel('Cumulative emission reductions (Mt CO\u2082e)',
+                         'Reducciones acumuladas de emisiones (Mt CO\u2082e)',
+                         '累计减排量（Mt CO\u2082e）'));
         addHoverCumulative(g, points, xScale, yScale, w, h);
     }
 
@@ -474,14 +485,17 @@ function buildKayaDecomposition(iso3) {
 function renderDecomposition() {
     const titleEl = document.getElementById('analysis-title');
     const subEl = document.getElementById('analysis-subtitle');
-    if (titleEl) titleEl.textContent = 'Kaya Decomposition';
+    if (titleEl) titleEl.textContent = tLabel('Kaya Decomposition', 'Descomposición de Kaya', 'Kaya 分解');
     if (subEl) subEl.textContent = _chartMode === 'annual'
-        ? 'Annual GHG change decomposed: Population \u00d7 Income \u00d7 Intensity'
-        : 'Cumulative Kaya factors over time';
+        ? tLabel('Annual GHG change decomposed: Population \u00d7 Income \u00d7 Intensity',
+            'Cambio anual de GEI descompuesto: población \u00d7 renta \u00d7 intensidad',
+            '年度温室气体变化的分解：人口 \u00d7 收入 \u00d7 强度')
+        : tLabel('Cumulative Kaya factors over time', 'Factores de Kaya acumulados a lo largo del tiempo', '累计 Kaya 因子随时间的变化');
 
+    resetFacetContainer(currentContainer);
     const countries = State.get('selectedCountries');
     if (countries.length === 0) {
-        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">Select countries to view Kaya decomposition</div>';
+        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('Select countries to view Kaya decomposition', 'Elige países para ver la descomposición de Kaya', '请选择国家以查看 Kaya 分解') + '</div>';
         return;
     }
 
@@ -492,7 +506,7 @@ function renderDecomposition() {
     }).filter(Boolean);
 
     if (dataSets.length === 0) {
-        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">No data available for decomposition</div>';
+        currentContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('No data available for decomposition', 'No hay datos para la descomposición', '暂无可用于分解的数据') + '</div>';
         return;
     }
 
@@ -541,24 +555,40 @@ function renderSingleDecomposition(container, ds) {
 }
 
 function renderFacetedDecomposition(container, dataSets) {
-    const { cols, height: cellHeight } = facetLayout(container, dataSets.length);
-    const gridDiv = document.createElement('div');
-    gridDiv.style.cssText = `display:grid;grid-template-columns:repeat(${cols},minmax(0,1fr));grid-auto-rows:minmax(${cellHeight}px,auto);gap:24px 18px;width:100%;height:100%;padding:10px;overflow:auto;align-content:start`;
-    container.appendChild(gridDiv);
-
     const currentYear = State.get('currentYear');
     const yearRange = State.get('yearRange');
-    let sharedMaxAbs;
 
+    const facets = dataSets
+        .map(ds => ({ ds, data: ds.data.filter(d => d.year >= yearRange[0] && d.year <= currentYear) }))
+        .filter(f => f.data.length > 0);
+    if (facets.length === 0) return;
+
+    const grid = createFacetGrid(container);
+
+    const legend = createFacetLegend();
+    [
+        { label: tLabel('Population', 'Población', '人口'), color: POP_COLOR },
+        { label: tLabel('Income', 'Renta', '收入'), color: INC_COLOR },
+        { label: tLabel('Intensity', 'Intensidad', '强度'), color: INT_COLOR }
+    ].forEach(item => {
+        legend.innerHTML += `<span style="display:flex;align-items:center;gap:6px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
+            <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
+            ${item.label}</span>`;
+    });
+    container.appendChild(legend);
+
+    sizeFacetGrid(grid, facets.length);
+    const cells = appendFacetCells(grid, facets.length);
+
+    let sharedMaxAbs;
     if (!_freeYAxis) {
         const allVals = [];
-        dataSets.forEach(ds => {
-            const data = ds.data.filter(d => d.year >= yearRange[0] && d.year <= currentYear);
+        facets.forEach(f => {
             if (_chartMode === 'annual') {
-                data.forEach(d => allVals.push(d.popEffect, d.incEffect, d.intEffect, d.ghgChange));
+                f.data.forEach(d => allVals.push(d.popEffect, d.incEffect, d.intEffect, d.ghgChange));
             } else {
                 let cumPop = 0, cumInc = 0, cumInt = 0, cumTotal = 0;
-                data.forEach(d => {
+                f.data.forEach(d => {
                     cumPop += d.popEffect;
                     cumInc += d.incEffect;
                     cumInt += d.intEffect;
@@ -570,18 +600,12 @@ function renderFacetedDecomposition(container, dataSets) {
         sharedMaxAbs = (d3.max(allVals.map(Math.abs)) || 10) * 1.15;
     }
 
-    dataSets.forEach((ds, idx) => {
-        const data = ds.data.filter(d => d.year >= yearRange[0] && d.year <= currentYear);
-        if (data.length === 0) return;
-
-        const cell = document.createElement('div');
-        cell.style.cssText = `position:relative;min-height:${cellHeight}px;overflow:hidden`;
-        gridDiv.appendChild(cell);
-
+    facets.forEach((f, idx) => {
+        const cell = cells[idx];
         const cellRect = cell.getBoundingClientRect();
-        const width = cellRect.width || 350;
-        const height = cellRect.height || cellHeight;
-        const margin = { top: 24, right: 12, bottom: 34, left: 62 };
+        const width = Math.round(cellRect.width) || 350;
+        const height = Math.round(cellRect.height) || 260;
+        const margin = { top: 26, right: 14, bottom: 38, left: 66 };
         const w = width - margin.left - margin.right;
         const h = height - margin.top - margin.bottom;
         if (w <= 0 || h <= 0) return;
@@ -591,30 +615,14 @@ function renderFacetedDecomposition(container, dataSets) {
         const g = svg.append('g')
             .attr('transform', `translate(${margin.left},${margin.top})`);
 
-        svg.append('text').attr('x', margin.left).attr('y', 14)
-            .style('font-size', '11px').style('font-weight', '600').style('fill', ds.color)
-            .text(ds.name);
+        facetTitle(svg, margin.left, 15, f.ds.name, f.ds.color, COLORS.dark);
 
         if (_chartMode === 'annual') {
-            renderKayaAnnual(g, data, w, h, false, sharedMaxAbs);
+            renderKayaAnnual(g, f.data, w, h, false, sharedMaxAbs);
         } else {
-            renderKayaCumulative(g, data, w, h, false, sharedMaxAbs);
+            renderKayaCumulative(g, f.data, w, h, false, sharedMaxAbs);
         }
     });
-
-    // Shared legend
-    const legendDiv = document.createElement('div');
-    legendDiv.style.cssText = 'display:flex;gap:20px;padding:8px 12px;justify-content:center;flex-shrink:0';
-    [
-        { label: 'Population', color: POP_COLOR },
-        { label: 'Income', color: INC_COLOR },
-        { label: 'Intensity', color: INT_COLOR }
-    ].forEach(item => {
-        legendDiv.innerHTML += `<span style="display:flex;align-items:center;gap:5px;font-size:10px;color:${COLORS.gray};text-transform:uppercase;letter-spacing:.12em">
-            <span style="width:12px;height:12px;background:${item.color};display:inline-block"></span>
-            ${item.label}</span>`;
-    });
-    container.appendChild(legendDiv);
 }
 
 // ---- Kaya annual bars (stacked positive/negative) ----
@@ -627,8 +635,11 @@ function renderKayaAnnual(g, data, w, h, isSingle, sharedMaxAbs) {
     const maxAbs = sharedMaxAbs || d3.max(allVals.map(Math.abs)) * 1.15 || 10;
     const yScale = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([h, 0]).nice();
 
+    const xTicks = facetTicks(w, isSingle ? 78 : 88, 3, isSingle ? 11 : 7);
+    const yTicks = facetTicks(h, 48, 3, isSingle ? 7 : 5);
+
     // Grid
-    g.selectAll('.grid-h').data(yScale.ticks(isSingle ? 5 : 4)).join('line')
+    g.selectAll('.grid-h').data(yScale.ticks(yTicks)).join('line')
         .attr('x1', 0).attr('x2', w)
         .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
         .attr('stroke', '#eee').attr('stroke-width', 0.5);
@@ -681,16 +692,19 @@ function renderKayaAnnual(g, data, w, h, isSingle, sharedMaxAbs) {
         .attr('stroke-width', 1.5).attr('opacity', 0.6);
 
     // Axes
-    g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(isSingle ? 10 : 5).tickFormat(d3.format('d')));
-    g.append('g').attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(isSingle ? 6 : 4).tickFormat(formatEmissionTick));
+    const gxAxis = g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
+        .call(d3.axisBottom(xScale).ticks(xTicks).tickFormat(d3.format('d')));
+    const gyAxis = g.append('g').attr('class', 'axis')
+        .call(d3.axisLeft(yScale).ticks(yTicks).tickFormat(formatEmissionTick));
+    dropCornerTick(gxAxis, gyAxis);
 
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.uiText)
-            .text('GHG change by Kaya factor (Mt CO\u2082e)');
+            .style('font-size', '12px').style('fill', COLORS.uiText)
+            .text(tLabel('GHG change by Kaya factor (Mt CO\u2082e)',
+                         'Cambio de GEI por factor de Kaya (Mt CO\u2082e)',
+                         '按卡亚因子分解的温室气体变化（Mt CO\u2082e）'));
 
         // Hover
         addHoverKaya(g, data, xScale, yScale, w, h);
@@ -719,8 +733,11 @@ function renderKayaCumulative(g, data, w, h, isSingle, sharedMaxAbs) {
     const maxAbs = sharedMaxAbs || d3.max(allVals.map(Math.abs)) * 1.15 || 10;
     const yScale = d3.scaleLinear().domain([-maxAbs, maxAbs]).range([h, 0]).nice();
 
+    const xTicks = facetTicks(w, isSingle ? 78 : 88, 3, isSingle ? 11 : 7);
+    const yTicks = facetTicks(h, 48, 3, isSingle ? 7 : 5);
+
     // Grid
-    g.selectAll('.grid-h').data(yScale.ticks(isSingle ? 5 : 4)).join('line')
+    g.selectAll('.grid-h').data(yScale.ticks(yTicks)).join('line')
         .attr('x1', 0).attr('x2', w)
         .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
         .attr('stroke', '#eee').attr('stroke-width', 0.5);
@@ -732,9 +749,9 @@ function renderKayaCumulative(g, data, w, h, isSingle, sharedMaxAbs) {
 
     // Factor lines
     const factors = [
-        { key: 'cumPop', color: POP_COLOR, label: 'Population' },
-        { key: 'cumInc', color: INC_COLOR, label: 'Income' },
-        { key: 'cumInt', color: INT_COLOR, label: 'Intensity' }
+        { key: 'cumPop', color: POP_COLOR, label: tLabel('Population', 'Población', '人口') },
+        { key: 'cumInc', color: INC_COLOR, label: tLabel('Income', 'Renta', '收入') },
+        { key: 'cumInt', color: INT_COLOR, label: tLabel('Intensity', 'Intensidad', '强度') }
     ];
 
     factors.forEach(f => {
@@ -750,7 +767,7 @@ function renderKayaCumulative(g, data, w, h, isSingle, sharedMaxAbs) {
             g.append('text')
                 .attr('x', xScale(last.year) + 4)
                 .attr('y', yScale(last[f.key]))
-                .attr('dy', '0.35em').attr('font-size', 9).attr('fill', f.color)
+                .attr('dy', '0.35em').attr('font-size', 12).attr('fill', f.color)
                 .text(f.label);
         }
     });
@@ -763,16 +780,19 @@ function renderKayaCumulative(g, data, w, h, isSingle, sharedMaxAbs) {
         .attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3').attr('opacity', 0.6);
 
     // Axes
-    g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
-        .call(d3.axisBottom(xScale).ticks(isSingle ? 10 : 5).tickFormat(d3.format('d')));
-    g.append('g').attr('class', 'axis')
-        .call(d3.axisLeft(yScale).ticks(isSingle ? 6 : 4).tickFormat(formatEmissionTick));
+    const gxAxis = g.append('g').attr('transform', `translate(0,${h})`).attr('class', 'axis')
+        .call(d3.axisBottom(xScale).ticks(xTicks).tickFormat(d3.format('d')));
+    const gyAxis = g.append('g').attr('class', 'axis')
+        .call(d3.axisLeft(yScale).ticks(yTicks).tickFormat(formatEmissionTick));
+    dropCornerTick(gxAxis, gyAxis);
 
     if (isSingle) {
         g.append('text').attr('transform', 'rotate(-90)')
             .attr('y', -52).attr('x', -h / 2).attr('text-anchor', 'middle')
-            .style('font-size', '10px').style('fill', COLORS.uiText)
-            .text('Cumulative Kaya factor contribution (Mt CO\u2082e)');
+            .style('font-size', '12px').style('fill', COLORS.uiText)
+            .text(tLabel('Cumulative Kaya factor contribution (Mt CO\u2082e)',
+                         'Contribución acumulada por factor de Kaya (Mt CO\u2082e)',
+                         '各卡亚因子的累计贡献（Mt CO\u2082e）'));
     }
 
     addYearMarker(g, xScale, h, isSingle);
@@ -795,7 +815,7 @@ function addYearMarker(g, xScale, h, isSingle) {
 
     if (isSingle) {
         g.append('text').attr('x', x).attr('y', -4)
-            .attr('text-anchor', 'middle').attr('font-size', 10).attr('font-weight', 600)
+            .attr('text-anchor', 'middle').attr('font-size', 12).attr('font-weight', 600)
             .attr('fill', COLORS.dark).text(year);
     }
 }
@@ -819,9 +839,9 @@ function addHoverAnnual(g, points, xScale, yScale, w, h) {
             const total = Math.abs(entry.delta_d) + Math.abs(entry.delta_r);
             Tooltip.show([
                 `<div class="tooltip-title"><span>${year}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${GREEN_COLOR}">Green growth</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.delta_d))}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${RECESS_COLOR}">Recessive</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.delta_r))}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label"><strong>Total</strong></span><span class="tooltip-value"><strong>${formatEmissions(total)}</strong></span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${GREEN_COLOR}">${tLabel('Green growth', 'Crecimiento verde', '绿色增长')}</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.delta_d))}</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${RECESS_COLOR}">${tLabel('Recessive', 'Recesivo', '衰退型')}</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.delta_r))}</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label"><strong>${tLabel('Total', 'Total', '合计')}</strong></span><span class="tooltip-value"><strong>${formatEmissions(total)}</strong></span></div>`,
                 entry.ar6 != null ? `<div class="tooltip-row"><span class="tooltip-label">AR6</span><span class="tooltip-value">${entry.ar6}</span></div>` : ''
             ].join(''), event);
         })
@@ -857,9 +877,9 @@ function addHoverCumulative(g, points, xScale, yScale, w, h) {
 
             Tooltip.show([
                 `<div class="tooltip-title"><span>${year}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${GREEN_COLOR}">Green growth</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.cum_d))} (${pctD}%)</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${RECESS_COLOR}">Recessive</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.cum_r))} (${pctR}%)</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label"><strong>Total</strong></span><span class="tooltip-value"><strong>${formatEmissions(totalCum)}</strong></span></div>`
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${GREEN_COLOR}">${tLabel('Green growth', 'Crecimiento verde', '绿色增长')}</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.cum_d))} (${pctD}%)</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${RECESS_COLOR}">${tLabel('Recessive', 'Recesivo', '衰退型')}</span><span class="tooltip-value">${formatEmissions(Math.abs(entry.cum_r))} (${pctR}%)</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label"><strong>${tLabel('Total', 'Total', '合计')}</strong></span><span class="tooltip-value"><strong>${formatEmissions(totalCum)}</strong></span></div>`
             ].join(''), event);
         })
         .on('mouseleave', function () {
@@ -886,10 +906,10 @@ function addHoverKaya(g, data, xScale, yScale, w, h) {
 
             Tooltip.show([
                 `<div class="tooltip-title"><span>${year}${entry.isRecession ? ' (recession)' : ''}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${POP_COLOR}">Population</span><span class="tooltip-value">${formatEmissions(entry.popEffect)}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${INC_COLOR}">Income</span><span class="tooltip-value">${formatEmissions(entry.incEffect)}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label" style="color:${INT_COLOR}">Intensity</span><span class="tooltip-value">${formatEmissions(entry.intEffect)}</span></div>`,
-                `<div class="tooltip-row"><span class="tooltip-label"><strong>Total GHG</strong></span><span class="tooltip-value"><strong>${formatEmissions(entry.ghgChange)}</strong></span></div>`
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${POP_COLOR}">${tLabel('Population', 'Población', '人口')}</span><span class="tooltip-value">${formatEmissions(entry.popEffect)}</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${INC_COLOR}">${tLabel('Income', 'Renta', '收入')}</span><span class="tooltip-value">${formatEmissions(entry.incEffect)}</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label" style="color:${INT_COLOR}">${tLabel('Intensity', 'Intensidad', '强度')}</span><span class="tooltip-value">${formatEmissions(entry.intEffect)}</span></div>`,
+                `<div class="tooltip-row"><span class="tooltip-label"><strong>${tLabel('Total GHG', 'GEI total', '温室气体总量')}</strong></span><span class="tooltip-value"><strong>${formatEmissions(entry.ghgChange)}</strong></span></div>`
             ].join(''), event);
         })
         .on('mouseleave', function () {
@@ -898,34 +918,44 @@ function addHoverKaya(g, data, xScale, yScale, w, h) {
         });
 }
 
-function renderReductionsLegend(svg, margin, w) {
-    const legend = svg.append('g')
-        .attr('transform', `translate(${margin.left + w / 2 - 80},${margin.top - 14})`);
+/**
+ * The legend of the single-country charts, laid out with the type's REAL
+ * widths (11-IX, r2). It used to advance by `label.length * 6.5`, which is
+ * blind both to the uppercase + 0.12 em tracking it then applies and to
+ * Chinese glyphs, so "GREEN GROWTH" ran 5.4 px into "RECESSIVE" in every
+ * language and at every width. Each row is measured with
+ * getComputedTextLength() and the strip is centred once it is built.
+ */
+function renderInSvgLegend(svg, margin, w, items) {
+    const legend = svg.append('g');
     let xOff = 0;
-    [{ label: 'Green growth', color: GREEN_COLOR }, { label: 'Recessive', color: RECESS_COLOR }].forEach(item => {
+    items.forEach(item => {
         const row = legend.append('g').attr('transform', `translate(${xOff},0)`);
         row.append('rect').attr('width', 10).attr('height', 10).attr('y', -8)
             .attr('fill', item.color).attr('opacity', 0.85);
-        row.append('text').attr('x', 14).attr('y', 0).attr('font-size', 10).attr('fill', COLORS.gray)
+        const t = row.append('text').attr('x', 14).attr('y', 0).attr('font-size', 12).attr('fill', COLORS.gray)
             .style('text-transform', 'uppercase').style('letter-spacing', '0.12em').text(item.label);
-        xOff += item.label.length * 6.5 + 28;
+        let tw;
+        try { tw = t.node().getComputedTextLength(); } catch (e) { tw = 0; }
+        if (!(tw > 0)) tw = String(item.label).length * 8;
+        xOff += 14 + Math.ceil(tw) + 24;
     });
+    const total = Math.max(0, xOff - 24);
+    legend.attr('transform',
+        `translate(${Math.round(Math.max(margin.left, margin.left + w / 2 - total / 2))},${margin.top - 14})`);
+}
+
+function renderReductionsLegend(svg, margin, w) {
+    renderInSvgLegend(svg, margin, w, [
+        { label: tLabel('Green growth', 'Crecimiento verde', '绿色增长'), color: GREEN_COLOR },
+        { label: tLabel('Recessive', 'Recesivo', '衰退型'), color: RECESS_COLOR }
+    ]);
 }
 
 function renderKayaLegend(svg, margin, w) {
-    const legend = svg.append('g')
-        .attr('transform', `translate(${margin.left + w / 2 - 120},${margin.top - 14})`);
-    let xOff = 0;
-    [
-        { label: 'Population', color: POP_COLOR },
-        { label: 'Income', color: INC_COLOR },
-        { label: 'Intensity', color: INT_COLOR }
-    ].forEach(item => {
-        const row = legend.append('g').attr('transform', `translate(${xOff},0)`);
-        row.append('rect').attr('width', 10).attr('height', 10).attr('y', -8)
-            .attr('fill', item.color).attr('opacity', 0.85);
-        row.append('text').attr('x', 14).attr('y', 0).attr('font-size', 10).attr('fill', COLORS.gray)
-            .style('text-transform', 'uppercase').style('letter-spacing', '0.12em').text(item.label);
-        xOff += item.label.length * 6.5 + 28;
-    });
+    renderInSvgLegend(svg, margin, w, [
+        { label: tLabel('Population', 'Población', '人口'), color: POP_COLOR },
+        { label: tLabel('Income', 'Renta', '收入'), color: INC_COLOR },
+        { label: tLabel('Intensity', 'Intensidad', '强度'), color: INT_COLOR }
+    ]);
 }

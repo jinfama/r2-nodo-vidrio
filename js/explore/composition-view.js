@@ -4,8 +4,8 @@
 // Supports viewing for world, single country, or sum of selected countries
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
 import {
     COLORS,
     labelInkOn,
@@ -21,8 +21,9 @@ import {
     MFA_FLOW_LABELS,
     CROPS_COMPONENT_KEYS,
     CROPS_COMPONENT_LABELS,
-    CROPS_COMPONENT_COLORS
-} from '../utils.js?v=20260911a';
+    CROPS_COMPONENT_COLORS,
+    tLabel
+} from '../utils.js?v=20260911b';
 
 let container = null;
 let resizeObserver = null;
@@ -30,27 +31,27 @@ let debounceTimer = null;
 
 // GHG gas components
 const GHG_COMPONENTS = [
-    { key: 'co2ff',  label: 'CO\u2082 fossil fuels', color: '#e63946' },
-    { key: 'co2luc', label: 'CO\u2082 land use',     color: '#d4a574' },
-    { key: 'ch4',    label: 'CH\u2084 methane',       color: '#e9c46a' },
+    { key: 'co2ff',  get label() { return tLabel('CO₂ fossil fuels', 'CO₂ de combustibles fósiles', '化石燃料 CO₂'); }, color: '#e63946' },
+    { key: 'co2luc', get label() { return tLabel('CO₂ land use', 'CO₂ de usos del suelo', '土地利用 CO₂'); }, color: '#d4a574' },
+    { key: 'ch4',    get label() { return tLabel('CH₄ methane', 'CH₄ metano', 'CH₄ 甲烷'); }, color: '#e9c46a' },
     { key: 'n2o',    label: 'N\u2082O',               color: '#2a9d8f' },
-    { key: 'fgas',   label: 'F-gases',                color: '#6a4c93' }
+    { key: 'fgas',   get label() { return tLabel('F-gases', 'Gases fluorados', '含氟气体'); }, color: '#6a4c93' }
 ];
 
 // MFA material components
 const MFA_COMPONENTS = [
-    { key: 'bio', label: 'Biomass',                 color: '#e07b39' },
-    { key: 'ff',  label: 'Fossil fuels',            color: '#2d2d2d' },
-    { key: 'met', label: 'Metal ores',              color: '#5b7fa5' },
-    { key: 'min', label: 'Non-metallic minerals',   color: '#c9b458' }
+    { key: 'bio', get label() { return MFA_MATERIAL_LABELS.bio; }, color: '#e07b39' },
+    { key: 'ff',  get label() { return MFA_MATERIAL_LABELS.ff;  }, color: '#2d2d2d' },
+    { key: 'met', get label() { return MFA_MATERIAL_LABELS.met; }, color: '#5b7fa5' },
+    { key: 'min', get label() { return MFA_MATERIAL_LABELS.min; }, color: '#c9b458' }
 ];
 
 // Crops / Land Use components
 const CROPS_COMPONENTS = [
-    { key: 'crop_cropland',  label: 'Cropland',          color: CROPS_COMPONENT_COLORS.crop_cropland },
-    { key: 'crop_arable',    label: 'Arable land',       color: CROPS_COMPONENT_COLORS.crop_arable },
-    { key: 'crop_permanent', label: 'Permanent crops',   color: CROPS_COMPONENT_COLORS.crop_permanent },
-    { key: 'crop_pastures',  label: 'Permanent pastures', color: CROPS_COMPONENT_COLORS.crop_pastures }
+    { key: 'crop_cropland',  get label() { return CROPS_COMPONENT_LABELS.crop_cropland; },  color: CROPS_COMPONENT_COLORS.crop_cropland },
+    { key: 'crop_arable',    get label() { return CROPS_COMPONENT_LABELS.crop_arable; },    color: CROPS_COMPONENT_COLORS.crop_arable },
+    { key: 'crop_permanent', get label() { return CROPS_COMPONENT_LABELS.crop_permanent; }, color: CROPS_COMPONENT_COLORS.crop_permanent },
+    { key: 'crop_pastures',  get label() { return CROPS_COMPONENT_LABELS.crop_pastures; },  color: CROPS_COMPONENT_COLORS.crop_pastures }
 ];
 
 function getCountryValueField(base) {
@@ -94,7 +95,9 @@ function renderCountryValueComposition(base, year, width, height) {
     const total = children.reduce((s, d) => s + d.value, 0);
     const titleBar = document.createElement('div');
     titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
-    const scope = selectedCountries.length > 0 ? children.length + ' selected countries' : 'All countries';
+    const scope = selectedCountries.length > 0
+        ? children.length + ' ' + tLabel('selected countries', 'países seleccionados', '个所选国家')
+        : tLabel('All countries', 'Todos los países', '所有国家');
     titleBar.textContent = `${label} by country — ${scope} — ${year}`;
 
     const wrap = document.createElement('div');
@@ -202,7 +205,7 @@ function render() {
     if (base === 'ghg') {
         components = GHG_COMPONENTS;
         dataKeys = GHG_COMPONENTS.map(c => c.key);
-        title = 'GHG emissions by gas';
+        title = tLabel('GHG emissions by gas', 'Emisiones de GEI por gas', '按气体划分的温室气体排放');
         formatFn = formatEmissions;
     } else if (base === 'mfa') {
         const flow = State.get('mfaFlow') || 'ext';
@@ -212,14 +215,16 @@ function render() {
             dataKey: `mfa_${flow}_${c.key}`
         }));
         dataKeys = components.map(c => c.dataKey);
-        title = `Material ${flowLabel.toLowerCase()} by type`;
+        title = tLabel(`Material ${flowLabel.toLowerCase()} by type`,
+                      `${flowLabel} de materiales por tipo`,
+                      `按类型划分的物质${flowLabel}`);
         formatFn = formatMFA;
     } else if (base === 'crops') {
         const selectedCrops = State.get('selectedCrops') || ['total'];
         const cropKeys = selectedCrops.includes('total') ? CROPS_COMPONENT_KEYS : selectedCrops;
         components = CROPS_COMPONENTS.filter(c => cropKeys.includes(c.key));
         dataKeys = CROPS_COMPONENTS.map(c => c.key);
-        title = 'Agricultural land by type';
+        title = tLabel('Agricultural land by type', 'Superficie agraria por tipo', '按类型划分的农业用地');
         formatFn = formatCrops;
     } else {
         renderCountryValueComposition(base, year, width, height);
@@ -297,7 +302,7 @@ function render() {
             panel.style.cssText = 'border:1px solid var(--cb,#e0e0e0);position:relative;min-height:200px';
 
             if (children.length === 0) {
-                panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">No data</div>';
+                panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">' + tLabel('No data', 'Sin datos', '无数据') + '</div>';
                 const lbl = document.createElement('div');
                 lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
                 lbl.textContent = comp.label + ' \u2014 ' + year;
@@ -418,14 +423,14 @@ function render() {
 
             const pctEl = document.createElement('div');
             pctEl.style.cssText = 'font-size:11px;margin-top:1px';
-            pctEl.textContent = pct + '% of total';
+            pctEl.textContent = pct + '% ' + tLabel('of total', 'del total', '（占合计）');
             label.appendChild(pctEl);
         }
 
         cell.appendChild(label);
 
         // Tooltip for small cells
-        cell.title = `${d.name}\n${formatFn(d.value)}\n${pct}% of total`;
+        cell.title = `${d.name}\n${formatFn(d.value)}\n${pct}% ${tLabel('of total', 'del total', '（占合计）')}`;
 
         wrap.appendChild(cell);
     });
@@ -433,9 +438,9 @@ function render() {
     // Title bar (normal flow, before the treemap)
     const titleBar = document.createElement('div');
     titleBar.style.cssText = 'position:relative;padding:6px 12px;font-size:11px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;flex-shrink:0';
-    const scope = countries.length === 0 ? 'World'
+    const scope = countries.length === 0 ? tLabel('World', 'Mundo', '世界')
         : countries.length === 1 ? (DataLoader.getMetadata(countries[0]) || {}).name || countries[0]
-        : countries.length + ' countries';
+        : countries.length + ' ' + tLabel('countries', 'países', '个国家');
     titleBar.textContent = `${title} \u2014 ${scope} \u2014 ${year}`;
 
     container.appendChild(titleBar);
@@ -459,7 +464,7 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
     }).filter(d => d.value > 0);
 
     if (children.length === 0) {
-        panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">No data</div>';
+        panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl,#adb5bd);font-size:12px;font-family:var(--ff)">' + tLabel('No data', 'Sin datos', '无数据') + '</div>';
         // Still add the country label
         const lbl = document.createElement('div');
         lbl.style.cssText = 'position:absolute;top:0;left:0;right:0;padding:4px 8px;font-size:10px;font-weight:600;color:var(--cg,#495057);font-family:var(--ff);text-transform:uppercase;letter-spacing:.3px;background:rgba(255,255,255,.85);z-index:2;pointer-events:none';
@@ -532,7 +537,7 @@ function renderTreemapInto(panel, components, dataRow, formatFn, scopeLabel, yea
         }
 
         cell.appendChild(label);
-        cell.title = `${d.name}\n${formatFn(d.value)}\n${pct}% of total`;
+        cell.title = `${d.name}\n${formatFn(d.value)}\n${pct}% ${tLabel('of total', 'del total', '（占合计）')}`;
         wrap.appendChild(cell);
     });
 

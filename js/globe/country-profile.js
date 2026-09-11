@@ -2,13 +2,13 @@
 // COUNTRY PROFILE - Side panel with multi-indicator mini charts + waterfall
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260911a';
-import State from '../state.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911b';
+import State from '../state.js?v=20260911b';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatMFA, formatCrops,
     formatRank, formatRatio,
-    formatPercent, getAbsoluteColorScale, INDICATOR_LABELS
-} from '../utils.js?v=20260911a';
+    formatPercent, getAbsoluteColorScale, INDICATOR_LABELS, tLabel, regionName
+} from '../utils.js?v=20260911b';
 
 let currentIso3 = null;
 
@@ -114,7 +114,7 @@ export function openProfile(iso3) {
     const nameEl = document.getElementById('profile-name');
     const regionEl = document.getElementById('profile-region');
     if (nameEl) nameEl.textContent = meta ? meta.name : iso3;
-    if (regionEl) regionEl.textContent = meta ? (meta.region_un_sub || '') : '';
+    if (regionEl) regionEl.textContent = meta ? regionName(meta.region_un_sub || '') : '';
 
     updateStatsRow(iso3, year, val, worldVal);
     panel.classList.add('open');
@@ -177,32 +177,35 @@ function updateStatsRow(iso3, year, val, worldVal) {
 
     row.innerHTML = `
         <div class="profile-stat">
-            <div class="profile-stat-label">Pop</div>
+            <div class="profile-stat-label">${tLabel('Pop', 'Pobl.', '人口')}</div>
             <div class="profile-stat-value">${popStr}</div>
             <div class="profile-stat-rank">${statRank(pop, 'pop')}</div>
         </div>
         <div class="profile-stat">
-            <div class="profile-stat-label">GDP pc</div>
+            <div class="profile-stat-label">${tLabel('GDP pc', 'PIB pc', '人均 GDP')}</div>
             <div class="profile-stat-value">${gdpStr}</div>
             <div class="profile-stat-rank">${statRank(gdp, 'gdp_pc')}</div>
         </div>
         <div class="profile-stat">
-            <div class="profile-stat-label">HDI</div>
+            <!-- HDI keeps the Latin initialism in Chinese on purpose: 人类发展指数 does
+                 not fit the tile and the abbreviation is the one used on the chart's own
+                 axis. Noted in the viewer's CLAUDE.md so no agent "fixes" it. -->
+            <div class="profile-stat-label">${tLabel('HDI', 'IDH', 'HDI')}</div>
             <div class="profile-stat-value">${hdiStr}</div>
             <div class="profile-stat-rank">${statRank(hdi, 'hdi')}</div>
         </div>
         <div class="profile-stat">
-            <div class="profile-stat-label">GHG</div>
+            <div class="profile-stat-label">${tLabel('GHG', 'GEI', '温室气体')}</div>
             <div class="profile-stat-value">${ghgStr}</div>
             <div class="profile-stat-rank">${statRank(ghg, 'ghg')}</div>
         </div>
         <div class="profile-stat">
-            <div class="profile-stat-label">Cropland</div>
+            <div class="profile-stat-label">${tLabel('Cropland', 'Cultivos', '耕地')}</div>
             <div class="profile-stat-value">${cropStr}</div>
             <div class="profile-stat-rank">${statRank(crop, 'crop_total')}</div>
         </div>
         <div class="profile-stat">
-            <div class="profile-stat-label">MFA</div>
+            <div class="profile-stat-label">${tLabel('MFA', 'MFA', '物质流')}</div>
             <div class="profile-stat-value">${mfaStr}</div>
             <div class="profile-stat-rank">${statRank(mfa, 'mfa_ext_tot')}</div>
         </div>
@@ -447,7 +450,7 @@ function renderMiniChart(containerId, iso3, field) {
             if (rank) {
                 const badge = document.createElement('span');
                 badge.className = 'profile-rank-badge';
-                badge.innerHTML = `<span style="color:${color}">#${rank}</span><br><span style="color:var(--cl)">of ${total}</span>`;
+                badge.innerHTML = `<span style="color:${color}">#${rank}</span><br><span style="color:var(--cl)">${tLabel('of', 'de', '/')} ${total}</span>`;
                 titleEl.appendChild(badge);
             }
         }

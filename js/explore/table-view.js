@@ -2,9 +2,9 @@
 // TABLE VIEW - Sortable data table for selected countries/indicator/year
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import { exportCSV } from '../components/export.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import { exportCSV } from '../components/export.js?v=20260911b';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -15,8 +15,9 @@ import {
     formatGDPTotal,
     formatRank,
     getColorForIndex,
-    resolveIndicatorValue
-} from '../utils.js?v=20260911a';
+    resolveIndicatorValue,
+    tLabel
+} from '../utils.js?v=20260911b';
 
 let currentContainer = null;
 let sortColumn = 'rank';
@@ -56,7 +57,7 @@ function renderTable() {
     }
 
     if (countryList.length === 0) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">No data available</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('No data available', 'No hay datos disponibles', '暂无数据') + '</div>';
         return;
     }
 
@@ -65,19 +66,19 @@ function renderTable() {
 
     const columns = [
         { key: 'rank', label: '#', width: '40px', align: 'center' },
-        { key: 'name', label: 'Country', width: 'auto', align: 'left' },
+        { key: 'name', label: tLabel('Country', 'País', '国家'), width: 'auto', align: 'left' },
         { key: indicator, label: INDICATOR_LABELS[indicator] || indicator, width: '120px', align: 'right' }
     ];
 
     // Context columns
     if (isEmission) {
-        if (indicator !== 'ghg_pc') columns.push({ key: 'ghg_pc', label: 'GHG p.c.', width: '80px', align: 'right' });
-        if (indicator !== 'co2ff') columns.push({ key: 'co2ff', label: 'CO\u2082 FF', width: '90px', align: 'right' });
+        if (indicator !== 'ghg_pc') columns.push({ key: 'ghg_pc', label: tLabel('GHG p.c.', 'GEI p.c.', '人均温室气体'), width: '80px', align: 'right' });
+        if (indicator !== 'co2ff') columns.push({ key: 'co2ff', label: tLabel('CO₂ FF', 'CO₂ fósil', '化石 CO₂'), width: '90px', align: 'right' });
     }
-    if (indicator !== 'gdp_pc') columns.push({ key: 'gdp_pc', label: 'GDP p.c.', width: '100px', align: 'right' });
-    if (indicator !== 'hdi' && indicator !== 'hdi_ng') columns.push({ key: 'hdi', label: 'HDI', width: '70px', align: 'right' });
+    if (indicator !== 'gdp_pc') columns.push({ key: 'gdp_pc', label: tLabel('GDP p.c.', 'PIB p.c.', '人均 GDP'), width: '100px', align: 'right' });
+    if (indicator !== 'hdi' && indicator !== 'hdi_ng') columns.push({ key: 'hdi', label: tLabel('HDI', 'IDH', 'HDI'), width: '70px', align: 'right' });
 
-    columns.push({ key: 'pop', label: 'Pop', width: '80px', align: 'right' });
+    columns.push({ key: 'pop', label: tLabel('Pop', 'Pobl.', '人口'), width: '80px', align: 'right' });
 
     // Build rows
     const rows = countryList.map(iso3 => {
@@ -129,7 +130,7 @@ function renderTable() {
     toolbar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:4px 8px;border-bottom:1px solid var(--cb);';
     toolbar.innerHTML = `
         <span style="font-size:12px;font-weight:600;color:var(--cd)">${INDICATOR_LABELS[indicator] || indicator} \u2014 ${year}</span>
-        <button id="explore-table-export" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--cb);border-radius:0;background:var(--bgl);color:var(--cg)">Export CSV</button>
+        <button id="explore-table-export" style="font-size:11px;padding:3px 10px;cursor:pointer;border:1px solid var(--cb);border-radius:0;background:var(--bgl);color:var(--cg)">${tLabel('Export CSV', 'Exportar CSV', '导出 CSV')}</button>
     `;
     wrapper.appendChild(toolbar);
 

@@ -2,12 +2,12 @@
 // CORRELATIONS - Gapminder-style bubble scatter plot
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
     COLORS, COMPARISON_PALETTE, INDICATOR_LABELS, INDICATOR_UNITS,
-    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260911a';
+    getColorForIndex, inkFor, formatValue, resolveIndicatorValue, textWidthPx, UI_FONT, tLabel } from '../utils.js?v=20260911b';
 
 const MARGIN = { top: 24, right: 118, bottom: 52, left: 72 };
 
@@ -358,8 +358,8 @@ function renderBubbles(bubbles) {
             .attr('fill', COLORS.uiText)
             .attr('font-size', 13)
             .text(State.get('correlationScope') === 'selected'
-                ? 'Select countries to show selected-only correlations'
-                : 'No correlation data available for this year');
+                ? tLabel('Select countries to show selected-only correlations', 'Elige países para ver las correlaciones solo de lo seleccionado', '请选择国家以仅显示所选国家的相关关系')
+                : tLabel('No correlation data available for this year', 'No hay datos de correlación para este año', '该年份暂无相关数据'));
         return;
     }
 
@@ -492,6 +492,37 @@ function renderBubbles(bubbles) {
 }
 
 function renderRegionLegend(bubbles) {
+    // Regions are a UI grouping: the legend follows the language of the page.
+    const REGION_NAMES_ES = {
+        'Western Europe': 'Europa Occidental', 'Europe & Central Asia': 'Europa y Asia Central',
+        'North America': 'América del Norte', 'Latin America & Caribbean': 'América Latina y Caribe',
+        'East Asia & Pacific': 'Asia Oriental y Pacífico', 'South Asia': 'Asia Meridional',
+        'Middle East & North Africa': 'Oriente Medio y N. de África', 'Sub-Saharan Africa': 'África Subsahariana',
+        'Southern Europe': 'Europa del Sur', 'Northern Europe': 'Europa del Norte',
+        'Eastern Europe': 'Europa del Este', 'Western Africa': 'África Occidental',
+        'Eastern Africa': 'África Oriental', 'Northern Africa': 'África del Norte',
+        'Southern Africa': 'África Austral', 'Middle Africa': 'África Central',
+        'South America': 'América del Sur', 'Central America': 'América Central',
+        'Caribbean': 'Caribe', 'Western Asia': 'Asia Occidental', 'Central Asia': 'Asia Central',
+        'Southern Asia': 'Asia Meridional', 'South-eastern Asia': 'Asia Sudoriental',
+        'Eastern Asia': 'Asia Oriental', 'Australia and New Zealand': 'Australia y Nueva Zelanda',
+        'Melanesia': 'Melanesia', 'Micronesia': 'Micronesia', 'Polynesia': 'Polinesia'
+    };
+    const REGION_NAMES_ZH = {
+        'Western Europe': '西欧', 'Europe & Central Asia': '欧洲与中亚',
+        'North America': '北美', 'Latin America & Caribbean': '拉丁美洲与加勒比',
+        'East Asia & Pacific': '东亚与太平洋', 'South Asia': '南亚',
+        'Middle East & North Africa': '中东与北非', 'Sub-Saharan Africa': '撒哈拉以南非洲',
+        'Southern Europe': '南欧', 'Northern Europe': '北欧', 'Eastern Europe': '东欧',
+        'Western Africa': '西非', 'Eastern Africa': '东非', 'Northern Africa': '北非',
+        'Southern Africa': '南部非洲', 'Middle Africa': '中非',
+        'South America': '南美洲', 'Central America': '中美洲', 'Caribbean': '加勒比',
+        'Western Asia': '西亚', 'Central Asia': '中亚', 'Southern Asia': '南亚',
+        'South-eastern Asia': '东南亚', 'Eastern Asia': '东亚',
+        'Australia and New Zealand': '澳大利亚与新西兰',
+        'Melanesia': '美拉尼西亚', 'Micronesia': '密克罗尼西亚', 'Polynesia': '波利尼西亚'
+    };
+    const regionLabel = (r) => tLabel(r, REGION_NAMES_ES[r] || r, REGION_NAMES_ZH[r] || r);
     const regions = [...new Set(bubbles.map(d => d.region))].sort();
     svg.selectAll('.region-legend').remove();
 
@@ -509,7 +540,7 @@ function renderRegionLegend(bubbles) {
         g.append('text')
             .attr('x', 12).attr('y', 9)
             .attr('font-size', 8.5).attr('fill', COLORS.gray)
-            .text(region.length > 16 ? region.slice(0, 14) + '..' : region);
+            .text(() => { const s = regionLabel(region); return s.length > 16 ? s.slice(0, 14) + '..' : s; });
     });
 }
 
@@ -531,8 +562,8 @@ export function updateCorrelations() {
 
     const titleEl = document.getElementById('analysis-title');
     const subEl = document.getElementById('analysis-subtitle');
-    if (titleEl) titleEl.textContent = `${INDICATOR_LABELS[yInd] || yInd} vs ${INDICATOR_LABELS[xInd] || xInd}`;
-    if (subEl) subEl.textContent = `Bubble size: ${INDICATOR_LABELS[State.get('correlationSize')]}, Year: ${year}, axes: ${axisMode}, scope: ${scope === 'all' ? 'all countries' : 'selected only'}`;
+    if (titleEl) titleEl.textContent = `${INDICATOR_LABELS[yInd] || yInd} ${tLabel('vs', 'frente a', '对比')} ${INDICATOR_LABELS[xInd] || xInd}`;
+    if (subEl) subEl.textContent = `${tLabel('Bubble size', 'Tamaño de la burbuja', '气泡大小')}: ${INDICATOR_LABELS[State.get('correlationSize')]}, ${tLabel('Year', 'Año', '年份')}: ${year}, ${tLabel('axes', 'ejes', '坐标轴')}: ${axisMode === 'fixed' ? tLabel('fixed', 'fijos', '固定') : tLabel('mobile', 'móviles', '自适应')}, ${tLabel('scope', 'alcance', '范围')}: ${scope === 'all' ? tLabel('all countries', 'todos los países', '所有国家') : tLabel('selected only', 'solo seleccionados', '仅所选')}`;
 
     const bubbles = buildBubbles(year);
     renderBubbles(bubbles);

@@ -2,11 +2,11 @@
 // GLOBE SECTION - Controller for the globe explorer tab
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import { initGlobe, retryGlobe, updateGlobeColors, updateGlobeLegend, flyToCountry } from './globe-renderer.js?v=20260911a';
-import { initCountryProfile, openProfile, closeProfile, updateProfileYear } from './country-profile.js?v=20260911a';
-import Timeline from '../components/timeline.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import { initGlobe, retryGlobe, updateGlobeColors, updateGlobeLegend, flyToCountry } from './globe-renderer.js?v=20260911b';
+import { initCountryProfile, openProfile, closeProfile, updateProfileYear } from './country-profile.js?v=20260911b';
+import Timeline from '../components/timeline.js?v=20260911b';
 
 let timeline = null;
 let initialized = false;
@@ -108,6 +108,12 @@ export function initGlobeSection() {
     // Indicator changes: recolor globe, refresh legend, refresh profile if open
     State.subscribe('indicator', () => {
         updateGlobeColors();
+        updateGlobeLegend();
+        updateProfileYear();
+    });
+
+    // Language: the legend and the profile print indicator names.
+    document.addEventListener('gw:language', () => {
         updateGlobeLegend();
         updateProfileYear();
     });

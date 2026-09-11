@@ -43,7 +43,7 @@ button{font:inherit;color:inherit}
 #chart{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
 #chart.grab{cursor:ew-resize}
 
-/* the map cartouche: paper on the water, under the plate, in water no wake reaches */
+/* the map cartouche: paper on the water, under the plate and as wide as it, in water no wake reaches */
 #mapbox{position:absolute;left:0;top:0;width:200px;padding:6px 6px 5px;pointer-events:auto;z-index:2;
   background:rgba(10,33,54,.55);border:1px solid rgba(241,230,200,.45);outline:1px solid rgba(241,230,200,.16);outline-offset:3px}
 #mapcap{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cream);line-height:1.3;text-align:center;margin:1px 0 5px;opacity:.9}
@@ -95,6 +95,15 @@ button{font:inherit;color:inherit}
 .lang button{background:transparent;border:0;min-width:40px;min-height:40px;padding:0 6px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink3);cursor:pointer}
 .lang button.on{color:var(--verm-deep);text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:1px}
 .lang button:focus-visible{outline:2px solid var(--verm);outline-offset:-2px}
+/* 中文 is two ideographs, not two capitals: it needs its own size and tracking
+   or it reads as a smudge next to EN / ES. */
+.lang button[data-lang="zh"]{font-size:13px;letter-spacing:.04em;min-width:38px;
+  font-family:"Source Han Sans SC","Noto Sans SC","Microsoft YaHei","PingFang SC",var(--sans)}
+:root[lang="zh"] .lede,:root[lang="zh"] .sub,:root[lang="zh"] .eyebrow,
+:root[lang="zh"] .index a,:root[lang="zh"] .cta,:root[lang="zh"] .poem{
+  font-family:"Source Han Serif SC","Noto Serif SC","Songti SC","Microsoft YaHei",var(--sans)}
+:root[lang="zh"] .eyebrow{letter-spacing:.12em}
+:root[lang="zh"] .poem p{white-space:normal;line-height:1.7}
 .mark{display:block;flex:0 0 auto;width:50px;height:50px;color:var(--verm);margin:6px 2px 0 0}
 h1{margin:0;font-family:var(--sans);font-weight:400;font-size:clamp(36px,3.1vw,44px);line-height:1.06;letter-spacing:.18em;text-transform:uppercase;color:var(--verm)}
 h1 .amp{font-weight:300}
@@ -166,60 +175,61 @@ h1 .amp{font-weight:300}
 </head>
 <body>
 <main class="page">
-  <section id="scene" aria-label="Scene">
-    <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024, then open water"></canvas>
+  <section id="scene" aria-label="Scene" data-aria-es="Escena" data-aria-zh="场景">
+    <canvas id="chart" aria-label="Eight regional wakes: GDP per capita 1750–2024, then open water" data-aria-es="Ocho estelas regionales: PIB per cápita 1750–2024 y después mar abierto" data-aria-zh="八条区域航迹：1750–2024 年人均 GDP，其后为公海"></canvas>
     <div id="mapbox">
-      <div id="mapcap" data-es="GEI por persona">GHG per person</div>
-      <svg id="map" viewBox="0 0 200 100" aria-label="World map by region"></svg>
+      <div id="mapcap" data-es="GEI por persona" data-zh="人均温室气体">GHG per person</div>
+      <svg id="map" viewBox="0 0 200 100" aria-label="World map by region" data-aria-es="Mapa del mundo por regiones" data-aria-zh="按区域划分的世界地图"></svg>
     </div>
     <div class="stamp" id="cap">
       <output id="year" for="slider">1750</output>
-      <span class="what"><b data-es="PIB per cápita">GDP per capita</b> · <span data-es="ocho regiones del mundo">eight world regions</span> · <span data-es="tinta y mapa: GEI por persona">ink and map: GHG per person</span></span>
+      <span class="what"><b data-es="PIB per cápita" data-zh="人均 GDP">GDP per capita</b> · <span data-es="ocho regiones del mundo" data-zh="世界八大区域">eight world regions</span> · <span data-es="tinta y mapa: GEI por persona" data-zh="墨色与地图：人均温室气体">ink and map: GHG per person</span></span>
       <span class="pin" id="pinlbl"></span>
-      <span class="hint" id="hint" data-es="Señala una estela; arrastra por los años">Point at a wake; drag along the years</span>
+      <span class="hint" id="hint" data-es="Señala una estela; arrastra por los años" data-zh="指向一道航迹；沿年份拖动">Point at a wake; drag along the years</span>
     </div>
-    <input id="slider" type="range" min="1750" max="2024" step="1" value="1750" aria-label="Year">
+    <input id="slider" type="range" min="1750" max="2024" step="1" value="1750" aria-label="Year" data-aria-es="Año" data-aria-zh="年份">
     <button id="play" type="button" class="playing sr-only" aria-label="Pause">
-      <span class="ic-play" data-es="Reproducir">Play</span><span class="ic-pause" data-es="Pausa">Pause</span>
+      <span class="ic-play" data-es="Reproducir" data-zh="播放">Play</span><span class="ic-pause" data-es="Pausa" data-zh="暂停">Pause</span>
     </button>
     <div class="tip" id="tip" role="status" aria-live="polite"></div>
   </section>
 
   <header class="plate">
     <div class="plate-top">
-      <p class="eyebrow" data-es="Estelas del crecimiento · 1750–2024">199 countries · 1750–2024</p>
-      <span class="lang" role="group" aria-label="Language">
+      <p class="eyebrow" data-es="Estelas del crecimiento · 1750–2024" data-zh="增长的航迹 · 1750–2024">199 countries · 1750–2024</p>
+      <span class="lang" role="group" aria-label="Language" data-aria-es="Idioma" data-aria-zh="语言">
         <button type="button" data-lang="en" class="on" aria-label="English">EN</button>
         <button type="button" data-lang="es" aria-label="Español">ES</button>
+        <button type="button" data-lang="zh" aria-label="中文" lang="zh">中文</button>
       </span>
     </div>
     <div class="title-row"><h1>Growth<br><span class="amp">&amp;</span> Earth</h1><svg class="mark" viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="21.5" stroke-width="1.8"/><path d="M7 29.5h34" stroke-width="1.2"/><path d="M15.5 29.5a8.5 8.5 0 0 1 17 0" stroke-width="1.8"/><path d="M24 14.5v-4.5M35 18.5l3.5-3.5M13 18.5l-3.5-3.5M34.2 25.3l3.2-1.3M13.8 25.3l-3.2-1.3" stroke-width="1.4"/><path d="M10 35.5c4.7-2.6 9.3-2.6 14 0s9.3 2.6 14 0M14 40c3.3-1.8 6.7-1.8 10 0s6.7 1.8 10 0" stroke-width="1.2"/></svg></div>
-    <p class="sub" data-es="desarrollo global y cambio ambiental desde 1750">global development and environmental change since 1750</p>
+    <p class="sub" data-es="desarrollo global y cambio ambiental desde 1750" data-zh="1750 年以来的全球发展与环境变化">global development and environmental change since 1750</p>
     <hr class="rule">
-    <p class="lede" data-es="Desde la revolución industrial, el crecimiento económico moderno ha sostenido poblaciones cada vez más numerosas y progresos extraordinarios en educación y salud, al tiempo que transformaba el planeta mediante las emisiones de gases de efecto invernadero, la expansión de los cultivos y la extracción de materias primas. Growth &amp; Earth es un lugar para explorar esta historia desigual del desarrollo global y del cambio ambiental.">Since the industrial revolution, modern economic growth has sustained ever larger populations and extraordinary progress in education and health, while also transforming the planet through greenhouse gas emissions, cropland expansion, and raw material extraction. Growth &amp; Earth is a place to explore this uneven history of global development and environmental change.</p>
-    <a class="cta" id="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <p class="lede" data-es="Desde la revolución industrial, el crecimiento económico moderno ha sostenido poblaciones cada vez más numerosas y progresos extraordinarios en educación y salud, al tiempo que transformaba el planeta mediante las emisiones de gases de efecto invernadero, la expansión de los cultivos y la extracción de materias primas. Growth &amp; Earth es un lugar para explorar esta historia desigual del desarrollo global y del cambio ambiental." data-zh="自工业革命以来，现代经济增长养活了不断扩大的人口，带来了教育与健康方面的非凡进步，同时也通过温室气体排放、耕地扩张与原材料开采改变了这颗星球。Growth &amp; Earth 是一个探索这段不均衡的全球发展与环境变化历史的地方。">Since the industrial revolution, modern economic growth has sustained ever larger populations and extraordinary progress in education and health, while also transforming the planet through greenhouse gas emissions, cropland expansion, and raw material extraction. Growth &amp; Earth is a place to explore this uneven history of global development and environmental change.</p>
+    <a class="cta" id="cta" href="explorer.html#globe"><span data-es="Entrar al visor" data-zh="进入可视化平台">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </header>
 
   <footer class="band">
-    <nav class="index" aria-label="Sections of the explorer">
-      <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país">Country profile</span></a>
-      <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar">Explore</span></a>
-      <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis">Analysis</span></a>
-      <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes">About &amp; sources</span></a>
-      <a href="explorer.html#whatif"><span class="n">05</span><span data-es="¿Y si…?">What if?</span></a>
+    <nav class="index" aria-label="Sections of the explorer" data-aria-es="Secciones del visor" data-aria-zh="可视化平台的各个部分">
+      <a href="explorer.html#globe"><span class="n">01</span><span data-es="Perfil de país" data-zh="国家概况">Country profile</span></a>
+      <a href="explorer.html#explore"><span class="n">02</span><span data-es="Explorar" data-zh="探索">Explore</span></a>
+      <a href="explorer.html#analysis"><span class="n">03</span><span data-es="Análisis" data-zh="分析">Analysis</span></a>
+      <a href="explorer.html#about"><span class="n">04</span><span data-es="Acerca de y fuentes" data-zh="关于与数据来源">About &amp; sources</span></a>
+      <a href="explorer.html#whatif"><span class="n">05</span><span data-es="¿Y si…?" data-zh="假如？">What if?</span></a>
     </nav>
-    <blockquote class="poem"><p>Caminante, no hay camino, sino estelas en la mar.<span class="src">Antonio Machado · 1912</span></p></blockquote>
+    <blockquote class="poem"><p data-es="Caminante, no hay camino, sino estelas en la mar.<span class=&quot;src&quot;>Antonio Machado · 1912</span>" data-zh="行路人，没有路，只有海上的航迹。<span class=&quot;src&quot;>«Caminante, no hay camino, sino estelas en la mar.» · Antonio Machado · 1912</span>">Caminante, no hay camino, sino estelas en la mar.<span class="src">Antonio Machado · 1912</span></p></blockquote>
   </footer>
   <div class="mob-only mob-cta">
-    <a class="cta" href="explorer.html#globe"><span data-es="Entrar al visor">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <a class="cta" href="explorer.html#globe"><span data-es="Entrar al visor" data-zh="进入可视化平台">Enter the explorer</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
-<script src="portada/cascorro.js"></script>
-<script src="portada/world-110m.js"></script>
-<script src="portada/regions-map.js"></script>
+<script src="portada/cascorro.js?v=20260911b"></script>
+<script src="portada/world-110m.js?v=20260911b"></script>
+<script src="portada/regions-map.js?v=20260911b"></script>
 <script>
 (function(){
 'use strict';
@@ -236,7 +246,7 @@ h1 .amp{font-weight:300}
    there is measured, labelled or bounded; it is a figure of speech,
    not a projection. V8: the scene is full-bleed; the editorial plate floats
    top-left and the engine keeps out of it (PL); the cartouche sits under the
-   plate at ~1.8x; the time line is a hairline on the year axis; the fonts
+   plate and is exactly as wide as it (11-IX); the time line is a hairline on the year axis; the fonts
    are read from the CSS tokens (--sans Gill Sans/Cabin, --serif Perpetua).
    ------------------------------------------------------------------ */
 var D=window.CASCORRO, TOPO=window.WORLD110, RG=window.CASCORRO_REGIONS;
@@ -257,7 +267,7 @@ var SANS=(CSSV.getPropertyValue('--sans')||'sans-serif').trim(), SERIF=(CSSV.get
 /* ---------- language ---------- */
 var LANG_KEY='growthWake.language';           /* the explorer's own key (js/app.js) */
 var LANG='en';
-try{if(localStorage.getItem(LANG_KEY)==='es')LANG='es';}catch(e){}
+try{var _l=localStorage.getItem(LANG_KEY);if(_l==='es'||_l==='zh')LANG=_l;}catch(e){}
 var T={
   en:{perPerson:'per person',gdp:'GDP per capita',ghg:'t CO₂e per person',pinned:'pinned · click again to release',pinnedTap:'pinned · tap again to release',
       part:'the wakes part',partShort:'they part',partSub:function(g,g0){return 'richest region earns '+g+'× the poorest ('+g0+'× in 1750)';},
@@ -266,7 +276,11 @@ var T={
   es:{perPerson:'por persona',gdp:'PIB per cápita',ghg:'t CO₂e por persona',pinned:'fijada · clic de nuevo para soltar',pinnedTap:'fijada · toca de nuevo para soltar',
       part:'las estelas se separan',partShort:'se separan',partSub:function(g,g0){return 'la región más rica gana '+g+'× la más pobre ('+g0+'× en 1750)';},
       open:'mar abierta — nada trazado',openShort:'mar abierta · nada trazado',openTiny:'mar abierta',last:'último dato',play:'Reproducir',pause:'Pausa',
-      title:'Growth & Earth · desarrollo global y cambio ambiental desde 1750'}
+      title:'Growth & Earth · desarrollo global y cambio ambiental desde 1750'},
+  zh:{perPerson:'人均',gdp:'人均 GDP',ghg:'吨 CO₂e/人',pinned:'已固定 · 再次点击解除',pinnedTap:'已固定 · 再次轻触解除',
+      part:'航迹开始分离',partShort:'开始分离',partSub:function(g,g0){return '最富区域的人均收入是最穷区域的 '+g+' 倍（1750 年为 '+g0+' 倍）';},
+      open:'公海 —— 尚无海图',openShort:'公海 · 尚无海图',openTiny:'公海',last:'最后一个观测值',play:'播放',pause:'暂停',
+      title:'Growth & Earth · 1750 年以来的全球发展与环境变化'}
 };
 var NAMES={
   en:{'East Asia & Pacific':'East Asia & Pacific','Europe & Central Asia':'Europe & Central Asia','Latin America & Caribbean':'Latin America & Caribbean',
@@ -274,29 +288,47 @@ var NAMES={
       'Sub-Saharan Africa':'Sub-Saharan Africa','Western Europe':'Western Europe'},
   es:{'East Asia & Pacific':'Asia Oriental y Pacífico','Europe & Central Asia':'Europa y Asia Central','Latin America & Caribbean':'América Latina y Caribe',
       'Middle East & North Africa':'Oriente Medio y Norte de África','North America':'América del Norte','South Asia':'Asia Meridional',
-      'Sub-Saharan Africa':'África Subsahariana','Western Europe':'Europa Occidental'}
+      'Sub-Saharan Africa':'África Subsahariana','Western Europe':'Europa Occidental'},
+  zh:{'East Asia & Pacific':'东亚与太平洋','Europe & Central Asia':'欧洲与中亚','Latin America & Caribbean':'拉丁美洲与加勒比',
+      'Middle East & North Africa':'中东与北非','North America':'北美','South Asia':'南亚',
+      'Sub-Saharan Africa':'撒哈拉以南非洲','Western Europe':'西欧'}
 };
 /* chart names: the short forms a sea chart would print */
 var SHORT={
   en:{'East Asia & Pacific':'East Asia & Pacific','North America':'North America','Europe & Central Asia':'Europe & C. Asia','Western Europe':'Western Europe',
       'Latin America & Caribbean':'Latin America','Middle East & North Africa':'Mid. East & N. Africa','Sub-Saharan Africa':'Sub-Saharan Africa','South Asia':'South Asia'},
   es:{'East Asia & Pacific':'Asia Or. y Pacífico','North America':'América del Norte','Europe & Central Asia':'Europa y Asia C.','Western Europe':'Europa Occ.',
-      'Latin America & Caribbean':'América Latina','Middle East & North Africa':'Or. Medio y N. África','Sub-Saharan Africa':'África Subsahariana','South Asia':'Asia Meridional'}
+      'Latin America & Caribbean':'América Latina','Middle East & North Africa':'Or. Medio y N. África','Sub-Saharan Africa':'África Subsahariana','South Asia':'Asia Meridional'},
+  zh:{'East Asia & Pacific':'东亚与太平洋','North America':'北美','Europe & Central Asia':'欧洲与中亚','Western Europe':'西欧',
+      'Latin America & Caribbean':'拉丁美洲','Middle East & North Africa':'中东与北非','Sub-Saharan Africa':'撒哈拉以南非洲','South Asia':'南亚'}
 };
 var TINY={
   en:{'East Asia & Pacific':'E. Asia & Pac.','North America':'N. America','Europe & Central Asia':'Eur. & C. Asia','Western Europe':'W. Europe',
       'Latin America & Caribbean':'Latin America','Middle East & North Africa':'MENA','Sub-Saharan Africa':'Africa (SSA)','South Asia':'South Asia'},
   es:{'East Asia & Pacific':'Asia Or. y Pac.','North America':'América N.','Europe & Central Asia':'Eur. y Asia C.','Western Europe':'Europa Occ.',
-      'Latin America & Caribbean':'América Lat.','Middle East & North Africa':'Or. Medio','Sub-Saharan Africa':'África Subs.','South Asia':'Asia Merid.'}
+      'Latin America & Caribbean':'América Lat.','Middle East & North Africa':'Or. Medio','Sub-Saharan Africa':'África Subs.','South Asia':'Asia Merid.'},
+  zh:{'East Asia & Pacific':'东亚·太平洋','North America':'北美','Europe & Central Asia':'欧洲·中亚','Western Europe':'西欧',
+      'Latin America & Caribbean':'拉美','Middle East & North Africa':'中东北非','Sub-Saharan Africa':'撒哈拉以南','South Asia':'南亚'}
 };
 function tr(k){return T[LANG][k];}
 function setLang(l,save){
-  LANG=(l==='es')?'es':'en';
+  LANG=(l==='es'||l==='zh')?l:'en';
   document.documentElement.lang=LANG;
-  var els=document.querySelectorAll('[data-es]');
+  /* [data-es] and [data-zh] both mark a translatable node; the English text is
+     the one the file shipped with, remembered on first pass. */
+  var els=document.querySelectorAll('[data-es],[data-zh]');
   for(var i=0;i<els.length;i++){var el=els[i];
     if(el.dataset.en==null)el.dataset.en=el.innerHTML;
-    el.innerHTML=LANG==='es'?el.dataset.es:el.dataset.en;}
+    var v=LANG==='es'?el.dataset.es:LANG==='zh'?el.dataset.zh:el.dataset.en;
+    el.innerHTML=(v==null?el.dataset.en:v);}
+  /* 11-IX (r2): the same mechanism for the aria-labels. They used to be English
+     in all three languages, so a screen reader in Spanish or Chinese heard an
+     English interface over a Spanish page. [data-aria-es]/[data-aria-zh]. */
+  var as=document.querySelectorAll('[data-aria-es],[data-aria-zh]');
+  for(i=0;i<as.length;i++){var ae=as[i];
+    if(ae.dataset.ariaEn==null)ae.dataset.ariaEn=ae.getAttribute('aria-label')||'';
+    var av=LANG==='es'?ae.dataset.ariaEs:LANG==='zh'?ae.dataset.ariaZh:ae.dataset.ariaEn;
+    ae.setAttribute('aria-label',av==null?ae.dataset.ariaEn:av);}
   var bs=document.querySelectorAll('.lang button');
   for(i=0;i<bs.length;i++)bs[i].classList.toggle('on',bs[i].dataset.lang===LANG);
   document.title=tr('title');
@@ -345,6 +377,9 @@ function inkAt(jj,idx){var s=ships[jj];return s.e?heat(s.e[idx]):0;}
 function inkRGB(jj,idx){return lerp3(RGB.FOAM,RGB.VERM,inkAt(jj,idx));}
 function inkCol(jj,idx,al){return rgbaArr(inkRGB(jj,idx),al);}
 var vMax=0;for(j=0;j<NS;j++)for(i=0;i<N;i++)if(ships[j].v[i]>vMax)vMax=ships[j].v[i];vMax*=1.2;   /* V7b: headroom, so the richest wake has water above it to climb into */
+/* the highest reading of any region in each year: the ceiling of the ink, year by year. The series
+   is not monotonic (1929-33 dips), so the cartouche guard reads every year in its span, not samples. */
+var VTOP=new Array(N);for(i=0;i<N;i++){var vt=0;for(j=0;j<NS;j++)if(ships[j].v[i]>vt)vt=ships[j].v[i];VTOP[i]=vt;}
 /* the year the wakes part: first year the richest region earns ten times the poorest */
 var GAP=10,ratio=new Array(N);
 for(i=0;i<N;i++){var lo=Infinity,hi=-Infinity;for(j=0;j<NS;j++){var w=ships[j].v[i];if(w<lo)lo=w;if(w>hi)hi=w;}ratio[i]=lo>0?hi/lo:1;}
@@ -362,6 +397,17 @@ function xs(y){return xL+(y-Y0)/(Y1-Y0)*(xData-xL);}
 function ys(v){return yB-(v/vMax)*(yB-yT);}
 function pt(jj,k){return [xs(YRS[k]),ys(ships[jj].v[k])+fbm(k*0.07+jj*9,jj)*(mobile?0.9:1.4)];}
 function xToIdx(x){var k=Math.round((x-xL)/(xData-xL)*(N-1));return k<0?0:k>N-1?N-1:k;}
+/* the highest wake ink between two x's, over the whole run: the water the cartouche may not enter */
+function wakeCeil(x0,x1){var k0=xToIdx(x0),k1=xToIdx(x1),hi=0,k;
+  for(k=k0;k<=k1;k++)if(VTOP[k]>hi)hi=VTOP[k];
+  return ys(hi)-2;}                              /* -2 for the swell the wake is drawn with */
+/* everything in the cartouche that is not the sheet itself: caption, paddings, the two rules.
+   Measured once — it does not depend on the width the sheet ends up taking. */
+var MAPCHROME=0;
+function mapChrome(){
+  if(!MAPCHROME){var b=mapbox.getBoundingClientRect().height,s=mapSvg.getBoundingClientRect().height;
+    MAPCHROME=(b>0&&s>0&&b>s)?Math.round(b-s):35;}
+  return MAPCHROME;}
 var TICKS_WIDE=[1750,1800,1850,1900,1950,2000,2024],TICKS_TIGHT=[1750,1850,1950,2024],TICKS=TICKS_WIDE;
 
 function layout(){
@@ -375,12 +421,31 @@ function layout(){
   /* the plate's keep-out (desktop only: on a phone the plate sits above the scene, not on it) */
   PL=null;
   if(!mobile&&plate){var pr=plate.getBoundingClientRect(),sr=scene.getBoundingClientRect();PL={x:pr.left-sr.left,y:pr.top-sr.top,w:pr.width,h:pr.height};}
-  /* the map cartouche: under the plate on desktop (about 1.8x the V7b size), top-left on a phone; always in water no wake reaches */
-  var mw,my,capH=mobile?0:22;
-  if(PL){my=Math.round(PL.y+PL.h+22);mw=Math.round(W*0.26);mw=Math.max(240,Math.min(mw,380));
-    var avail=(yB-60)-my-capH-12;if(avail<mw*0.5)mw=Math.max(200,Math.floor(avail*2));}
-  else{my=yT+6;mw=Math.round(W*(mobile?0.42:0.26));mw=Math.max(mobile?150:240,Math.min(mw,mobile?190:380));}
-  MB={x:PL?Math.round(PL.x):xL+10,y:my,w:mw,h:mw*0.5+capH+12};   /* flush with the plate's left edge */
+  /* the map cartouche: on desktop it takes the plate's own measured width and sits right under it
+     (the author, 11-IX: the map the same width as the text plate), so plate and map read as one
+     column, flush on both edges. It keeps its 2:1 sheet and stays in clear water: it stops short of
+     the year axis and of the highest wake crossing its span, giving width back — at the same ratio —
+     when a taller plate (ES) or a short window leaves too little water under it. Top-left on a phone. */
+  var mw,my,mx,capH=mobile?0:22,gi,ar=0.5,vbh=100,vb0=0;
+  if(PL){
+    mx=Math.round(PL.x);my=Math.round(PL.y+PL.h+16);mw=Math.round(PL.w);   /* 16 px: 8 px between the two outlines */
+    /* 11-IX (r2): the width is the one thing that does NOT give. The sheet keeps the plate's
+       measured width at every size and it is the HEIGHT that yields: the 2:1 sheet is cropped
+       down to about 3:1, from the bottom first (empty Southern Ocean — Antarctica is not in the
+       data) and only then from the top, so no landmass goes until the last millimetres. Width is
+       returned only as a last resort and never below 86 % of the plate. */
+    var chrome=mapChrome(),fl=Math.min(yB-22,wakeCeil(mx,mx+mw)-2);
+    ar=(fl-my-chrome)/(mw-14);
+    if(ar>0.5)ar=0.5;
+    if(ar<0.32){ar=0.32;
+      for(gi=0;gi<40&&mw>PL.w*0.92;gi++){
+        if(my+(mw-14)*ar+chrome<=Math.min(yB-22,wakeCeil(mx,mx+mw)-2))break;
+        mw-=4;}}
+    vbh=Math.round(200*ar);vb0=Math.max(0,100-vbh-20);            /* bottom crop first, up to 20 units */
+    MB={x:mx,y:my,w:mw,h:Math.round(chrome+(mw-14)*ar)};}
+  else{mx=xL+10;my=yT+6;mw=Math.round(W*(mobile?0.42:0.26));mw=Math.max(mobile?150:240,Math.min(mw,mobile?190:380));
+    MB={x:mx,y:my,w:mw,h:mw*0.5+capH+12};}                        /* flush with the plate's left edge */
+  mapSvg.setAttribute('viewBox','0 '+vb0+' 200 '+vbh);
   mapbox.style.left=MB.x+'px';mapbox.style.top=MB.y+'px';mapbox.style.width=MB.w+'px';
   /* the time line: a hairline laid on the year axis itself (44 px tall to take a finger) */
   slider.style.left=xL+'px';slider.style.width=(xData-xL)+'px';slider.style.top=(yB-22)+'px';
@@ -478,7 +543,8 @@ function soundings(g){
     var x=xL+30+hash(tries*3.1+5)*(xData-xL-60),y=top+hash(tries*7.7+2)*(bot-top),ok=true;
     if(x>MB.x-14&&x<MB.x+MB.w+14&&y>MB.y-14&&y<MB.y+MB.h+14)ok=false;              /* under the map */
     if(PL&&x<PL.x+PL.w+16&&y<PL.y+PL.h+16)ok=false;                                /* under the plate */
-    if(x>xs(partYear)-40&&x<xs(partYear)+320&&Math.abs(y-partLabelY())<40)ok=false; /* the parting label */
+    var plx=partLabelX();
+    if(x>plx-46&&x<plx+320&&Math.abs(y-partLabelY())<40)ok=false;                   /* the parting label */
     if(ok){var kk=xToIdx(x);for(jj=0;jj<NS&&ok;jj++){var yy=ys(ships[jj].v[kk]);if(y>yy-26)ok=false;}}
     if(ok){for(k=0;k<SOUND.length;k++)if(Math.abs(SOUND[k][0]-x)<34&&Math.abs(SOUND[k][1]-y)<18){ok=false;break;}}
     if(ok)SOUND.push([x,y,Math.round(3+hash(tries*1.9)*46)]);
@@ -559,7 +625,7 @@ function partRule(alpha){
     ctx.font=chartFont(13.5,true,500);spaced(ctx,'0.05em');var l1=partYear+' · '+tr('partShort');
     ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1,0,0);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1,0,0);
     spaced(ctx,'0px');ctx.restore();ctx.globalAlpha=1;return;}
-  var tx=x+7,ly=partLabelY();
+  var tx=partLabelX(),ly=partLabelY();
   ctx.font=chartFont(16,true,500);ctx.textAlign='left';ctx.textBaseline='top';spaced(ctx,'0.05em');
   var l1b='✦ '+partYear+' · '+tr('part'),l2=tr('partSub')(GAP,gap0);
   ctx.strokeStyle=rgba(SEA2,0.92);ctx.lineWidth=3.2;ctx.strokeText(l1b,tx,ly);ctx.fillStyle=rgba(CREAM,0.94);ctx.fillText(l1b,tx,ly);
@@ -568,6 +634,10 @@ function partRule(alpha){
 }
 /* where the parting label goes: at the top, unless the plate owns that corner, then just under it */
 function partLabelY(){var x=xs(partYear)+7;return (PL&&x<PL.x+PL.w+12&&yT+4<PL.y+PL.h+12)?PL.y+PL.h+24:yT+4;}
+/* ...and where it starts: clear of the cartouche when the sheet lies across that row */
+function partLabelX(){var tx=xs(partYear)+7,ly=partLabelY();
+  if(MB&&!mobile&&tx<MB.x+MB.w+12&&ly<MB.y+MB.h+8&&ly+36>MB.y)tx=MB.x+MB.w+12;
+  return tx;}
 /* name plates just past each head, in spaced Gill capitals */
 function headLabels(heads,alpha,lit){
   if(alpha<=0)return;
@@ -580,6 +650,10 @@ function headLabels(heads,alpha,lit){
   for(k=0;k<ord.length;k++){var o=ord[k],lx=o.x+(mobile?10:14),nm=((mobile?TINY:SHORT)[LANG][ships[o.k].name]||ships[o.k].name).toUpperCase();
     var a=alpha*(lit<0||lit===o.k?1:0.42);ctx.globalAlpha=a;
     var tw=ctx.measureText(nm).width;
+    /* 11-IX (r2): now that the sheet takes the plate's full width, an early head can sit behind it.
+       A name plate never lands on the cartouche: it steps out to its right edge, as the parting
+       label already does. */
+    if(MB&&!mobile&&lx<MB.x+MB.w+12&&lx+tw+4>MB.x-4&&o.ly+fs>MB.y&&o.ly-fs<MB.y+MB.h)lx=MB.x+MB.w+12;
     if(lx+tw+4>W-4){lx=o.x-tw-(mobile?9:12);}
     if(Math.abs(o.ly-o.y)>2.5){ctx.strokeStyle=rgba(CREAM,0.32);ctx.lineWidth=0.7;ctx.beginPath();ctx.moveTo(o.x+3,o.y);ctx.lineTo(lx-2,o.ly);ctx.stroke();}
     ctx.fillStyle=rgba(SEA2,0.7);ctx.fillRect(lx-4,o.ly-fs*0.7,tw+8,fs*1.4);
@@ -759,7 +833,7 @@ function redraw(){needDraw=true;loop();}
 
 /* ---------- pointer: hover, pin, drag ---------- */
 function setHover(jj,k,src,cxp,cyp){
-  hover=jj;if(jj>=0){hoverIdx=k;hoverSrc=src;}else if(pinned<0){hoverSrc='';}
+  hover=jj;if(jj>=0){hoverIdx=Math.round(k);hoverSrc=src;}else if(pinned<0){hoverSrc='';}
   if(jj>=0)showTip(jj,k,cxp,cyp,pinned===jj);else if(pinned>=0)refreshTip();else hideTip();
   syncState();redraw();
 }
@@ -772,6 +846,7 @@ function updatePinLabel(){pinLbl.innerHTML=pinned>=0?('<span class="star">✦</s
 var tipX=0,tipY=0;
 function showTip(jj,k,cxp,cyp,isPinned){
   var s=ships[jj];tipX=cxp;tipY=cyp;
+  k=Math.round(k);if(k<0)k=0;else if(k>N-1)k=N-1;    /* the clock runs fractional while playing */
   tip.innerHTML='<b>'+NAMES[LANG][s.name]+'<span class="yr">'+YRS[k]+'</span></b>'+fmtMoney(s.v[k])+' '+tr('perPerson')+' · '+tr('gdp')+
     (s.e?'<br><span class="v2">'+(Math.round(s.e[k]*10)/10).toString().replace('.',LANG==='es'?',':'.')+' '+tr('ghg')+'</span>':'')+
     (isPinned?'<span class="pinned">'+tr(COARSE?'pinnedTap':'pinned')+'</span>':'');

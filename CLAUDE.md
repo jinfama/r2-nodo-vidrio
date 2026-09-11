@@ -431,14 +431,32 @@ barrido de cierre en
 
 ### Sello de caché
 
-`?v=20260911a` en el `<script src="js/app.js">` de `explorer.html` **y en los 88 `import` de
-`js/`** (los cuatro de `js/whatif/` incluidos). Es un único sufijo para todo el visor: si
-tocas cualquier módulo, súbelo en todos a la vez (un `sed` sobre `js/` y `explorer.html`) y
-comprueba que no queda ningún import sin sello:
+**Sello vigente: `?v=20260911b`** (subido en la ronda 2 del 11-IX; 97 apariciones). Es un
+único sufijo para todo el visor. Si tocas cualquier módulo, súbelo en **todos a la vez**, en
+un solo barrido, y comprueba que no queda ninguno con el sello viejo ni sin sello.
+
+Qué lo lleva:
+
+| Sitio | Cuántos | Por qué |
+|---|---|---|
+| `explorer.html` → `<script src="js/app.js?v=…">` | 1 | el punto de entrada del explorador |
+| `index.html` → `portada/{cascorro,world-110m,regions-map}.js` | 3 | la portada cambió 114 líneas el 11-IX y no llevaba sello |
+| `import`s de `js/**/*.js` | 92 | todos, sin excepción |
+| `js/whatif/whatif-section.js` → `DATA_URL` | 1 | **`data/whatif.json` se pide con `cache:'force-cache'`**: sin sello, quien ya hubiera abierto el visor se quedaba clavado en el JSON viejo para siempre |
+
+Qué **no** lo lleva, a propósito:
+
+- Los otros cinco `fetch` de `js/data-loader.js`. Usan la política por defecto, así que
+  revalidan contra el servidor y responden 304 cuando el fichero no ha cambiado. Sellarlos
+  forzaría una descarga completa de 27 MB en cada release aunque los datos fueran idénticos.
+- Las siete referencias a `img/` de `explorer.html`. Son las tres marcas institucionales y
+  las fotografías de About: no cambian.
+
+Comprobación (debe dar cero en las dos):
 
 ```
-grep -rn "from " js/ | grep -v "v=20260911a"
-grep -n "js/app.js" explorer.html
+grep -rnoE '\?v=[A-Za-z0-9]+' js/ explorer.html index.html | grep -v 'v=20260911b'
+grep -rnoE "(from ['\"]|src=['\"])(\.{1,2}/|js/|portada/)[^'\"?]+\.js['\"]" js/ explorer.html index.html
 ```
 
 ### Dónde están la especificación y el ledger
@@ -706,6 +724,208 @@ declarado.
   `getMapFamily()`: un indicador nuevo que caiga ahí y tenga ceros los pintaría invisibles
   para un dicrómata. Al añadir un indicador, darle familia explícita.
 
+## Ronda 2 del 11-IX — cierre de la verificación (lee esto antes de tocar layout o idiomas)
+
+Tres verificadores independientes (diseño, idiomas, regresión) revisaron el visor y sus
+hallazgos se cerraron en una sola pasada. Lo que sigue es el estado resultante y las reglas
+que lo sostienen. Cada una nació de un defecto medido: no las deshagas sin medir otra vez.
+
+### Portada: el cartucho del mapa
+
+Juan pidió «el mapa un poco más grande, mismo ancho que el cuadro del texto». La regla es:
+
+> **El ancho del cartucho es el de la placa y no se negocia. Lo que cede es el ALTO.**
+
+`index.html`, en `layout()`: `mw = PL.w` siempre. El hueco disponible se calcula con
+`fl = min(yB-22, wakeCeil(mx, mx+mw)-2)` y de ahí sale la proporción `ar` del pliego, acotada
+a `[0.32, 0.50]`. Esa proporción se aplica **recortando el `viewBox` del SVG**, no encogiendo
+la caja: `vbh = 200*ar`, y el recorte sale primero del sur (hasta 20 unidades de Océano
+Austral vacío — la Antártida no está en los datos) y solo después del norte. Devolver ancho es
+el último recurso y nunca por debajo del **92 % de la placa**. Medido: 472/472 px en
+1920×1080, 1600×900 y 1440×900 en los tres idiomas; 432/472 (−8 %) solo en el caso extremo de
+1280×720. Antes era 296/472 (−37 %) en ese mismo caso y 416/472 en un portátil normal.
+
+`mapChrome()` mide una vez lo que el cartucho gasta en cejilla, filetes y relleno, para que el
+cálculo no dependa de constantes copiadas a mano.
+
+Efecto lateral que también se arregló: con el pliego a ancho completo, un rótulo de estela
+podía caer encima de él en los primeros años. `headLabels()` ahora lo esquiva por la derecha,
+igual que ya hacía `partLabelX()`.
+
+### Portada: los tres idiomas
+
+- Texto: `[data-es]` / `[data-zh]`, con el inglés recordado en `dataset.en` la primera vez.
+- **Atributos `aria-label`: `[data-aria-es]` / `[data-aria-zh]`** (nuevo). Antes eran seis
+  etiquetas fijas en inglés, así que un lector de pantalla en español oía la interfaz en
+  inglés sobre una página en español. El bucle vive en `setLang()`, justo debajo del de texto.
+- El botón de play se reescribe aparte, desde `syncPlayLabel()`.
+
+### What if?: la composición del 11-IX (r2)
+
+La escena ya no tiene altura fija. `.wi-view` es `flex:1 1 auto` y `.wi-stage` es
+`flex:1 1 auto` con `min-height: clamp(268px,41vh,432px)` y `max-height: clamp(268px,62vh,660px)`:
+el escenario **se come el hueco que sobra** en lugar de dejarlo en blanco (en 1920×1080 eran
+227 px de pergamino vacío entre los números y la regla de honestidad; ahora el hueco es el
+propio `gap` de 12 px). La columna del termómetro crece con él,
+`clamp(176px,12.5vw,228px)`, para que el raíl no se convierta en un hilo.
+
+> **Trampa que costó una hora: un `<svg>` con `viewBox` tiene proporción intrínseca.** Con
+> `height:100%` declaraba como altura mínima de contenido la que tenía dibujada en el pase
+> anterior, de modo que el escenario nunca podía devolver espacio y la escena acababa
+> haciendo scroll por debajo de la regla pegajosa. Las dos figuras del escenario van
+> **fuera de flujo** dentro de su caja `position:relative`
+> (`.wi-stage .wi-chart-svg` y `.wi-therm-svg`: `position:absolute; inset:0`). Si añades otra
+> figura que deba encoger con su caja, hazlo igual.
+
+**Las ocho tarjetas llevan figura.** Juan pidió los cuadros «juntos, pero más visual»; solo
+`CUMULATIVE` tenía dibujo y en *Behind* no lo tenía ninguna (58 % de cada tarjeta en blanco a
+1280×720). El vocabulario es uno solo, definido en `explorer.html`:
+
+- `.wi-fig` — el contenedor, anclado al pie de la tarjeta con `margin-top:auto`, así que la
+  tarjeta se lee «cifra arriba, prueba abajo» y no queda hueco muerto en medio.
+- `.wi-fig-track` — el raíl de 7 px con filete de 1 px. **Es `display:block`**: dentro de
+  `.wi-fig` ya no lo blockifica el flex de la tarjeta (un `<span>` suelto se queda en línea y
+  la barra desaparece).
+- `.wi-fig-mass` (bermellón) — el valor; `.wi-fig-ghost` (filete) — el mundo con el que se
+  compara; `.wi-fig-zero` / `.wi-fig-tick` — hairlines de cero y de marca.
+- `.wi-fig-key` — la clave, con `<i>` de 10×5 px como muestra de color.
+
+Ninguna figura introduce una cifra nueva: todas dibujan a escala lo que ya está impreso en su
+propia tarjeta (`drawCardFigures()`, en `ahead-view.js` y en `behind-view.js`).
+
+**El termómetro tiene colores de clima.** La rampa (`whatif-section.js`, `RAMP`) arrancaba en
+`#f1e6c8`, que es exactamente el `--bg` de la página: a 1,36 °C el raíl se leía «vacío», no
+«templado». Ahora abre en pizarra apagada (`92,126,152`), pasa por la paja del propio papel en
+el codo de 1,2 °C y termina en el granate. Es la convención de las *warming stripes* escrita
+en la paleta de la sección. El color aquí es **codificación de datos**, la única licencia que
+la identidad concede para salir del acento único; ningún texto se pinta sobre la rampa.
+
+**Móvil.** La tira viva de arriba y la primera tarjeta decían lo mismo, con la misma barra, en
+la misma pantalla. En ≤900 px la tarjeta duplicada desaparece
+(`.wi-card[data-wi-card="cum"]`, `.wi-card[data-wib-card="delta-t"]`) y la que queda suelta
+ocupa la fila entera. La tira de renta de *Behind* pasó de 21:1 y 55:1 a 62 px de alto, con el
+rótulo encima del dibujo en vez de a su lado.
+
+### What if?: cambiar de idioma en caliente
+
+`updateBehindView()` **tiene ahora la rama `reason === 'language'`** que ya tenía
+`updateAheadView()`: suelta los listeners, reconstruye `dialsHTML()` y `sceneHTML()`, vuelve a
+cablear y sigue al redibujo normal. El resultado del modelo no se toca — `compute()` está
+cacheado por las palancas, no por el idioma — así que la reconstrucción repinta exactamente
+los mismos números.
+
+> **Por qué hace falta:** tres cadenas (`#wib-figcap`, `.wi-readout-head`, el `summary` de
+> «lo que no cambia») se hornean con `pk()` al construir el esqueleto y **no llevan
+> `data-i18n`**, así que `applyLanguage()` no las alcanza. En frío salían perfectas; al
+> conmutar en caliente se quedaban en el idioma anterior y convivían dos idiomas en pantalla.
+> `ahead-view.js` usa el mismo patrón horneado y se salva **solo** porque se reconstruye. Si
+> algún día quitas esa rama, mete antes esas cadenas en `LANGUAGES`.
+
+### Cómo se añade una cadena nueva (tres mecanismos, y cuál toca)
+
+1. **`LANGUAGES` de `js/app.js` + `data-i18n` en el HTML.** El camino normal para todo lo que
+   vive en `explorer.html` o en un esqueleto que se reconstruya. Ganchos disponibles:
+   `data-i18n` (texto), `data-i18n-html`, `data-i18n-title`, `data-i18n-placeholder`,
+   `data-i18n-aria` (→ `aria-label`) y `data-i18n-alt`. Añade la clave en los **tres** packs.
+   Desde JS se lee con `gwText('clave', 'fallback')`.
+2. **`tLabel(en, es, zh)` de `js/utils.js`.** Para cadenas que un módulo genera al dibujar
+   (rótulos de eje, cabeceras de tabla, etiquetas de leyenda). Se evalúa en el momento del
+   dibujo, así que basta con que la vista se redibuje al cambiar de idioma. Si la cadena vive
+   en un objeto de configuración a nivel de módulo, decláralo como `get label()` para que no
+   se congele al cargar el fichero (ver `GHG_COMPONENTS` en `composition-view.js`).
+3. **`pk(en, es, zh)` dentro de `js/whatif/`.** Idéntico a `tLabel`, local a la sección. Con
+   la misma trampa: si el resultado se hornea en un `innerHTML` que no se reconstruye, hay que
+   reconstruirlo al cambiar de idioma o pasar la cadena al mecanismo 1.
+
+Los presets de *Ahead* son un caso aparte: `data/whatif.json` trae `label` en inglés,
+`label_es` y `source` en castellano, y nada en chino. Mientras el JSON no se regenere, la
+tabla `DEFS` de `ahead-view.js` completa `label_zh` de los trece presets y
+`source_en`/`source_es`/`source_zh` de los que el JSON dejaba en castellano («cálculo sobre
+data/cascorro_regions.json», «definición») o en inglés (las tres variantes de la ONU).
+
+**No escribas secuencias `\uXXXX` en literales JS.** En la ronda 1 se escaparon dos veces y
+quince cadenas imprimían literalmente `CO₂` en pantalla (treemap de Composition, tooltip
+del mapa y tooltip del globo). Escribe el carácter real: `CO₂`, `CH₄`, `N₂O`. Comprobación:
+buscar dos barras seguidas antes de `uXXXX` en `js/` debe dar cero.
+
+### Analysis: rejilla, rótulos y ejes
+
+- **Rejilla.** `js/analysis/facet-grid.js` reparte la altura de la sección entre las filas:
+  1 faceta ocupa la escena entera, 2 media altura cada una, 3-4 en 2×2, 5-6 en 3×2 con la
+  altura de fila calculada, y a partir de 7 la rejilla hace scroll sin bajar de un suelo
+  legible. Es lo que pidió Juan en la petición 3.
+- **Títulos de faceta: `facetTitle(svg, x, y, nombre, color, ink)`.** El nombre va en `--cd`
+  (12,2:1) y el color de la serie se queda como **muestra de 9 px delante del nombre**. Antes
+  el título se pintaba en el color del país y cuatro de seis quedaban por debajo de 4,5:1
+  (Francia `#E9C46A` = 1,34:1). Lo usan `recessions.js` (dos sitios) y `tapio-view.js`.
+- **Leyendas dentro del SVG: `renderInSvgLegend()`** mide con `getComputedTextLength()`. El
+  avance anterior era `label.length * 6.5`, ciego a las versales, al tracking de 0,12 em y a
+  los glifos chinos: «GREEN GROWTH» pisaba «RECESSIVE» 5,4 px en los tres idiomas.
+- **Choque de esquina: `dropCornerTick(gx, gy)`.** Oculta el primer *tick* del eje X cuando su
+  caja invade el carril del eje Y. Cableado en las cuatro parejas de ejes de `recessions.js` y
+  en la de `tapio-view.js`.
+- **Suelo tipográfico de 12 px.** `.facet-grid .axis text` ya lo tenía; se añadió
+  `#analysis-chart-wrapper .axis text{font-size:12px}` para los caminos de gráfico único, que
+  dibujaban a 10 px. Si un eje se satura, **baja el número de ticks, no el cuerpo**.
+- **Tapio.** La etiqueta del último año sale del marcador sobre una guía de 1 px y se pinta en
+  `--cd` (iba en el color del patrón: `#8ECAE6` = 1,44:1, y encima de su propio círculo). Los
+  rótulos de cuadrante van en `--cl` (5,4:1) con su tinte en la muestra. Los dos rótulos de eje
+  y el nombre del gas pasan por `tLabel`. También se tradujeron los cuatro rótulos de eje de
+  `recessions.js`, que solo se dibujan en la vista de un país y estaban fijos en inglés.
+
+> **Distinción que se mantiene a propósito:** un rótulo de cromo (título de faceta, rótulo de
+> cuadrante, cabecera de tabla) debe cumplir contraste y va en tinta. Una **etiqueta de serie
+> pegada a su propia línea** (los nombres al final de las curvas de Intensities, Drivers y
+> Trend) es parte de la marca de datos y conserva el color de la serie. No las «arregles».
+
+### Móvil: objetivos táctiles
+
+Regla: **el cuerpo tipográfico no crece — es lo que sostiene la estética Gill — solo la caja**;
+y donde una fila no puede permitirse la altura, el área se agranda con un `::after` invisible.
+En ≤900 px: chips `×`, botones de idioma, botones de cabecera, `.ctrl-btn`, `.gas-preset`,
+`.footer-btn`, `.tl-play`, `.tl-speed`, `.profile-close`, `.ctrl-select` y los campos de texto
+a 44 px; las casillas de 12-14 px conservan su tamaño y ganan el área con `inset:-15px`.
+Medido: de 12/24/29 controles por debajo de 44 px a **cero** en las cuatro secciones.
+
+El pie, en móvil: la línea de autores se oculta (`.footer-authors`) porque se comía el enlace
+«Acerca de y fuentes» con puntos suspensivos (en chino quedaba en 17 px de 320), y desaparece
+el `FULLSCREEN` duplicado (la cabecera ya lo lleva). La pestaña inferior usa la clave
+`navProfileShort`, no `navProfile`, para no truncar «Country Profile».
+
+### Botones del pie
+
+`PNG` ya no parpadea «No figure» después de pulsarlo: `refreshFooterActions()` — llamada desde
+`writeURLNow()`, por donde pasan todos los cambios de estado y de sección — lo apaga donde no
+hay figura que exportar (Composition dibuja el treemap con divs; Table y About no son figuras)
+y explica por qué en el `title`. Los avisos `No figure`, `Done` y `Error` pasan ahora por el
+diccionario (`flashNoFigure`, `flashDone`, `flashError`), como ya hacía `Copied`.
+
+### Lo que NO se tocó, y por qué
+
+- **Escala del termómetro.** *Ahead* 1,0–3,5 °C y *Behind* 0,0–5,0 °C. Unificarlas a 0–5
+  contradice la §6 de la especificación y le quita a *Ahead* la resolución que necesita. Que la
+  marca de «hoy» se mueva al cambiar de modo es deliberado: cada modo cuenta otra historia.
+- **Cejilla de la portada.** EN promete «199 countries», ES y ZH hablan de estelas. Es una
+  decisión de contenido de Juan, no un fallo de traducción.
+- **Subtítulo chino del logotipo.** `增长与地球 · 1750年以来` glosa la marca en vez de traducir
+  la coletilla («development & environment since 1750»). Decisión de persona; si se quisiera el
+  paralelismo sería `发展与环境 · 1750年以来`.
+- **`HDI` en chino.** La ficha de perfil mantiene la sigla latina a conciencia: 人类发展指数 no
+  cabe en la ficha y la abreviatura es la que usa el eje del propio gráfico. Hay un comentario
+  en `country-profile.js` para que ningún agente lo «arregle». Sí se corrigió `人均GDP` →
+  `人均 GDP`, que era una inconsistencia mecánica.
+- **`robots.txt`.** Sigue borrado del árbol de trabajo. Su contenido era `Disallow: /`, así que
+  restaurarlo bloquearía la indexación justo cuando el visor se hace público. **Decisión de
+  Juan**: si lo quiere de vuelta, `git checkout -- robots.txt`. `.nojekyll` sí se restauró: es
+  lo que evita que GitHub Pages procese el sitio con Jekyll.
+- **Reset y «vs World avg».** Reset no devuelve el año a 2024 (la timeline lo reescribe al
+  recomponerse) y «vs World avg» divide por el total mundial, no por la media. Las dos son
+  **anteriores** a este sprint (comprobado A/B contra HEAD) y quedan en Pendiente.
+- **Términos chinos.** 去增长, 照常, 墨色与地图, 公海, 物质流, 增长的航迹: los revisa una
+  persona que lea chino. Sí se unificó la puntuación (`假如？` en la pestaña y en el título) y
+  el espacio de `人均 GDP`. El «Safe space» en cursiva se queda en inglés en los tres idiomas:
+  es el título del paper.
+
 ## Reglas para agentes
 - **Hay DOS modos de despliegue**:
   1. `cascorro_explorer.html` — archivo único autocontenido (30 MB). Se genera con `build/build.ps1`.
@@ -727,6 +947,14 @@ declarado.
 - [x] Sección «What if?» completa (2026-09-11): modelo, vistas Ahead y Behind, panel
       «Solve for…», permalink, PNG y CSV; 33/33 casos del modelo y barrido de interfaz en
       1440×900 y 390×844 sin errores de consola ni desbordamiento
+- [x] **Ronda 2 del 11-IX — cierre de la verificación** (sello `?v=20260911b`): cartucho de
+      portada al ancho de la placa, reparto vertical y ocho micro-figuras en What if?, rama de
+      idioma en *Behind*, presets con etiqueta y fuente en los tres idiomas, rótulos de faceta
+      en tinta, leyendas medidas, suelo de 12 px en los ejes de Analysis, 44 px táctiles en
+      móvil y quince cadenas `CO₂`/`CH₄` recuperadas del doble escape. Barrido final: 5
+      pestañas × 3 idiomas × (1440×900, 390×844) → **0 errores de consola, 0 desbordamientos,
+      0 nodos recortados**; 33/33 del modelo; A1, I1 y B2 leídos del DOM coinciden con la
+      especificación
 
 ## Pendiente
 - [ ] **`cascorro_explorer.html` está desfasado** (de 2026-05-14; `explorer.html` es de
@@ -734,11 +962,24 @@ declarado.
       cromo claro V7b, la `ember` de ocho anclas ni el globo sin textura (2026-09-09), ni el
       nombre e identidad Growth & Earth (2026-09-10).
       Regenerarlo con `build/build.ps1` cuando toque distribuir la versión offline.
-- [ ] **Regenerar `data/whatif.json`** con `build/build_whatif_data.py` para arrastrar tres
-      arreglos que hoy viven en la capa de vista: `definition_en` de los trece presets (el JSON
-      solo trae la definición en castellano), la definición completa del preset «mejor región»
-      (los tres filtros de la §5.2) y el «por confirmar por el PI» que se coló en el tooltip de
-      Decrecimiento. El JSON **no se edita a mano**.
+- [ ] **Regenerar `data/whatif.json`** con `build/build_whatif_data.py` para arrastrar los
+      arreglos que hoy viven en la capa de vista (tabla `DEFS` de `ahead-view.js`):
+      `definition_en` y `definition_zh` de los trece presets (el JSON solo trae la definición
+      en castellano), **`label_zh` de los trece** y `source_en`/`source_es`/`source_zh` de los
+      cinco cuya fuente el JSON deja en castellano («cálculo sobre data/cascorro_regions.json»,
+      «definición») más las tres variantes de población, la definición completa del preset
+      «mejor región» (los tres filtros de la §5.2) y el «por confirmar por el PI» que se coló
+      en el tooltip de Decrecimiento. El JSON **no se edita a mano**.
+- [ ] **`robots.txt`**: borrado del árbol a la espera de la decisión de Juan. Su contenido era
+      `Disallow: /`; restaurarlo bloquea la indexación del visor público.
+- [ ] **Reset no devuelve el año a 2024** (la timeline lo reescribe al recomponerse) y
+      **«vs World avg» divide por el total mundial, no por la media**. Defectos reales,
+      anteriores a este sprint (comprobado A/B contra HEAD).
+- [ ] **Exportar Composition a PNG**: el treemap se dibuja con divs y `visibleFigure()` solo
+      encuentra `<svg>` y `<canvas>`. Hoy el botón se apaga donde no hay figura; la solución
+      de fondo es dibujar el treemap en SVG.
+- [ ] **Revisión humana del chino** (términos y tipografía): ver «Lo que NO se tocó» en la
+      sección de la ronda 2.
 - [ ] Permalink de Explore: `applyStateFromParams()` escribe `indicator` pero nunca
       `baseIndicator`, así que un enlace con `ind=` deja el rail izquierdo marcando GHG
       (deuda anterior a «What if?», verificada contra HEAD).

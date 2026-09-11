@@ -3,18 +3,18 @@
 // (Map, Trend, Ranking, Table, Composition)
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import { initChoropleth, updateChoropleth, highlightCountries, setDualMap, setYearFrom, isDual } from './choropleth.js?v=20260911a';
-import { initTrendView, updateTrendView, updateTrendYearMarker, destroyTrendView } from './trend-view.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import { initChoropleth, updateChoropleth, highlightCountries, setDualMap, setYearFrom, isDual } from './choropleth.js?v=20260911b';
+import { initTrendView, updateTrendView, updateTrendYearMarker, destroyTrendView } from './trend-view.js?v=20260911b';
 
-import { initRankingView, updateRankingView, destroyRankingView } from './ranking-view.js?v=20260911a';
-import { initTableView, updateTableView } from './table-view.js?v=20260911a';
-import { initCompositionView, updateCompositionView } from './composition-view.js?v=20260911a';
-import Timeline from '../components/timeline.js?v=20260911a';
+import { initRankingView, updateRankingView, destroyRankingView } from './ranking-view.js?v=20260911b';
+import { initTableView, updateTableView } from './table-view.js?v=20260911b';
+import { initCompositionView, updateCompositionView } from './composition-view.js?v=20260911b';
+import Timeline from '../components/timeline.js?v=20260911b';
 import { getColorForIndex, getEffectiveIndicator, INDICATOR_LABELS,
          MFA_FLOW_LABELS, MFA_MATERIAL_KEYS, MFA_MATERIAL_LABELS, MFA_MATERIAL_COLORS,
-         CROPS_COMPONENT_KEYS, CROPS_COMPONENT_LABELS, CROPS_COMPONENT_COLORS } from '../utils.js?v=20260911a';
+         CROPS_COMPONENT_KEYS, CROPS_COMPONENT_LABELS, CROPS_COMPONENT_COLORS } from '../utils.js?v=20260911b';
 
 let timeline = null;
 let initialized = false;
@@ -752,6 +752,15 @@ export function initExploreSection() {
     State.subscribe('selectedMaterials', () => redrawCurrentView());
     State.subscribe('selectedCrops', () => redrawCurrentView());
     State.subscribe('freeYAxis', () => redrawCurrentView());
+
+    // Language: the chart titles, axis labels, legends and tooltips are
+    // written by the views from INDICATOR_LABELS, so they only change
+    // language on a redraw.
+    document.addEventListener('gw:language', () => {
+        updateControlsUI();
+        redrawCurrentView();
+        updateChips();
+    });
 
     // ---- Initial draw ----
     adjustYearRangeForIndicator();

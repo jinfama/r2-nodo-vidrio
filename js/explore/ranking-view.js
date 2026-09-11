@@ -3,9 +3,9 @@
 // Maddison-style with quartile zones, configurable indicator + scope
 // ============================================================================
 
-import State from '../state.js?v=20260911a';
-import DataLoader from '../data-loader.js?v=20260911a';
-import Tooltip from '../components/tooltip.js?v=20260911a';
+import State from '../state.js?v=20260911b';
+import DataLoader from '../data-loader.js?v=20260911b';
+import Tooltip from '../components/tooltip.js?v=20260911b';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -13,7 +13,7 @@ import {
     inkFor,
     formatValue,
     formatRank,
-    resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260911a';
+    resolveIndicatorValue, textWidthPx, UI_FONT, tLabel } from '../utils.js?v=20260911b';
 
 let currentContainer = null;
 
@@ -85,7 +85,7 @@ function renderBumpChart() {
         : [];
 
     if (currentRanking.length === 0) {
-        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">No ranking data available</div>';
+        container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--cl)">' + tLabel('No ranking data available', 'No hay datos de ranking disponibles', '暂无排名数据') + '</div>';
         return;
     }
 
@@ -205,13 +205,13 @@ function renderBumpChart() {
         .attr('x', -h / 2).attr('y', -38)
         .attr('text-anchor', 'middle')
         .style('font-size', '11px').style('fill', COLORS.gray)
-        .text('World ranking (1 = highest)');
+        .text(tLabel('World ranking (1 = highest)', 'Puesto mundial (1 = el más alto)', '世界排名（1 = 最高）'));
 
     // Title
     svg.append('text')
         .attr('x', margin.left).attr('y', 16)
         .style('font-size', '12px').style('font-weight', '600').style('fill', COLORS.dark)
-        .text(`${indLabel} ${scopeLabel} ranking`);
+        .text(tLabel(`${indLabel} ${scopeLabel} ranking`, `Ranking de ${indLabel} ${scopeLabel}`, `${indLabel} ${scopeLabel} 排名`).replace(/\s+/g, ' ').trim());
 
     // Draw trajectories
     const selectedSet = new Set(selectedCountries);
@@ -270,7 +270,7 @@ function renderBumpChart() {
                 const pt = validPoints.find(p => p.year === hoveredYear) || last;
                 Tooltip.show(`
                     <div class="tooltip-title"><span>${traj.name}</span><span>${pt.year}</span></div>
-                    <div class="tooltip-row"><span class="tooltip-label">Rank</span><span class="tooltip-value">#${pt.rank}</span></div>
+                    <div class="tooltip-row"><span class="tooltip-label">${tLabel('Rank', 'Puesto', '排名')}</span><span class="tooltip-value">#${pt.rank}</span></div>
                     <div class="tooltip-row"><span class="tooltip-label">${indLabel}</span><span class="tooltip-value">${formatValue(pt.value, indicator)}</span></div>
                 `, event);
             })
@@ -308,8 +308,8 @@ function renderBumpChart() {
     // stays above on the current-year rule and on the unselected trajectories,
     // which are data.
     const footNote = width < 560
-        ? `${trajectories.length} countries \u00b7 rank 1 = highest`
-        : `Showing ${trajectories.length} countries \u2014 Rank 1 = highest ${indLabel}`;
+        ? `${trajectories.length} ${tLabel('countries', 'países', '个国家')} \u00b7 ${tLabel('rank 1 = highest', 'puesto 1 = el más alto', '第 1 名 = 最高')}`
+        : `${tLabel('Showing', 'Se muestran', '显示')} ${trajectories.length} ${tLabel('countries', 'países', '个国家')} \u2014 ${tLabel('Rank 1 = highest', 'Puesto 1 = el más alto', '第 1 名 = 最高')} ${indLabel}`;
     g.append('text')
         .attr('x', 0).attr('y', h + 30)
         .style('font-size', '10px').style('fill', COLORS.uiText)
