@@ -2,9 +2,9 @@
 // TABLE VIEW - Sortable data table for selected countries/indicator/year
 // ============================================================================
 
-import State from '../state.js?v=20260910a';
-import DataLoader from '../data-loader.js?v=20260910a';
-import { exportCSV } from '../components/export.js?v=20260910a';
+import State from '../state.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911a';
+import { exportCSV } from '../components/export.js?v=20260911a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -16,7 +16,7 @@ import {
     formatRank,
     getColorForIndex,
     resolveIndicatorValue
-} from '../utils.js?v=20260910a';
+} from '../utils.js?v=20260911a';
 
 let currentContainer = null;
 let sortColumn = 'rank';

@@ -2,21 +2,23 @@
 // APP.JS - Application entry point, routing, initialization
 // ============================================================================
 
-import State from './state.js?v=20260910a';
-import DataLoader from './data-loader.js?v=20260910a';
-import { initGlobeSection } from './globe/globe-section.js?v=20260910a';
-import { initExploreSection } from './explore/explore-section.js?v=20260910a';
-import { initAnalysisSection } from './analysis/analysis-section.js?v=20260910a';
-import { toggleFullscreen, exportCSV } from './components/export.js?v=20260910a';
-import CountryPicker from './components/country-picker.js?v=20260910a';
-import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260910a';
-import { INDICATOR_LABELS, INDICATOR_UNITS, UI_FONT } from './utils.js?v=20260910a';
+import State from './state.js?v=20260911a';
+import DataLoader from './data-loader.js?v=20260911a';
+import { initGlobeSection } from './globe/globe-section.js?v=20260911a';
+import { initExploreSection } from './explore/explore-section.js?v=20260911a';
+import { initAnalysisSection } from './analysis/analysis-section.js?v=20260911a';
+import { initWhatifSection, whatifModel, WHATIF_STATE_KEYS, WHATIF_DEFAULTS } from './whatif/whatif-section.js?v=20260911a';
+import { toggleFullscreen, exportCSV } from './components/export.js?v=20260911a';
+import CountryPicker from './components/country-picker.js?v=20260911a';
+import { renderGlobeFrame, resetGlobeView } from './globe/globe-renderer.js?v=20260911a';
+import { INDICATOR_LABELS, INDICATOR_UNITS, UI_FONT } from './utils.js?v=20260911a';
 
 // ---- TAB NAVIGATION ---- //
 const sections = {
     globe: document.getElementById('section-globe'),
     explore: document.getElementById('section-explore'),
     analysis: document.getElementById('section-analysis'),
+    whatif: document.getElementById('section-whatif'),
     about: document.getElementById('section-about')
 };
 
@@ -24,7 +26,7 @@ const tabButtons = document.querySelectorAll('.tab-btn');
 
 function switchSection(sectionId) {
     Object.keys(sections).forEach(key => {
-        sections[key].classList.toggle('active', key === sectionId);
+        if (sections[key]) sections[key].classList.toggle('active', key === sectionId);
     });
     tabButtons.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.section === sectionId);
@@ -45,8 +47,16 @@ tabButtons.forEach(btn => {
 function handleHash() {
     const hash = window.location.hash.replace('#', '') || 'globe';
     const parts = hash.split('?');
-    const section = parts[0];
+    // A path segment too: the spec (§2.1 and §9) documents #whatif/ahead and
+    // #whatif/behind, and those links used to land the reader on the globe
+    // with the hash silently rewritten, because the whole "whatif/behind"
+    // matched no section.
+    const path = parts[0].split('/');
+    const section = path[0];
     if (sections[section]) switchSection(section);
+    if (section === 'whatif' && (path[1] === 'ahead' || path[1] === 'behind')) {
+        State.set('whatifMode', path[1]);
+    }
 
     if (parts[1]) applyStateFromParams(new URLSearchParams(parts[1]));
 }
@@ -85,6 +95,56 @@ function applyStateFromParams(params) {
         const y = parseInt(params.get('year'), 10);
         if (!isNaN(y)) State.set('currentYear', y);
     }
+    applyWhatifParams(params);
+}
+
+// What if? carries its own parameters and nothing else:
+//   #whatif?mode=ahead&g=0.0232&r=-0.0231&pop=medium&target=2.0C&prob=50
+//   #whatif?mode=behind&region=WLD&ref=GBR&t0=1850&cf=rate&int=own
+// Every value is validated here, so a hand-edited link can only ever fall
+// back to the defaults of js/state.js.
+const WHATIF_REGIONS = ['WLD', 'CHN', 'EAP', 'ECA', 'LAC', 'MENA', 'NAM', 'SAS', 'SSA', 'WEU', 'GBR'];
+
+function applyWhatifParams(params) {
+    const pick = (name, key, allowed) => {
+        if (!params.has(name)) return;
+        const v = params.get(name);
+        if (allowed.indexOf(v) !== -1) State.set(key, v);
+    };
+    const rate = (name, key, lo, hi) => {
+        if (!params.has(name)) return;
+        const v = parseFloat(params.get(name));
+        if (isFinite(v) && v >= lo && v <= hi) State.set(key, v);
+    };
+    pick('mode', 'whatifMode', ['ahead', 'behind']);
+    rate('g', 'whatifG', -0.30, 0.20);
+    rate('r', 'whatifR', -0.60, 0.20);
+    pick('pop', 'whatifPop', ['low', 'medium', 'high']);
+    pick('target', 'whatifTarget', ['1.5C', '2.0C', '3.0C']);
+    if (params.has('prob')) {
+        const v = params.get('prob').replace('%', '');
+        if (['50', '67', '83'].indexOf(v) !== -1) State.set('whatifProb', v + '%');
+    }
+    if (params.has('hz')) {
+        const v = parseInt(params.get('hz'), 10);
+        if (v === 2050 || v === 2100) State.set('whatifHorizon', v);
+    }
+    if (params.has('solve')) {
+        const v = params.get('solve');
+        State.set('whatifSolveFor', (v === 'intensity' || v === 'growth') ? v : null);
+    }
+    if (params.has('tail')) State.set('whatifTail', params.get('tail') === '1');
+    if (params.has('region')) {
+        const v = params.get('region').toUpperCase();
+        if (WHATIF_REGIONS.indexOf(v) !== -1) State.set('whatifRegion', v);
+    }
+    pick('ref', 'whatifRef', ['GBR', 'WLD']);
+    if (params.has('t0')) {
+        const v = parseInt(params.get('t0'), 10);
+        if (v >= 1850 && v <= 2000) State.set('whatifFrom', v);
+    }
+    pick('cf', 'whatifCfMode', ['rate', 'level']);
+    pick('int', 'whatifIntensity', ['own', 'ref', 'world']);
 }
 
 window.addEventListener('hashchange', handleHash);
@@ -113,6 +173,67 @@ const LANGUAGES = {
         navExplore: 'Explore',
         navAnalysis: 'Analysis',
         navAbout: 'About',
+        navWhatif: 'What if?',
+        whatifTitle: 'What if?',
+        whatifSubtitle: 'Three dials, one carbon budget',
+        whatifModeLabel: 'Mode',
+        whatifModeAhead: 'Ahead <span class="wi-mode-when">· 2025–2050</span>',
+        whatifModeBehind: 'Behind <span class="wi-mode-when">· 1850–2024</span>',
+        whatifDialsTitle: 'Dials',
+        whatifDial1: 'Economic growth',
+        whatifDial1Unit: 'GDP per person, %/yr',
+        whatifDial2: 'Technological change',
+        whatifDial2Unit: 'CO₂ per dollar, %/yr',
+        whatifDial3: 'Population',
+        whatifDial3Unit: 'UN World Population Prospects 2024',
+        whatifSolveTitle: 'Solve for…',
+        whatifSolveTarget: 'Target',
+        whatifSolveProbability: 'Probability',
+        whatifSolveUnknown: 'Unknown',
+        whatifSolveHorizon: 'Horizon',
+        whatifSolveIntensity: 'CO₂ per dollar',
+        whatifSolveGrowth: 'GDP per person',
+        whatifSolveApply: 'Apply to dials',
+        whatifHorizon2050: 'to 2050',
+        whatifHorizon2100: 'constant rates to 2100',
+        whatifTarget15: '1.5 °C',
+        whatifTarget20: '2 °C',
+        whatifTarget30: '≈ 3 °C (thermometer mark, derived)',
+        whatifProb50: '50 %',
+        whatifProb67: '67 %',
+        whatifProb83: '83 %',
+        whatifPopLow: 'UN low',
+        whatifPopMedium: 'UN medium',
+        whatifPopHigh: 'UN high',
+        whatifCardCum: 'Cumulative 2025–2050',
+        whatifCardRemaining: 'Budget left in 2050',
+        whatifCardExhaustion: 'Budget exhausted',
+        whatifCard2050: 'Emissions 2050 vs 2024',
+        whatifCardDeltaGt: 'Δ cumulative 1850–2024',
+        whatifCardDeltaT: 'Δ warming today',
+        whatifCardCrossing: 'Budget crossed',
+        whatifCardGdp: 'GDP per person in 2024',
+        whatifBehindRegion: 'Region',
+        whatifBehindReference: 'Reference',
+        whatifBehindFrom: 'From',
+        whatifBehindMode: 'Counterfactual',
+        whatifBehindModeRate: 'same growth rate',
+        whatifBehindModeLevel: 'same income level',
+        whatifBehindIntensity: 'Carbon intensity',
+        whatifBehindIntOwn: 'its own',
+        whatifBehindIntRef: 'the reference’s',
+        whatifBehindIntWorld: 'world average',
+        whatifBehindMini: 'GDP per person',
+        whatifThermTitle: 'Thermometer',
+        whatifThermToday: 'today',
+        whatifThermNote: 'The thermometer counts CO₂ only; when the 2 °C budget runs out it reads about 1.9 °C because the IPCC budget also allows for non-CO₂ warming.',
+        whatifBudgetNote: 'Budgets from 1 January 2025: 320.6 Gt of fossil CO₂ for 1.5 °C and 1,170.6 Gt for 2 °C, both at 50 %. Newer estimates are much smaller.',
+        whatifHonestyLabel: 'Method and limits',
+        whatifHonestyLead: 'Kaya arithmetic, not a climate model — method and limits',
+        whatifHonesty: '<strong>This is Kaya arithmetic, not a climate model.</strong> Emissions = population × GDP per person × CO₂ per dollar, with constant yearly rates you choose. Degrees come from the IPCC’s TCRE (0.45 °C per 1,000 Gt CO₂, likely range 0.27–0.63) added to 1.36 °C of human-induced warming in 2024 (Forster et al. 2025). Budgets are the AR6 remaining budgets used in the <em>Safe space</em> paper (500 and 1,350 Gt from 2020 for 1.5 °C and 2 °C at 50 %), minus what was emitted in 2020–2024, compared with fossil CO₂ only (land-use CO₂ excluded, non-CO₂ gases do not enter the thermometer, and the paper carries them as a ×1.25 factor on the budgets). Newer estimates are much smaller (130 Gt for 1.5 °C from 2025, Forster et al. 2025). Nothing here feeds back: growth does not change population, prices, or technology. The past cannot be rerun; these are thought experiments.',
+        whatifLoading: 'Loading the What if? data…',
+        whatifError: 'The What if? data could not be loaded.',
+        whatifRetry: 'Try again',
         homeTitle: 'Back to cover',
         footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: 'About & sources',
@@ -152,6 +273,67 @@ const LANGUAGES = {
         navExplore: 'Explorar',
         navAnalysis: 'Análisis',
         navAbout: 'Acerca de',
+        navWhatif: '¿Y si…?',
+        whatifTitle: '¿Y si…?',
+        whatifSubtitle: 'Tres palancas, un presupuesto de carbono',
+        whatifModeLabel: 'Modo',
+        whatifModeAhead: 'Hacia 2050 <span class="wi-mode-when">· desde 2025</span>',
+        whatifModeBehind: 'Otro pasado <span class="wi-mode-when">· 1850–2024</span>',
+        whatifDialsTitle: 'Palancas',
+        whatifDial1: 'Crecimiento económico',
+        whatifDial1Unit: 'PIB por persona, %/año',
+        whatifDial2: 'Cambio tecnológico',
+        whatifDial2Unit: 'CO₂ por dólar, %/año',
+        whatifDial3: 'Población',
+        whatifDial3Unit: 'ONU, World Population Prospects 2024',
+        whatifSolveTitle: 'Despejar…',
+        whatifSolveTarget: 'Objetivo',
+        whatifSolveProbability: 'Probabilidad',
+        whatifSolveUnknown: 'Incógnita',
+        whatifSolveHorizon: 'Horizonte',
+        whatifSolveIntensity: 'CO₂ por dólar',
+        whatifSolveGrowth: 'PIB por persona',
+        whatifSolveApply: 'Aplicar a las palancas',
+        whatifHorizon2050: 'hasta 2050',
+        whatifHorizon2100: 'tasas constantes hasta 2100',
+        whatifTarget15: '1,5 °C',
+        whatifTarget20: '2 °C',
+        whatifTarget30: '≈ 3 °C (marca del termómetro, derivada)',
+        whatifProb50: '50 %',
+        whatifProb67: '67 %',
+        whatifProb83: '83 %',
+        whatifPopLow: 'ONU baja',
+        whatifPopMedium: 'ONU media',
+        whatifPopHigh: 'ONU alta',
+        whatifCardCum: 'Acumulado 2025–2050',
+        whatifCardRemaining: 'Presupuesto restante en 2050',
+        whatifCardExhaustion: 'Presupuesto agotado',
+        whatifCard2050: 'Emisiones de 2050 respecto a 2024',
+        whatifCardDeltaGt: 'Δ acumulado 1850–2024',
+        whatifCardDeltaT: 'Δ calentamiento actual',
+        whatifCardCrossing: 'Presupuesto cruzado',
+        whatifCardGdp: 'PIB por persona en 2024',
+        whatifBehindRegion: 'Región',
+        whatifBehindReference: 'Referencia',
+        whatifBehindFrom: 'Desde',
+        whatifBehindMode: 'Contrafactual',
+        whatifBehindModeRate: 'mismo ritmo de crecimiento',
+        whatifBehindModeLevel: 'mismo nivel de renta',
+        whatifBehindIntensity: 'Intensidad de carbono',
+        whatifBehindIntOwn: 'la suya',
+        whatifBehindIntRef: 'la de la referencia',
+        whatifBehindIntWorld: 'la media mundial',
+        whatifBehindMini: 'PIB por persona',
+        whatifThermTitle: 'Termómetro',
+        whatifThermToday: 'hoy',
+        whatifThermNote: 'El termómetro solo cuenta el CO₂: cuando se agota el presupuesto de 2 °C marca unos 1,9 °C porque el presupuesto del IPCC descuenta también el calentamiento no-CO₂.',
+        whatifBudgetNote: 'Presupuestos desde el 1 de enero de 2025: 320,6 Gt de CO₂ fósil para 1,5 °C y 1.170,6 Gt para 2 °C, ambos al 50 %. Las estimaciones más recientes son mucho menores.',
+        whatifHonestyLabel: 'Método y límites',
+        whatifHonestyLead: 'Aritmética de Kaya, no un modelo climático — método y límites',
+        whatifHonesty: '<strong>Esto es aritmética de Kaya, no un modelo climático.</strong> Emisiones = población × PIB por persona × CO₂ por dólar, con tasas anuales constantes que eliges tú. Los grados salen del TCRE del IPCC (0,45 °C por 1.000 Gt CO₂, rango probable 0,27–0,63) sumados a los 1,36 °C de calentamiento antropogénico de 2024 (Forster et al. 2025). Los presupuestos son los del AR6 usados en el paper <em>Safe space</em> (500 y 1.350 Gt desde 2020 para 1,5 °C y 2 °C al 50 %), menos lo emitido en 2020–2024, comparados solo con el CO₂ fósil (sin cambio de uso del suelo; los gases no-CO₂ no entran en el termómetro y el paper los incorpora con un factor ×1,25 sobre los presupuestos). Las estimaciones más recientes son mucho menores (130 Gt para 1,5 °C desde 2025, Forster et al. 2025). Nada retroalimenta: el crecimiento no cambia la población, los precios ni la tecnología. El pasado no se puede repetir; son experimentos mentales.',
+        whatifLoading: 'Cargando los datos de ¿Y si…?…',
+        whatifError: 'No se han podido cargar los datos de ¿Y si…?',
+        whatifRetry: 'Reintentar',
         homeTitle: 'Volver a la portada',
         footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: 'Acerca de y fuentes',
@@ -191,6 +373,67 @@ const LANGUAGES = {
         navExplore: '探索',
         navAnalysis: '分析',
         navAbout: '关于',
+        navWhatif: '假如',
+        whatifTitle: '假如？',
+        whatifSubtitle: '三个旋钮，一份碳预算',
+        whatifModeLabel: '模式',
+        whatifModeAhead: '展望 <span class="wi-mode-when">· 2025–2050</span>',
+        whatifModeBehind: '回望 <span class="wi-mode-when">· 1850–2024</span>',
+        whatifDialsTitle: 'Dials',
+        whatifDial1: 'Economic growth',
+        whatifDial1Unit: 'GDP per person, %/yr',
+        whatifDial2: 'Technological change',
+        whatifDial2Unit: 'CO₂ per dollar, %/yr',
+        whatifDial3: 'Population',
+        whatifDial3Unit: 'UN World Population Prospects 2024',
+        whatifSolveTitle: 'Solve for…',
+        whatifSolveTarget: 'Target',
+        whatifSolveProbability: 'Probability',
+        whatifSolveUnknown: 'Unknown',
+        whatifSolveHorizon: 'Horizon',
+        whatifSolveIntensity: 'CO₂ per dollar',
+        whatifSolveGrowth: 'GDP per person',
+        whatifSolveApply: 'Apply to dials',
+        whatifHorizon2050: 'to 2050',
+        whatifHorizon2100: 'constant rates to 2100',
+        whatifTarget15: '1.5 °C',
+        whatifTarget20: '2 °C',
+        whatifTarget30: '≈ 3 °C (thermometer mark, derived)',
+        whatifProb50: '50 %',
+        whatifProb67: '67 %',
+        whatifProb83: '83 %',
+        whatifPopLow: 'UN low',
+        whatifPopMedium: 'UN medium',
+        whatifPopHigh: 'UN high',
+        whatifCardCum: 'Cumulative 2025–2050',
+        whatifCardRemaining: 'Budget left in 2050',
+        whatifCardExhaustion: 'Budget exhausted',
+        whatifCard2050: 'Emissions 2050 vs 2024',
+        whatifCardDeltaGt: 'Δ cumulative 1850–2024',
+        whatifCardDeltaT: 'Δ warming today',
+        whatifCardCrossing: 'Budget crossed',
+        whatifCardGdp: 'GDP per person in 2024',
+        whatifBehindRegion: 'Region',
+        whatifBehindReference: 'Reference',
+        whatifBehindFrom: 'From',
+        whatifBehindMode: 'Counterfactual',
+        whatifBehindModeRate: 'same growth rate',
+        whatifBehindModeLevel: 'same income level',
+        whatifBehindIntensity: 'Carbon intensity',
+        whatifBehindIntOwn: 'its own',
+        whatifBehindIntRef: 'the reference’s',
+        whatifBehindIntWorld: 'world average',
+        whatifBehindMini: 'GDP per person',
+        whatifThermTitle: 'Thermometer',
+        whatifThermToday: 'today',
+        whatifThermNote: 'The thermometer counts CO₂ only; when the 2 °C budget runs out it reads about 1.9 °C because the IPCC budget also allows for non-CO₂ warming.',
+        whatifBudgetNote: 'Budgets from 1 January 2025: 320.6 Gt of fossil CO₂ for 1.5 °C and 1,170.6 Gt for 2 °C, both at 50 %. Newer estimates are much smaller.',
+        whatifHonestyLabel: 'Method and limits',
+        whatifHonestyLead: 'Kaya arithmetic, not a climate model — method and limits',
+        whatifHonesty: '<strong>This is Kaya arithmetic, not a climate model.</strong> Emissions = population × GDP per person × CO₂ per dollar, with constant yearly rates you choose. Degrees come from the IPCC’s TCRE (0.45 °C per 1,000 Gt CO₂, likely range 0.27–0.63) added to 1.36 °C of human-induced warming in 2024 (Forster et al. 2025). Budgets are the AR6 remaining budgets used in the <em>Safe space</em> paper (500 and 1,350 Gt from 2020 for 1.5 °C and 2 °C at 50 %), minus what was emitted in 2020–2024, compared with fossil CO₂ only (land-use CO₂ excluded, non-CO₂ gases do not enter the thermometer, and the paper carries them as a ×1.25 factor on the budgets). Newer estimates are much smaller (130 Gt for 1.5 °C from 2025, Forster et al. 2025). Nothing here feeds back: growth does not change population, prices, or technology. The past cannot be rerun; these are thought experiments.',
+        whatifLoading: 'Loading the What if? data…',
+        whatifError: 'The What if? data could not be loaded.',
+        whatifRetry: 'Try again',
         homeTitle: '返回介绍',
         footerBrand: 'Growth & Earth · Infante-Amate, Aguilera & Travieso ·',
         footerAbout: '关于与数据来源',
@@ -249,7 +492,30 @@ function applyLanguage(root = document) {
     document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.lang === lang);
     });
+    // Sections that generate their own prose (What if?) redraw on this.
+    document.dispatchEvent(new CustomEvent('gw:language', { detail: { lang } }));
 }
+
+// ---- Language bridge for the lazily-loaded sections ----
+// js/whatif/* must not import app.js (that would be a circular import), so the
+// dictionaries reach it through this small read-only object plus the
+// 'gw:language' event above. Read it lazily: app.js evaluates AFTER the
+// modules it imports.
+window.GrowthEarth = Object.assign(window.GrowthEarth || {}, {
+    /** 'en' | 'es' | 'zh' — the language the reader chose. */
+    lang: () => (LANGUAGES[currentLanguage] ? currentLanguage : 'en'),
+    /** A string from the active dictionary, falling back to English. */
+    t: (key, fallback = '') => {
+        const pack = LANGUAGES[LANGUAGES[currentLanguage] ? currentLanguage : 'en'];
+        if (pack && pack[key] != null) return pack[key];
+        if (LANGUAGES.en[key] != null) return LANGUAGES.en[key];
+        return fallback;
+    },
+    /** Translate [data-i18n] nodes a section has just created. */
+    applyLanguage: (root) => applyLanguage(root || document),
+    /** Rewrite the permalink from State (debounced by app.js). */
+    writeStateHash: () => scheduleURLSync()
+});
 
 function setLanguage(lang) {
     if (!LANGUAGES[lang]) return;
@@ -419,7 +685,7 @@ function wireIntroEnter(overlayEl) {
         appEl.style.display = 'flex';
         // Retry globe init now that app is visible
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260910a').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260911a').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => overlayEl.remove(), 600);
     });
@@ -670,9 +936,88 @@ document.getElementById('btn-home').addEventListener('click', () => {
 });
 document.getElementById('btn-fullscreen').addEventListener('click', toggleFullscreen);
 
+/**
+ * The CSV of the What if? scenario on screen. Ahead: the trajectory with the
+ * cumulative and what is left of each budget. Behind: observed against
+ * counterfactual, for the region and for the world. Returns false when the
+ * section has not loaded its data yet, so the caller falls back.
+ */
+function exportWhatifCSV() {
+    const model = whatifModel();
+    if (!model) return false;
+    const behind = State.get('whatifMode') === 'behind';
+    const rows = [];
+    try {
+        if (behind) {
+            const r = model.counterfactualResult({
+                region: State.get('whatifRegion'),
+                reference: State.get('whatifRef'),
+                fromYear: State.get('whatifFrom'),
+                mode: State.get('whatifCfMode'),
+                intensity: State.get('whatifIntensity'),
+                probability: '50%'
+            });
+            r.years.filter(y => y >= 1850).forEach((year) => {
+                const i = year - 1750;
+                rows.push({
+                    year: year,
+                    region: r.inputs.region,
+                    reference: r.inputs.reference,
+                    co2ff_observed_mt: round1(r.series_actual_mt[i]),
+                    co2ff_counterfactual_mt: round1(r.series_cf_mt[i]),
+                    gdp_pc_observed: round1(r.gdp_pc_actual[i]),
+                    gdp_pc_counterfactual: round1(r.gdp_pc_cf[i]),
+                    world_observed_mt: round1(r.world_actual_mt[i]),
+                    world_counterfactual_mt: round1(r.world_cf_mt[i]),
+                    counterfactual: r.inputs.mode,
+                    intensity: r.inputs.intensity
+                });
+            });
+        } else {
+            const r = model.aheadResult({
+                g: State.get('whatifG'), r: State.get('whatifR'),
+                population: State.get('whatifPop'), target: State.get('whatifTarget'),
+                probability: State.get('whatifProb'), horizon: State.get('whatifHorizon')
+            });
+            const last = State.get('whatifTail') ? 2100 : 2050;
+            const cum = {};
+            r.cumulative_by_year.forEach(c => { cum[c.year] = c.cum_gt; });
+            r.trajectory_2100.filter(p => p.year <= last).forEach(p => {
+                rows.push({
+                    year: p.year,
+                    co2ff_mt: round1(p.E_mt),
+                    cumulative_since_2025_gt: round1(cum[p.year]),
+                    remaining_1p5c_gt: round1(r.budget_1p5_gt - cum[p.year]),
+                    remaining_2c_gt: round1(r.budget_2p0_gt - cum[p.year]),
+                    population: Math.round(p.P),
+                    gdp_pc: round1(p.y),
+                    co2_per_dollar_kg: p.I == null ? '' : Number((p.I * 1e9).toPrecision(4))
+                });
+            });
+        }
+    } catch (err) {
+        console.error('[whatif] CSV export failed:', err);
+        return false;
+    }
+    if (!rows.length) return false;
+    const slug = behind
+        ? `behind_${State.get('whatifRegion')}_${State.get('whatifRef')}_${State.get('whatifFrom')}`
+        : `ahead_g${Math.round(State.get('whatifG') * 10000)}_r${Math.round(State.get('whatifR') * 10000)}_${State.get('whatifPop')}`;
+    exportCSV(rows, `growth-earth_what-if_${slug}.csv`);
+    return true;
+}
+
+function round1(x) {
+    return (x == null || !isFinite(x)) ? '' : Math.round(x * 10) / 10;
+}
+
 // ---- FOOTER ACTIONS ---- //
 document.getElementById('footer-fullscreen').addEventListener('click', toggleFullscreen);
 document.getElementById('footer-csv').addEventListener('click', () => {
+    // Inside What if? the button used to hand a co-author the series of the
+    // countries picked in the OTHER sections, which have nothing to do with
+    // the figure on screen. There it exports the scenario.
+    if (State.get('activeSection') === 'whatif' && exportWhatifCSV()) return;
     const countries = State.get('selectedCountries');
     if (countries.length === 0) return;
     const yearRange = State.get('yearRange');
@@ -763,6 +1108,7 @@ async function init() {
         initGlobeSection();
         initExploreSection();
         initAnalysisSection();
+        initWhatifSection();
         CountryPicker.init();
 
         handleHash();
@@ -778,7 +1124,7 @@ async function init() {
         if (introOverlay) introOverlay.classList.add('hidden');
         appEl.style.display = 'flex';
         setTimeout(() => {
-            import('./globe/globe-renderer.js?v=20260910a').then(m => m.retryGlobe());
+            import('./globe/globe-renderer.js?v=20260911a').then(m => m.retryGlobe());
         }, 100);
         setTimeout(() => introOverlay && introOverlay.remove(), 600);
 
@@ -829,6 +1175,31 @@ let _urlSyncTimer = null;
 function buildStateHash() {
     const section = State.get('activeSection') || 'globe';
     const p = new URLSearchParams();
+    // What if? is a world of its own: its link carries its dials and nothing
+    // of the countries, years and indicators of the other four sections.
+    if (section === 'whatif') {
+        const mode = State.get('whatifMode') || 'ahead';
+        p.set('mode', mode);
+        if (mode === 'ahead') {
+            p.set('g', Number(State.get('whatifG')).toFixed(4));
+            p.set('r', Number(State.get('whatifR')).toFixed(4));
+            p.set('pop', State.get('whatifPop'));
+            p.set('target', State.get('whatifTarget'));
+            p.set('prob', String(parseInt(State.get('whatifProb'), 10)));
+            const hz = State.get('whatifHorizon');
+            if (hz && hz !== 2100) p.set('hz', String(hz));
+            const solve = State.get('whatifSolveFor');
+            if (solve) p.set('solve', solve);
+            if (State.get('whatifTail')) p.set('tail', '1');
+        } else {
+            p.set('region', State.get('whatifRegion'));
+            p.set('ref', State.get('whatifRef'));
+            p.set('t0', String(State.get('whatifFrom')));
+            p.set('cf', State.get('whatifCfMode'));
+            p.set('int', State.get('whatifIntensity'));
+        }
+        return '#whatif?' + p.toString();
+    }
     const countries = State.get('selectedCountries') || [];
     if (countries.length) p.set('c', countries.slice(0, 40).join(','));
     const year = State.get('currentYear');
@@ -957,7 +1328,47 @@ function figureTitle() {
     if (section === 'globe') return { main: `Country profile — ${label}`, unit };
     if (section === 'analysis') return { main: `Analysis — ${State.get('analysisMode')}`, unit };
     if (section === 'about') return { main: 'About & sources', unit };
+    if (section === 'whatif') return whatifFigureTitle();
     return { main: `${label}`, unit, view: State.get('exploreView') };
+}
+
+// What if? is world-wide and carries no countries: its exported figure used to
+// be stamped with the country list of the OTHER sections ("CHN, USA, IND, DEU,
+// GBR, ESP") and with a period fixed to 2025-2050 even when the reader had
+// asked for the tail to 2100. The subtitle carries the scenario instead, and
+// the foot of the sheet says what kind of arithmetic this is.
+function whatifFigureTitle() {
+    const behind = State.get('whatifMode') === 'behind';
+    const t = (k, fb) => (window.GrowthEarth && window.GrowthEarth.t ? window.GrowthEarth.t(k, fb) : fb);
+    const plain = (k, fb) => String(t(k, fb))
+        .replace(/<span class="wi-mode-when">[\s\S]*?<\/span>/g, '')   // the period is printed on its own
+        .replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    const head = plain('whatifTitle', 'What if?');
+    const note = 'Kaya arithmetic, not a climate model \u00b7 warming from the AR6 TCRE';
+    if (behind) {
+        const cf = State.get('whatifCfMode') === 'level' ? 'same income level' : 'same growth rate';
+        const int = { own: 'own intensity', ref: 'reference intensity', world: 'world-average intensity' }[State.get('whatifIntensity')] || '';
+        return {
+            main: `${head} \u2014 ${plain('whatifModeBehind', 'Behind')}`,
+            unit: 'Gt CO\u2082',
+            when: '1850\u20132024',
+            subtitle: `${State.get('whatifRegion')} vs ${State.get('whatifRef')} \u00b7 from ${State.get('whatifFrom')} \u00b7 ${cf} \u00b7 ${int}`,
+            note: note
+        };
+    }
+    const pct = (x) => {
+        const v = Number(x) * 100;
+        return (v > 0 ? '+' : v < 0 ? '\u2212' : '') + Math.abs(v).toFixed(2) + ' %/yr';
+    };
+    const popTxt = { low: 'UN low', medium: 'UN medium', high: 'UN high' }[State.get('whatifPop')] || '';
+    const target = { '1.5C': '1.5 \u00b0C', '2.0C': '2 \u00b0C', '3.0C': '\u22483 \u00b0C (derived)' }[State.get('whatifTarget')] || '';
+    return {
+        main: `${head} \u2014 ${plain('whatifModeAhead', 'Ahead')}`,
+        unit: 'Gt CO\u2082',
+        when: State.get('whatifTail') ? '2025\u20132100' : '2025\u20132050',
+        subtitle: `GDP/person ${pct(State.get('whatifG'))} \u00b7 CO\u2082/$ ${pct(State.get('whatifR'))} \u00b7 ${popTxt} population \u00b7 ${target} at ${State.get('whatifProb')}`,
+        note: note
+    };
 }
 
 async function exportVisiblePNG(btn) {
@@ -988,8 +1399,8 @@ async function exportVisiblePNG(btn) {
     const t = figureTitle();
     const year = State.get('currentYear');
     const range = State.get('yearRange') || [];
-    const when = (State.get('activeSection') === 'explore' && State.get('exploreView') !== 'map' && range.length === 2)
-        ? `${range[0]}–${range[1]}` : String(year);
+    const when = t.when || ((State.get('activeSection') === 'explore' && State.get('exploreView') !== 'map' && range.length === 2)
+        ? `${range[0]}–${range[1]}` : String(year));
 
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = mute;
@@ -1000,10 +1411,13 @@ async function exportVisiblePNG(btn) {
     ctx.fillStyle = ink;
     ctx.font = `500 20px ${UI_FONT}`;
     ctx.fillText(`${t.main}${t.unit ? ` (${t.unit})` : ''} · ${when}`, padSide, 51);
+    // A section that declares its own subtitle owns that line; only the four
+    // country-based sections stamp the selection there.
     const sel = State.get('selectedCountries') || [];
+    const sub = t.subtitle || (sel.length ? sel.join(', ') : '');
     ctx.fillStyle = mute;
     ctx.font = `400 10.5px ${UI_FONT}`;
-    if (sel.length) ctx.fillText(sel.join(', ').slice(0, 140), padSide, 66);
+    if (sub) ctx.fillText(sub.slice(0, 150), padSide, 66);
 
     ctx.strokeStyle = rule;
     ctx.lineWidth = 1;
@@ -1013,8 +1427,9 @@ async function exportVisiblePNG(btn) {
     ctx.stroke();
     ctx.fillStyle = mute;
     ctx.font = `400 10px ${UI_FONT}`;
-    ctx.fillText('Source: Growth & Earth — Infante-Amate, Aguilera & Travieso. See About & sources for the full reference list.', padSide, h + padTop + 33);
-    ctx.fillText(permalinkURL().slice(0, 160), padSide, h + padTop + 47);
+    ctx.fillText('Source: Growth & Earth — Infante-Amate, Aguilera & Travieso. See About & sources for the full reference list.'
+        + (t.note ? '  ·  ' + t.note : ''), padSide, h + padTop + 33);
+    ctx.fillText(permalinkURL().slice(0, 170), padSide, h + padTop + 47);
 
     canvas.toBlob(blob => {
         if (!blob) { flashAction(btn, 'Error'); return; }
@@ -1049,6 +1464,11 @@ function resetViewer() {
     State.set('perCapita', true);
     State.set('indicator', 'co2ff_pc');
     State.set('selectedGases', ['co2ff']);
+    // Every key the section declares, not a hand-kept list of eight: the five
+    // dials of Behind (region, reference, start year, counterfactual mode and
+    // intensity) used to survive a Reset and come back when the reader
+    // switched mode again.
+    WHATIF_STATE_KEYS.forEach(k => State.set(k, WHATIF_DEFAULTS[k]));
     document.querySelector('.map-subtab[data-view="map"]')?.click();
     document.querySelector('.tab-btn[data-section="globe"]')?.click();
     resetGlobeView();
@@ -1064,8 +1484,12 @@ document.getElementById('footer-reset')?.addEventListener('click', e => {
     resetViewer(); flashAction(e.currentTarget, 'Done');
 });
 
+// The four country-based sections, then every key What if? declares (so a new
+// dial cannot be forgotten here again: 'whatifTail' was one).
 ['activeSection', 'selectedCountries', 'currentYear', 'yearRange', 'yearFrom', 'indicator',
- 'exploreView', 'analysisMode', 'isPlaying'].forEach(key => State.subscribe(key, scheduleURLSync));
+ 'exploreView', 'analysisMode', 'isPlaying']
+    .concat(WHATIF_STATE_KEYS)
+    .forEach(key => State.subscribe(key, scheduleURLSync));
 
 // The link is applied once, by handleHash(), in an order that survives the
 // year-range recompute. It used to be re-applied here on a 900 ms timer, and

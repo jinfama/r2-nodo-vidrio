@@ -2,13 +2,13 @@
 // COUNTRY PROFILE - Side panel with multi-indicator mini charts + waterfall
 // ============================================================================
 
-import DataLoader from '../data-loader.js?v=20260910a';
-import State from '../state.js?v=20260910a';
+import DataLoader from '../data-loader.js?v=20260911a';
+import State from '../state.js?v=20260911a';
 import {
     COLORS, formatValue, formatGDP, formatEmissions, formatMFA, formatCrops,
     formatRank, formatRatio,
     formatPercent, getAbsoluteColorScale, INDICATOR_LABELS
-} from '../utils.js?v=20260910a';
+} from '../utils.js?v=20260911a';
 
 let currentIso3 = null;
 

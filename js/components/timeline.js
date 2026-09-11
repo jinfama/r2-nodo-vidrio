@@ -3,7 +3,7 @@
 // Supports optional dual-handle mode for comparing two years
 // ============================================================================
 
-import State from '../state.js?v=20260910a';
+import State from '../state.js?v=20260911a';
 
 const SPEEDS = [
     { label: '1x', ms: 300 },

@@ -3,9 +3,9 @@
 // Supports absolute values, % of world total, and GHG stacked area decomposition
 // ============================================================================
 
-import State from '../state.js?v=20260910a';
-import DataLoader from '../data-loader.js?v=20260910a';
-import Tooltip from '../components/tooltip.js?v=20260910a';
+import State from '../state.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911a';
+import Tooltip from '../components/tooltip.js?v=20260911a';
 import {
     COLORS,
     INDICATOR_LABELS,
@@ -19,7 +19,7 @@ import {
     getColorForIndex,
     inkFor,
     formatValue,
-    resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260910a';
+    resolveIndicatorValue, textWidthPx, UI_FONT } from '../utils.js?v=20260911a';
 
 let currentContainer = null;
 let drawMode = 'line';       // 'line' | 'stacked'

@@ -3,10 +3,10 @@
 // Waterfall chart with optional faceting by country
 // ============================================================================
 
-import State from '../state.js?v=20260910a';
-import DataLoader from '../data-loader.js?v=20260910a';
-import Tooltip from '../components/tooltip.js?v=20260910a';
-import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260910a';
+import State from '../state.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911a';
+import Tooltip from '../components/tooltip.js?v=20260911a';
+import { COLORS, getColorForIndex, formatPercent, formatEmissions } from '../utils.js?v=20260911a';
 
 const MARGIN = { top: 24, right: 24, bottom: 64, left: 64 };
 const FACTOR_COLORS = {

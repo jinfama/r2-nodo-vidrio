@@ -43,6 +43,21 @@ const State = (() => {
         correlationTimelapse: false,
         // Recessions
         recessionFreeYAxis: true,      // true = each facet gets its own Y scale
+        // What if? (js/whatif/*) — the shell owns these; see WHATIF_DEFAULTS
+        whatifMode: 'ahead',           // 'ahead' (2025-2050) | 'behind' (1850-2024)
+        whatifG: 0.0232,               // GDP per person, fraction per year  (preset 'recent')
+        whatifR: -0.0231,              // CO2 per dollar, fraction per year  (preset 'bau')
+        whatifPop: 'medium',           // 'low' | 'medium' | 'high'  (UN WPP 2024)
+        whatifTarget: '2.0C',          // '1.5C' | '2.0C' | '3.0C' (derived mark)
+        whatifProb: '50%',             // '50%' | '67%' | '83%'
+        whatifSolveFor: null,          // null (panel closed) | 'intensity' | 'growth'
+        whatifHorizon: 2100,           // 2050 | 2100 (the solver's horizon)
+        whatifTail: false,             // Ahead: the faint 2051-2100 tail of the figure
+        whatifRegion: 'WLD',           // Behind: WLD CHN EAP ECA LAC MENA NAM SAS SSA WEU GBR
+        whatifRef: 'GBR',              // Behind: 'GBR' | 'WLD'
+        whatifFrom: 1850,              // Behind: counterfactual start year
+        whatifCfMode: 'rate',          // Behind: 'rate' | 'level'
+        whatifIntensity: 'own',        // Behind: 'own' | 'ref' | 'world'
         // Chart options
         chartType: 'evolution',
         movingAverage: 0,

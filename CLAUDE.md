@@ -26,10 +26,10 @@ environmental change.»
 ```
 cascorro_explorer.html  ← ARCHIVO DESPLEGABLE (30 MB, autocontenido con todo embebido) — DESFASADO, ver Pendiente
 index.html              ← Portada V8 «Growth & Earth» (2026-09-10): escena V7b a sangre + placa Gill arriba a la izquierda; CTA → explorer.html
-explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08; identidad Gill desde 2026-09-10; caché `?v=20260910a`
+explorer.html           ← Explorador modular (js/ + data/), página propia desde 2026-09-08; identidad Gill desde 2026-09-10; caché `?v=20260911a`
 portada/                ← Kit de la portada (cascorro.js, world-110m.js, regions-map.js ← build/portada_kit_v6.py); no se toca
-js/                     ← Módulos ES6 (23 archivos)
-├── app.js              ← Controlador principal, routing por hash, diccionarios i18n (EN/ES/中文), exportación PNG
+js/                     ← Módulos ES6 (27 archivos)
+├── app.js              ← Controlador principal, routing por hash, diccionarios i18n (EN/ES/中文), exportación PNG y CSV
 ├── state.js            ← Gestión de estado
 ├── data-loader.js      ← Carga de datos
 ├── utils.js            ← Utilidades, COLORS, rampas de mapa, COMPARISON_INK, UI_FONT
@@ -37,16 +37,22 @@ js/                     ← Módulos ES6 (23 archivos)
 ├── globe/              ← globe-section, globe-renderer, country-profile
 ├── explore/            ← explore-section, trend, composition, choropleth,
 │                         ranking, tapio, table
-└── analysis/           ← analysis-section, recessions, drivers,
-                          correlations, intensities
-data/                   ← JSONs (27.3 MB) — no se tocan
+├── analysis/           ← analysis-section, recessions, drivers,
+│                         correlations, intensities
+└── whatif/             ← whatif-model (modelo puro), whatif-section (armazón),
+                          ahead-view, behind-view  (ver «Sección What if?»)
+data/                   ← JSONs (27.4 MB) — no se tocan
 ├── cascorro_countries.json    ← 24 MB — dataset principal
 ├── cascorro_regions.json      ← 2.4 MB — agregaciones regionales
 ├── cascorro_reductions.json   ← 693K — descomposiciones
 ├── cascorro_metadata.json     ← Definiciones de variables
-└── countries-110m.json        ← Topología del mapa
+├── countries-110m.json        ← Topología del mapa
+└── whatif.json                ← 115K — sección «What if?» (v0.3.0); NO editar a mano
 img/                    ← Fotos del equipo y logos institucionales; `cascorro.jpg` (el azulejo, marca antigua) se conserva y solo lo usa la historia de About
-build/build.ps1         ← NO DESPLEGAR. Script PowerShell que genera cascorro_explorer.html
+build/build.ps1              ← NO DESPLEGAR. Script PowerShell que genera cascorro_explorer.html
+build/build_whatif_data.py   ← Genera `data/whatif.json` (Python global; `--refresh-wpp` re-descarga la ONU WPP 2024)
+build/test_whatif_model.mjs  ← Arnés de QA de los 33 casos del modelo (`node build/test_whatif_model.mjs`)
+build/portada_kit_v6.py      ← Genera el kit de `portada/`
 {}                      ← Archivo vacío, se puede borrar
 ```
 
@@ -55,6 +61,10 @@ portada), `explorer.html` (`:root` + bloque `<style>` de ~640 líneas), `js/app.
 del PNG exportado, que lee `--bg/--cd/--cl/--cb` y la familia `UI_FONT` de `utils.js`) y las
 cadenas `style=`/`cssText` de `js/explore/composition-view.js`, `js/explore/table-view.js`,
 `js/explore/tapio-view.js` y `js/components/country-picker.js` (todas con `var(--...)`).
+**Una excepción, de 2026-09-11**: las dos vistas de «What if?» traen además un `const CSS`
+propio que inyectan al montarse (`.wi-ahead-*` en `ahead-view.js`, `.wib-*` en `behind-view.js`),
+para que cada vista sea autónoma; el resto de la familia `.wi-*` (cabecera, palancas, tarjetas,
+frases, honestidad) sigue en el `<style>` de `explorer.html`. Todo con `var(--...)`.
 
 ## Stack
 - HTML/CSS/JS vanilla (módulos ES6)
@@ -273,7 +283,190 @@ este orden:
 7. **La portada**: si la sección debe aparecer en el índice de la banda, añadir un enlace
    `explorer.html#<id>` en `nav.index` de `index.html` (con `data-es`).
 8. **Caché**: subir el sufijo `?v=` en `explorer.html` y en todos los `import` de `js/`
-   (hoy `20260910a`; un solo `sed` sobre `js/` y `explorer.html`).
+   (hoy `20260911a`; un solo `sed` sobre `js/` y `explorer.html`).
+
+## Sección «What if?» — armazón (2026-09-11)
+
+Ruta `#whatif`, tras *Analysis*. Dos modos: **Ahead** (2025–2050, por defecto) y **Behind**
+(1850–2024). El armazón vive en `js/whatif/whatif-section.js` y NO dibuja nada: monta la vista
+del modo activo y le pasa un contexto.
+
+- **Ficheros**: `js/whatif/whatif-model.js` (modelo puro, `createModel(data)`),
+  `whatif-section.js` (armazón), `ahead-view.js` y `behind-view.js` (una vista cada uno,
+  autónomos: todo lo suyo dentro, para que dos agentes puedan reescribirlos en paralelo).
+- **Datos**: `data/whatif.json` (v0.3.0, 115 KB) se carga con `fetch` la primera vez que se
+  entra en la sección, con `.wi-loading` y `.wi-error` visibles en crema. No bloquea el resto
+  del visor. **No editar el JSON a mano** (regla del `AGENTS.md`): se regenera con
+  `build/build_whatif_data.py`.
+- **DOM**: `#section-whatif` → `.wi-head` (título + subtítulo + conmutador `[data-whatif-mode]`)
+  y `.wi-body` → `#whatif-dials` (columna izquierda; acordeón arriba en móvil) con
+  `#whatif-dials-ahead` / `#whatif-dials-behind`, y `#whatif-scene` con `#whatif-ahead` /
+  `#whatif-behind`, `#whatif-honesty`, `#whatif-loading` y `#whatif-error`. Cada vista solo
+  toca su par de contenedores.
+- **Estado**: **catorce** claves en `js/state.js` (`whatifMode`, `whatifG`, `whatifR`,
+  `whatifPop`, `whatifTarget`, `whatifProb`, `whatifSolveFor`, `whatifHorizon`, `whatifTail`,
+  `whatifRegion`, `whatifRef`, `whatifFrom`, `whatifCfMode`, `whatifIntensity`); la
+  decimocuarta (`whatifTail`, la cola de 2051–2100) entró el 11-IX. La lista viva es
+  `WHATIF_STATE_KEYS` en `whatif-section.js`: quien añada una palanca la añade **ahí**, y el
+  permalink, el Reset y el título del PNG la recogen solos. El permalink de esta sección
+  solo lleva las suyas: `#whatif?mode=ahead&g=0.0232&r=-0.0231&pop=medium&target=2.0C&prob=50`
+  y `#whatif?mode=behind&region=WLD&ref=GBR&t0=1850&cf=rate&int=own`. Ojo: `from` ya está
+  cogido por el `yearFrom` del timeline, por eso el año de partida de Behind es `t0`.
+- **Idioma**: `app.js` publica `window.GrowthEarth` (`lang()`, `t(key, fallback)`,
+  `applyLanguage(node)`, `writeStateHash()`) y dispara `gw:language` en `document` cada vez
+  que cambia. Las vistas no importan `app.js` (sería circular): lo leen del contexto. En 中文
+  el cromo (pestaña, título, subtítulo y conmutador de modo) está traducido desde el 11-IX y
+  la prosa generada sigue en inglés, por decisión del autor.
+- **Decisiones cerradas** (no reabrir): presupuestos del paper (320,6 y 1.170,6 Gt desde 2025
+  al 50 %) con nota de las estimaciones recientes; marca de 3 °C «≈ 3 °C (marca del
+  termómetro, derivada)»; horizonte del solver con titular 2100 y paréntesis 2050; LULUCF
+  fuera, con nota; vista GEI fuera del piloto.
+- **CSS**: la familia `.wi-*` común vive en el bloque `<style>` de `explorer.html`, y cada
+  vista inyecta su propio `const CSS` al montarse (`.wi-ahead-*`, `.wib-*`). Identidad Gill:
+  pastilla activa `--verm-deep` con tipo crema, filetes de 1 px,
+  versales espaciadas, Perpetua para las frases y las cifras grandes, `border-radius:0`,
+  ≥ 44 px de alto en móvil.
+- **Especificación**: `06_dev/docs/visores_2026-09/GROWTH_AND_EARTH_WHATIF_SPEC.md` (v0.3) y
+  su ledger de auditoría.
+
+## Sección «What if?» (2026-09-11)
+
+Sección cerrada el 11 de septiembre: **modelo + armazón + dos vistas**, 33 casos de prueba en
+verde y barrido de interfaz en 1440×900 y 390×844. La sección de arriba («armazón») explica el
+andamio; esta explica los ficheros, el contrato entre las tres capas, cómo se prueba y qué
+sello de caché lleva. Ruta `#whatif`, quinta pestaña, dos modos: **Ahead** (2025–2050, por
+defecto) y **Behind** (1850–2024).
+
+### Estructura de ficheros
+
+```
+js/whatif/whatif-model.js    ← 42 KB · MODELO PURO. `createModel(data)` y nada más: sin DOM,
+                               sin State, sin i18n, sin colores. Es el único sitio donde se
+                               hace aritmética (Kaya hacia delante, bisección del inverso,
+                               contrafactuales, presupuestos, TCRE).
+js/whatif/whatif-section.js  ← 20 KB · ARMAZÓN. Carga `data/whatif.json` la primera vez que se
+                               entra, monta y desmonta la vista del modo activo, publica el
+                               contexto, arregla los glifos científicos (`sciFix`) y lleva los
+                               estados de carga y error. No dibuja ni calcula nada.
+js/whatif/ahead-view.js      ← 75 KB · VISTA AHEAD: tres palancas con presets, panel
+                               «Solve for…», gráfica 1990–2050 (+ cola opcional a 2100),
+                               termómetro, cuatro tarjetas, frases, fuentes de los presets y
+                               la tira de lectura viva del móvil. Trae su `const CSS`.
+js/whatif/behind-view.js     ← 50 KB · VISTA BEHIND: tres atajos («Tres preguntas»), región,
+                               referencia, año de partida, contrafactual e intensidad;
+                               gráfica observado vs contrafactual 1850–2024, miniatura de
+                               renta, termómetro de escala propia, tarjetas y frases. `const CSS`.
+data/whatif.json             ← 115 KB · v0.3.0 (2026-09-10). Series 1750–2024 del mundo, ocho
+                               regiones, GBR y CHN; proyección de población de la ONU; clima;
+                               presupuestos; presets; contrafactuales; diagnósticos; 33
+                               `test_cases`. **No se edita a mano** (regla del `AGENTS.md`):
+                               se regenera con el script.
+build/build_whatif_data.py   ← Genera el JSON (Python global; `--refresh-wpp` re-baja la ONU).
+build/test_whatif_model.mjs  ← Arnés de QA del modelo contra los 33 casos (node).
+```
+
+### Contrato entre armazón, modelo y vistas
+
+Tres capas y una sola dirección: **el modelo no sabe que existe una pantalla, la vista no sabe
+de dónde salen los datos, el armazón no sabe dibujar.**
+
+1. **Modelo** (`whatif-model.js`). `createModel(data)` devuelve un objeto con `version`,
+   `data`, `meta`, `units`; la aritmética base (`base`, `forward`, `cumulativeGt`,
+   `exhaustionYear`, `nearZeroYear`, `warming`, `intensityOf`, `popPath`); los solvers
+   inversos por bisección (`solveIntensity`, `solveGrowth`); los resultados de alto nivel
+   (`aheadResult`, `inverseResult`, `counterfactualResult`, `counterfactualSeries`,
+   `cumRangeGt`, `crossingYear`); y los lectores del JSON (`presets`, `presetRate`,
+   `budgets`, `budgetGt`…). **No redondea nunca**: redondear es cosa de la vista.
+2. **Armazón** (`whatif-section.js`). Exporta `initWhatifSection()`, `whatifModel()`,
+   `WHATIF_STATE_KEYS` y `WHATIF_DEFAULTS` — de eso vive `app.js` para el permalink, el Reset
+   y el título del PNG. A cada vista le pasa **un solo objeto de contexto** `ctx`:
+
+   | Clave | Qué es |
+   |---|---|
+   | `mode` | `'ahead'` o `'behind'` |
+   | `model`, `data` | el modelo ya construido y el JSON crudo |
+   | `root`, `dials`, `scene` | sus dos contenedores y la columna de la escena; **la vista no toca nada fuera** |
+   | `State` | el bus del visor (las catorce claves `whatif*`) |
+   | `lang`, `t`, `applyI18n` | idioma vivo y diccionarios de `app.js`, leídos por el puente `window.GrowthEarth` para no importar `app.js` y cerrar un ciclo |
+   | `fmt` | formateo por idioma: `n`, `nGroup`, `minus`, cifras tabulares, millares a la española |
+   | `sciFix(node)` | envuelve `₂` y `°` en `.wi-sub`/`.wi-sci` (Perpetua dibuja el subíndice en la línea de base); recorre **nodos de texto**, nunca HTML |
+   | `requestRedraw`, `onResize`, `onLanguage` | un `rAF` por fotograma y suscripciones que el armazón desmonta solo |
+   | `writeHash` | reescribe la barra de direcciones desde `State` |
+   | `keys`, `defaults` | `WHATIF_STATE_KEYS` y `WHATIF_DEFAULTS` |
+   | `sceneSize()`, `isMobile()` | medida viva de la escena y el corte de 900 px |
+
+   Cada vista exporta `initAheadView(ctx)` / `initBehindView(ctx)` con su `destroy…()`; al
+   cambiar de modo el armazón destruye la vista anterior antes de montar la otra.
+3. **Vistas**. Leen y escriben **solo** claves `whatif*` de `State`, redondean, traducen,
+   dibujan su SVG y llaman a `ctx.sciFix()` sobre su prosa. Son autónomas a propósito: dos
+   agentes pueden reescribir `ahead-view.js` y `behind-view.js` en paralelo sin pisarse.
+
+**Si añades una palanca**: clave en `js/state.js` → en `WHATIF_STATE_KEYS` y
+`WHATIF_DEFAULTS` → parámetro en `applyStateFromParams()` y `buildStateHash()` de `app.js` →
+rama en `figureTitle()` si cambia el periodo del PNG. El Reset del pie ya recorre
+`WHATIF_STATE_KEYS`, así que ahí no hay lista manual que actualizar (la había, y se olvidó
+`whatifTail`).
+
+### Cómo se prueban los 33 casos
+
+```
+cd 06_dev/visores/web_cascorro
+node build/test_whatif_model.mjs          # --verbose imprime campo a campo
+```
+
+El arnés importa el modelo **real** (`js/whatif/whatif-model.js`, sin navegador) y lo compara
+con `data/whatif.json → test_cases`: once casos *Ahead* directos (A1–A11), diez inversos
+(I1–I10) y doce *Behind* (B1–B12). Tolerancias de la §11 de la especificación: Gt y Mt
+±0,1 % relativo, °C ±0,01 absoluto, tasas ±0,0001, años exactos (`null` incluido). Antes de
+comparar redondea la salida al número de decimales del literal guardado, porque el modelo no
+redondea. Sale con código 1 si algo falla. Verificado el 11-IX: **33/33, desviación máxima
+0,0000 % sobre 578 campos**. Si tocas el modelo o regeneras el JSON, este es el primer botón
+que hay que pulsar: si falla, el visor miente.
+
+La otra mitad de la QA es de interfaz, con Playwright (Python global, chromium headless,
+1440×900 y 390×844 con `is_mobile`/`has_touch`): las cinco pestañas, los dos modos, EN/ES/中文,
+el panel «Solve for…» y dos casos de *Behind*, **mirando** las capturas. Guiones y capturas del
+barrido de cierre en
+`C:/Work/scratch/ephemeral/visores_2026-09/growth_earth/whatif/final/`.
+
+### Sello de caché
+
+`?v=20260911a` en el `<script src="js/app.js">` de `explorer.html` **y en los 88 `import` de
+`js/`** (los cuatro de `js/whatif/` incluidos). Es un único sufijo para todo el visor: si
+tocas cualquier módulo, súbelo en todos a la vez (un `sed` sobre `js/` y `explorer.html`) y
+comprueba que no queda ningún import sin sello:
+
+```
+grep -rn "from " js/ | grep -v "v=20260911a"
+grep -n "js/app.js" explorer.html
+```
+
+### Dónde están la especificación y el ledger
+
+- Especificación (manda sobre el modelo y sobre los textos):
+  `06_dev/docs/visores_2026-09/GROWTH_AND_EARTH_WHATIF_SPEC.md` (v0.3; §3 modelo, §4 fuentes,
+  §5 palancas, §8 textos, §9 UI, §11 los 33 casos, §12 decisiones abiertas D1–D12).
+- Ledger de la auditoría cruzada con Codex:
+  `06_dev/docs/visores_2026-09/GROWTH_AND_EARTH_WHATIF_AUDIT.md`.
+- Bitácora de agentes: `06_dev/docs/visores_2026-09/_agents/log.md`, entrada
+  «Growth & Earth — What if? (2026-09-11)», que termina con las divergencias entre la
+  especificación y lo construido.
+
+### Decisiones cerradas el 11-IX (no reabrir sin Juan)
+
+- Eje Y de *Ahead* fijo por la **envolvente** del espacio de presets (5 crecimientos × 5
+  tecnologías a 2050, cacheada por variante de población): mover una palanca cambia la curva,
+  no la escala. La cola a 2100 sí puede levantar el techo, y lo anuncia moviendo el eje X.
+- En el móvil, tira de lectura viva (`.wi-live`, `position:sticky`) encima de las palancas:
+  con el acordeón abierto el resultado sigue a la vista, en los dos modos.
+- *Behind* tiene **termómetro de escala propia** (la del relato, no la heredada de *Ahead*);
+  las marcas que quedan fuera se anuncian con «2.0 °C ›» junto a la lectura.
+- Una decimal en las cifras en Gt de las tarjetas, y nota de presupuestos generada desde
+  `budgets.remaining_from_2025[objetivo][probabilidad]`: al 67 % la prosa cambia sola.
+- La honestidad (§8.4) va anclada al pie de la escena, con el aviso en el propio rótulo
+  («Kaya arithmetic, not a climate model — method and limits») y el párrafo desplegable.
+- Sin conmutador de «vintage» de presupuesto (D2) y sin vista GEI (D10): no están construidos,
+  y la prosa de honestidad ya no los menciona.
 
 ## Escalas de color de los mapas (rehechas 2026-09-06; familia de la portada desde 2026-09-08; `ember` V7b 2026-09-09)
 
@@ -520,7 +713,7 @@ declarado.
 - **Para GitHub Pages**: se puede desplegar `index.html` directamente (usa módulos ES6 + CDN). El HTML autocontenido es alternativa para distribución offline.
 - **NO modificar `build/`** sin instrucción explícita
 - **Idioma**: inglés (interfaz EN/ES/中文; la marca «Growth & Earth» no se traduce)
-- **4 secciones**: globe, explore, analysis, about (routing por hash; ver «Sistema de pestañas» arriba antes de añadir una)
+- **5 secciones**: globe, explore, analysis, whatif, about (routing por hash; ver «Sistema de pestañas» arriba antes de añadir una)
 - **Identidad Gill (2026-09-10)**: un solo acento (bermellón), crema, tinta cálida, versales espaciadas, filetes finos, Gill Sans/Cabin + Perpetua/Crimson Pro, sin ficheros de fuentes en el repo, una sola hoja de Google Fonts, `border-radius:0`. No introduzcas colores nuevos de cromo ni otra familia; `--verm` claro nunca como texto pequeño (usa `--verm-ink`/`--verm-deep`).
 
 ## Estado actual
@@ -529,6 +722,11 @@ declarado.
 - [x] 4 análisis (recessions, drivers, correlations, intensities)
 - [x] Versión autocontenida generada (desfasada)
 - [x] Identidad Growth & Earth / Gill en portada y explorador (2026-09-10)
+- [x] Armazón de la sección «What if?» (2026-09-11): pestaña, panel, CSS `.wi-*`, i18n,
+      enrutado `#whatif`, carga diferida de `data/whatif.json` y contrato de las dos vistas
+- [x] Sección «What if?» completa (2026-09-11): modelo, vistas Ahead y Behind, panel
+      «Solve for…», permalink, PNG y CSV; 33/33 casos del modelo y barrido de interfaz en
+      1440×900 y 390×844 sin errores de consola ni desbordamiento
 
 ## Pendiente
 - [ ] **`cascorro_explorer.html` está desfasado** (de 2026-05-14; `explorer.html` es de
@@ -536,6 +734,17 @@ declarado.
       cromo claro V7b, la `ember` de ocho anclas ni el globo sin textura (2026-09-09), ni el
       nombre e identidad Growth & Earth (2026-09-10).
       Regenerarlo con `build/build.ps1` cuando toque distribuir la versión offline.
+- [ ] **Regenerar `data/whatif.json`** con `build/build_whatif_data.py` para arrastrar tres
+      arreglos que hoy viven en la capa de vista: `definition_en` de los trece presets (el JSON
+      solo trae la definición en castellano), la definición completa del preset «mejor región»
+      (los tres filtros de la §5.2) y el «por confirmar por el PI» que se coló en el tooltip de
+      Decrecimiento. El JSON **no se edita a mano**.
+- [ ] Permalink de Explore: `applyStateFromParams()` escribe `indicator` pero nunca
+      `baseIndicator`, así que un enlace con `ind=` deja el rail izquierdo marcando GHG
+      (deuda anterior a «What if?», verificada contra HEAD).
+- [ ] Eje Y de *Behind*: `niceMax()` da un techo redondo, pero los cuatro escalones iguales
+      de `drawChart()` no lo son cuando el techo es 15 Gt (caso CHN/1978: 3,8 · 7,5 · 11,3 ·
+      15,0). Cosmético; se arregla eligiendo un techo divisible entre cuatro o cinco tramos.
 - [ ] Crear `.gitignore` (excluir `build/`, `cascorro_explorer.html`, `{}`)
 - [ ] Borrar archivo `{}` (vacío, sin propósito)
 - [ ] Decidir estrategia de despliegue: modular (index.html) vs autocontenido (cascorro_explorer.html)

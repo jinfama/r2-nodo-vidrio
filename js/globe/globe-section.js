@@ -2,11 +2,11 @@
 // GLOBE SECTION - Controller for the globe explorer tab
 // ============================================================================
 
-import State from '../state.js?v=20260910a';
-import DataLoader from '../data-loader.js?v=20260910a';
-import { initGlobe, retryGlobe, updateGlobeColors, updateGlobeLegend, flyToCountry } from './globe-renderer.js?v=20260910a';
-import { initCountryProfile, openProfile, closeProfile, updateProfileYear } from './country-profile.js?v=20260910a';
-import Timeline from '../components/timeline.js?v=20260910a';
+import State from '../state.js?v=20260911a';
+import DataLoader from '../data-loader.js?v=20260911a';
+import { initGlobe, retryGlobe, updateGlobeColors, updateGlobeLegend, flyToCountry } from './globe-renderer.js?v=20260911a';
+import { initCountryProfile, openProfile, closeProfile, updateProfileYear } from './country-profile.js?v=20260911a';
+import Timeline from '../components/timeline.js?v=20260911a';
 
 let timeline = null;
 let initialized = false;
